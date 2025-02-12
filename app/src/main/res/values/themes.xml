@@ -1,9 +1,99 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.PickleballCourtManagementSystem" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
-    </style>
+                <item name="android:minHeight">48dp</item>
+            </style>
+            <style name="imgIns">
+                <item name="android:layout_width">match_parent</item>
+                <item name="android:layout_height">wrap_content</item>
+                <item name="android:layout_marginTop">64dp</item>
+                <item name="android:src">@drawable/_69819</item>
+                <item name="android:contentDescription">Ins</item>
+            </style>
+            <style name="layoutUsername" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                <item name="android:layout_width">0dp</item>
+                <item name="android:layout_height">wrap_content</item>
+            </style>
+            <style name="txtUsername" >
+                <item name="android:layout_width">match_parent</item>
+                <item name="android:layout_height">wrap_content</item>
+                <item name="android:hint">Username</item>
+                <item name="android:textColorHint">@color/input_text</item>
+            </style>
+            <style name="layoutPassword" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                <item name="android:layout_width">0dp</item>
+                <item name="android:layout_height">wrap_content</item>
+                <item name="android:layout_marginTop">16dp</item>
+            </style>
+            <style name="txtPassword" >
+                <item name="android:layout_width">match_parent</item>
+                <item name="android:layout_height">wrap_content</item>
+                <item name="android:hint">Password</item>
+                <item name="android:textColorHint">@color/input_text</item>
+            </style>
+            <style name="btnLogin" parent="Widget.MaterialComponents.Button.OutlinedButton">
+                <item name="android:layout_width">0dp</item>
+                <item name="android:layout_height">wrap_content</item>
+                <item name="android:layout_marginTop">16dp</item>
+                <item name="android:paddingVertical">16dp</item>
+                <item name="android:text">Log In</item>
+                <item name="android:textColor">@color/input_text</item>
+            </style>
+            <style name="txtForget">
+                <item name="android:layout_width">wrap_content</item>
+                <item name="android:layout_height">wrap_content</item>
+                <item name="android:layout_marginTop">16dp</item>
+                <item name="android:text">Forgot password?</item>
+                <item name="android:textColor">@color/white</item>
+            </style>
+            <style name="txtGethelp">
+                <item name="android:layout_width">wrap_content</item>
+                <item name="android:layout_height">wrap_content</item>
+                <item name="android:text">Get help signing in</item>
+                <item name="android:textColor">@color/white</item>
+                <item name="android:paddingLeft">4dp</item>
+            </style>
+            <style name="txtOR">
+                <item name="android:layout_width">wrap_content</item>
+                <item name="android:layout_height">wrap_content</item>
+                <item name="android:text">OR</item>
+                <item name="android:layout_marginTop">32dp</item>
+                <item name="android:textColor">@color/input_text</item>
+            </style>
+            <style name="bar">
+                <item name="android:layout_width">0dp</item>
+                <item name="android:layout_height">1dp</item>
+                <item name="android:layout_marginHorizontal">8dp</item>
+                <item name="android:layout_marginBottom">32dp</item>
+                <item name="android:background">@color/input_text</item>
+            </style>
+            <style name="btnLoginwithfb" parent="Widget.MaterialComponents.Button.TextButton">
+                <item name="android:layout_width">wrap_content</item>
+                <item name="android:layout_height">wrap_content</item>
+                <item name="android:text">Log in with Facebook</item>
+                <item name="android:layout_marginTop">16dp</item>
+                <item name="android:textColor">@color/white</item>
+            </style>
+            <style name="thanhchim">
+                <item name="android:layout_width">0dp</item>
+                <item name="android:layout_height">54dp</item>
+                <item name="android:layout_marginTop">32dp</item>
+                <item name="android:background">@color/input_background</item>
+            </style>
+            <style name="txtDhac">
+                <item name="android:layout_width">wrap_content</item>
+                <item name="android:layout_height">wrap_content</item>
+                <item name="android:textColor">@color/input_text</item>
+            </style>
+            <style name="txtSignup">
+                <item name="android:layout_width">wrap_content</item>
+                <item name="android:layout_height">wrap_content</item>
+                <item name="android:layout_marginLeft">4dp</item>
+                <item name="android:text">Sign up</item>
+                <item name="android:textColor">@color/white</item>
+                <item name="android:textStyle">bold</item>
+
+            </style>
 
     <style name="Theme.PickleballCourtManagementSystem" parent="Base.Theme.PickleballCourtManagementSystem" />
 </resources>
