@@ -3,12 +3,10 @@ package SEP490.G9;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
-import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.gson.Gson;
+
+import Model.User;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,5 +15,8 @@ public class MainActivity extends AppCompatActivity {
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_main);
 
+            User user = new User();
+            Gson gson = new Gson();
+            String strJson = gson.toJson(user);
         }
     }
