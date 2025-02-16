@@ -37,7 +37,7 @@
             app:layout_constraintGuide_end="32dp" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/Username"
+            android:id="@+id/tvUsername"
             style="@style/layoutUsername"
             app:boxBackgroundColor="@color/input_background"
             app:boxStrokeWidth="0dp"
@@ -49,29 +49,29 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/Password"
+            android:id="@+id/tvPassword"
             style="@style/layoutPassword"
             app:boxBackgroundColor="@color/input_background"
             app:boxStrokeWidth="0dp"
             app:layout_constraintEnd_toStartOf="@id/guideline2"
             app:layout_constraintStart_toStartOf="@id/guideline"
-            app:layout_constraintTop_toBottomOf="@id/Username">
+            app:layout_constraintTop_toBottomOf="@id/tvUsername">
             <com.google.android.material.textfield.TextInputEditText
                 style="@style/txtPassword"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/btnLogin"
             style="@style/btnLogin"
             app:layout_constraintEnd_toStartOf="@+id/guideline2"
             app:layout_constraintStart_toStartOf="@+id/guideline"
-            app:layout_constraintTop_toBottomOf="@+id/Password" />
+            app:layout_constraintTop_toBottomOf="@+id/tvPassword" />
 
         <TextView
             android:id="@+id/Forget"
             style="@style/txtForget"
             app:layout_constraintEnd_toStartOf="@id/guideline2"
-            app:layout_constraintTop_toBottomOf="@id/button"
+            app:layout_constraintTop_toBottomOf="@id/btnLogin"
             />
         <View
             android:id="@+id/leftbar"

@@ -26,6 +26,6 @@ public interface ApiService {
             .build()
             .create(ApiService.class);
 
-    @POST("identity/auth/token")
+    @POST("/api/identity/auth/token")
     Call<GetToken> getToken(@Body User user);
 }

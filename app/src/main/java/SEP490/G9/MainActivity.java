@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -12,6 +13,11 @@ import Model.User;
 
 public class MainActivity extends AppCompatActivity {
 
+    private TextView tvcode;
+    private TextView tvmessage;
+    private TextView tvtoken;
+    private TextView tvauthenticated;
+    private Button btnLogin;
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -20,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
             User user = new User();
             Gson gson = new Gson();
             String strJson = gson.toJson(user);
+
 
     // Ánh xạ nút Sign up
     TextView tvSignUp = findViewById(R.id.Signup);
