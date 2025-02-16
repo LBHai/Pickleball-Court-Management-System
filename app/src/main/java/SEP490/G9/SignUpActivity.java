@@ -19,7 +19,7 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Quay lại màn hình Login
-                Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
+                Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
                 startActivity(intent);
                 finish(); // Kết thúc SignUpActivity để tránh quay lại khi nhấn back
             }

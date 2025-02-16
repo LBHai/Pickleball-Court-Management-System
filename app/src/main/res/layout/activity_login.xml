@@ -1,78 +1,145 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
+    android:fillViewport="true"
+    android:background="@drawable/bg"
     tools:context=".LoginActivity">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content">
 
-        <TextView
+        <ImageView
+            android:id="@+id/imageView"
+            style="@style/imgBG"
+            android:contentDescription="Pickleball"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+
+            />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:text="code: "/>
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="32dp" />
 
-        <TextView
-            android:id="@+id/tv_code"
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"
-            android:layout_marginStart="10dp" />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="32dp" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tvUsername"
+            style="@style/layoutUsername"
+            app:boxBackgroundColor="@color/input_background"
+            app:boxStrokeWidth="0dp"
+            app:layout_constraintEnd_toStartOf="@id/guideline2"
+            app:layout_constraintStart_toStartOf="@id/guideline"
+            app:layout_constraintTop_toBottomOf="@id/imageView">
+
+            <com.google.android.material.textfield.TextInputEditText style="@style/txtUsername" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tvPassword"
+            style="@style/layoutPassword"
+            app:boxBackgroundColor="@color/input_background"
+            app:boxStrokeWidth="0dp"
+            app:layout_constraintEnd_toStartOf="@id/guideline2"
+            app:layout_constraintStart_toStartOf="@id/guideline"
+            app:layout_constraintTop_toBottomOf="@id/tvUsername">
+            <com.google.android.material.textfield.TextInputEditText
+                style="@style/txtPassword"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/btnLogin"
+            style="@style/btnLogin"
+            app:layout_constraintEnd_toStartOf="@+id/guideline2"
+            app:layout_constraintStart_toStartOf="@+id/guideline"
+            app:layout_constraintTop_toBottomOf="@+id/tvPassword" />
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:text="token: "/>
+            android:id="@+id/btnForget"
+            style="@style/txtForget"
+            app:layout_constraintEnd_toStartOf="@id/guideline2"
+            app:layout_constraintTop_toBottomOf="@id/btnLogin"
+            />
+        <View
+            android:id="@+id/leftbar"
+            style="@style/bar"
+            app:layout_constraintBottom_toBottomOf="@+id/OR"
+            app:layout_constraintEnd_toStartOf="@+id/OR"
+            app:layout_constraintStart_toStartOf="@+id/guideline"
+            app:layout_constraintTop_toTopOf="@+id/OR" />
 
         <TextView
-            android:id="@+id/tv_token"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"
-            android:layout_marginStart="10dp" />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+            android:id="@+id/OR"
+            style="@style/txtOR"
+            app:layout_constraintBottom_toTopOf="@+id/btnLoginwithgg"
+            app:layout_constraintEnd_toStartOf="@+id/guideline2"
+            app:layout_constraintStart_toStartOf="@+id/guideline"
+            app:layout_constraintTop_toBottomOf="@+id/btnForget" />
+
+        <View
+            android:id="@+id/rightbar"
+            style="@style/bar"
+            app:layout_constraintBottom_toBottomOf="@+id/OR"
+            app:layout_constraintEnd_toEndOf="@+id/guideline2"
+            app:layout_constraintStart_toEndOf="@+id/OR"
+            app:layout_constraintTop_toTopOf="@+id/OR" />
+
+        <Button
+            android:id="@+id/btnLoginwithgg"
+            style="@style/btnLoginwithgg"
+            app:iconTint="@color/white"
+            app:icon="@drawable/facebook_icon_2013"
+            app:iconPadding="8dp"
+            app:iconSize="24dp"
+            app:layout_constraintEnd_toStartOf="@+id/guideline2"
+            app:layout_constraintStart_toStartOf="@+id/guideline"
+            app:layout_constraintTop_toBottomOf="@+id/OR" />
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="0dp"
+            android:layout_height="54dp"
+            android:layout_marginTop="32dp"
+            android:background="@color/input_background"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btnLoginwithgg"
+            app:layout_constraintVertical_bias="1.0" />
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:text="authenticated: "/>
+            android:id="@+id/tvDhac"
+            style="@style/txtDhac"
+            android:text="Don't have an account?"
+            app:layout_constraintBottom_toBottomOf="@+id/view"
+            app:layout_constraintEnd_toStartOf="@+id/btnSignup"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toEndOf="@+id/view"
+            app:layout_constraintStart_toStartOf="@+id/guideline"
+            app:layout_constraintTop_toTopOf="@+id/view" />
 
         <TextView
-            android:id="@+id/tv_authenticated"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"
-            android:layout_marginStart="10dp" />
-    </LinearLayout>
-    
-    <Button
-        android:id="@+id/btn_call_api"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:textColor="@color/white"
-        android:text="Call API"
-        android:layout_marginTop="50dp"/>
-</LinearLayout>
+            android:id="@+id/btnSignup"
+            style="@style/txtSignup"
+            app:layout_constraintBottom_toBottomOf="@+id/tvDhac"
+            app:layout_constraintEnd_toStartOf="@+id/guideline2"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/tvDhac"
+            app:layout_constraintTop_toTopOf="@+id/tvDhac"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
