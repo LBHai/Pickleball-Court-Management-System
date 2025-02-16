@@ -68,7 +68,7 @@
             app:layout_constraintTop_toBottomOf="@+id/tvPassword" />
 
         <TextView
-            android:id="@+id/Forget"
+            android:id="@+id/btnForget"
             style="@style/txtForget"
             app:layout_constraintEnd_toStartOf="@id/guideline2"
             app:layout_constraintTop_toBottomOf="@id/btnLogin"
@@ -84,10 +84,10 @@
         <TextView
             android:id="@+id/OR"
             style="@style/txtOR"
-            app:layout_constraintBottom_toTopOf="@+id/Loginwithfb"
+            app:layout_constraintBottom_toTopOf="@+id/btnLoginwithgg"
             app:layout_constraintEnd_toStartOf="@+id/guideline2"
             app:layout_constraintStart_toStartOf="@+id/guideline"
-            app:layout_constraintTop_toBottomOf="@+id/Forget" />
+            app:layout_constraintTop_toBottomOf="@+id/btnForget" />
 
         <View
             android:id="@+id/rightbar"
@@ -98,8 +98,8 @@
             app:layout_constraintTop_toTopOf="@+id/OR" />
 
         <Button
-            android:id="@+id/Loginwithfb"
-            style="@style/btnLoginwithfb"
+            android:id="@+id/btnLoginwithgg"
+            style="@style/btnLoginwithgg"
             app:iconTint="@color/white"
             app:icon="@drawable/facebook_icon_2013"
             app:iconPadding="8dp"
@@ -117,28 +117,28 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/Loginwithfb"
+            app:layout_constraintTop_toBottomOf="@+id/btnLoginwithgg"
             app:layout_constraintVertical_bias="1.0" />
 
         <TextView
-            android:id="@+id/Dhac"
+            android:id="@+id/tvDhac"
             style="@style/txtDhac"
             android:text="Don't have an account?"
             app:layout_constraintBottom_toBottomOf="@+id/view"
-            app:layout_constraintEnd_toStartOf="@+id/Signup"
+            app:layout_constraintEnd_toStartOf="@+id/btnSignup"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toEndOf="@+id/view"
             app:layout_constraintStart_toStartOf="@+id/guideline"
             app:layout_constraintTop_toTopOf="@+id/view" />
 
         <TextView
-            android:id="@+id/Signup"
+            android:id="@+id/btnSignup"
             style="@style/txtSignup"
-            app:layout_constraintBottom_toBottomOf="@+id/Dhac"
+            app:layout_constraintBottom_toBottomOf="@+id/tvDhac"
             app:layout_constraintEnd_toStartOf="@+id/guideline2"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/Dhac"
-            app:layout_constraintTop_toTopOf="@+id/Dhac"
+            app:layout_constraintStart_toEndOf="@+id/tvDhac"
+            app:layout_constraintTop_toTopOf="@+id/tvDhac"
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

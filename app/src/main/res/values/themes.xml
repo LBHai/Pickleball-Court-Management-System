@@ -67,7 +67,7 @@
                 <item name="android:layout_marginBottom">32dp</item>
                 <item name="android:background">@color/input_text</item>
             </style>
-            <style name="btnLoginwithfb" parent="Widget.MaterialComponents.Button.TextButton">
+            <style name="btnLoginwithgg" parent="Widget.MaterialComponents.Button.TextButton">
                 <item name="android:layout_width">wrap_content</item>
                 <item name="android:layout_height">wrap_content</item>
                 <item name="android:text">Log in with Facebook</item>

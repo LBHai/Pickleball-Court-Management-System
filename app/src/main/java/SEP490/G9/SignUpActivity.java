@@ -14,7 +14,7 @@ public class SignUpActivity extends AppCompatActivity {
         setContentView(R.layout.activity_signup);
 
         // Tìm TextView Login và gắn sự kiện click
-        TextView loginTextView = findViewById(R.id.Login);
+        TextView loginTextView = findViewById(R.id.btnLogin);
         loginTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

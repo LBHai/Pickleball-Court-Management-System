@@ -13,11 +13,6 @@ import Model.User;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView tvcode;
-    private TextView tvmessage;
-    private TextView tvtoken;
-    private TextView tvauthenticated;
-    private Button btnLogin;
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -29,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     // Ánh xạ nút Sign up
-    TextView tvSignUp = findViewById(R.id.Signup);
+    TextView tvSignUp = findViewById(R.id.btnSignup);
 
     // Xử lý sự kiện khi bấm nút Sign up
         tvSignUp.setOnClickListener(v -> {
