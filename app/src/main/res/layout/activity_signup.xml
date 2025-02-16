@@ -36,7 +36,7 @@
             app:layout_constraintGuide_end="32dp" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tvUsername"
+            android:id="@+id/edtUsername"
             style="@style/layoutUsername"
             app:boxBackgroundColor="@color/input_background"
             app:boxStrokeWidth="0dp"
@@ -48,26 +48,26 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tvPassword"
+            android:id="@+id/edtPassword"
             style="@style/layoutPassword"
             app:boxBackgroundColor="@color/input_background"
             app:boxStrokeWidth="0dp"
             app:layout_constraintEnd_toStartOf="@id/guideline2"
             app:layout_constraintStart_toStartOf="@id/guideline"
-            app:layout_constraintTop_toBottomOf="@id/tvUsername"
+            app:layout_constraintTop_toBottomOf="@id/edtUsername"
             android:layout_marginTop="5dp">
 
             <com.google.android.material.textfield.TextInputEditText style="@style/txtPassword"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tvFirstName"
+            android:id="@+id/edtFirstName"
             style="@style/layoutUsername"
             app:boxBackgroundColor="@color/input_background"
             app:boxStrokeWidth="0dp"
             app:layout_constraintEnd_toStartOf="@id/guideline2"
             app:layout_constraintStart_toStartOf="@id/guideline"
-            app:layout_constraintTop_toBottomOf="@id/tvPassword"
+            app:layout_constraintTop_toBottomOf="@id/edtPassword"
             android:layout_marginTop="5dp">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -76,13 +76,13 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tvLastName"
+            android:id="@+id/edtLastName"
             style="@style/layoutUsername"
             app:boxBackgroundColor="@color/input_background"
             app:boxStrokeWidth="0dp"
             app:layout_constraintEnd_toStartOf="@id/guideline2"
             app:layout_constraintStart_toStartOf="@id/guideline"
-            app:layout_constraintTop_toBottomOf="@id/tvFirstName"
+            app:layout_constraintTop_toBottomOf="@id/edtFirstName"
             android:layout_marginTop="5dp">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -90,13 +90,13 @@
                 android:hint="Last Name"/>
         </com.google.android.material.textfield.TextInputLayout>
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tvDOB"
+            android:id="@+id/edtDOB"
             style="@style/layoutUsername"
             app:boxBackgroundColor="@color/input_background"
             app:boxStrokeWidth="0dp"
             app:layout_constraintEnd_toStartOf="@id/guideline2"
             app:layout_constraintStart_toStartOf="@id/guideline"
-            app:layout_constraintTop_toBottomOf="@id/tvLastName"
+            app:layout_constraintTop_toBottomOf="@id/edtLastName"
             android:layout_marginTop="5dp">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -104,13 +104,13 @@
                 android:hint="Date of birth"/>
         </com.google.android.material.textfield.TextInputLayout>
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tvPhoneNumber"
+            android:id="@+id/edtPhoneNumber"
             style="@style/layoutUsername"
             app:boxBackgroundColor="@color/input_background"
             app:boxStrokeWidth="0dp"
             app:layout_constraintEnd_toStartOf="@id/guideline2"
             app:layout_constraintStart_toStartOf="@id/guideline"
-            app:layout_constraintTop_toBottomOf="@id/tvDOB"
+            app:layout_constraintTop_toBottomOf="@id/edtDOB"
             android:layout_marginTop="5dp">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -123,7 +123,7 @@
             style="@style/btnSignup"
             app:layout_constraintEnd_toStartOf="@+id/guideline2"
             app:layout_constraintStart_toStartOf="@+id/guideline"
-            app:layout_constraintTop_toBottomOf="@+id/tvPhoneNumber" />
+            app:layout_constraintTop_toBottomOf="@+id/edtPhoneNumber" />
 
 
         <TextView
