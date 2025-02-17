@@ -63,7 +63,7 @@ public class LoginActivity extends AppCompatActivity {
 
         // Xử lý sự kiện khi bấm nút Sign up
         tvSignUp.setOnClickListener(v -> {
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
             startActivity(intent);
         });
     }

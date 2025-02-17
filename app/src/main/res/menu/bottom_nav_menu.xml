@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/Map"
+        android:icon="@drawable/map"
+        android:title="Item" />
+    <item
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/Clubs"
+        android:icon="@drawable/list"
+        android:title="Item" />
+    <item
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/Prominent"
+        android:icon="@drawable/hot"
+        android:title="Item" />
+    <item
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/Account"
+        android:icon="@drawable/person"
+        android:title="Item" />
+</menu>
