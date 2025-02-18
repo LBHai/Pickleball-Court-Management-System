@@ -3,6 +3,7 @@ package Api;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import Model.CUser;
 import Model.GetToken;
 import Model.User;
 import retrofit2.Call;
@@ -26,6 +27,8 @@ public interface ApiService {
             .build()
             .create(ApiService.class);
 
-    @POST("/api/identity/auth/token")
+    @POST("api/identity/auth/token")
     Call<GetToken> getToken(@Body User user);
+    @POST("api/identity/users/create_user")
+    Call<GetToken> getToken(@Body CUser cUser);
 }
