@@ -16,19 +16,19 @@ import retrofit2.http.Query;
 public interface ApiService {
 
 
-    //link API: http://203.145.46.242:8080/identity/auth/token
+    //link API: http://203.145.46.242:8080/api/
     Gson gson = new GsonBuilder()
             .setDateFormat("yyyy-MM-dd HH:mm:ss")
             .create();
 
     ApiService apiService = new Retrofit.Builder()
-            .baseUrl("http://203.145.46.242:8080/")
+            .baseUrl("http://203.145.46.242:8080/api/")
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
             .create(ApiService.class);
 
-    @POST("api/identity/auth/token")
+    @POST("identity/auth/token")
     Call<GetToken> getToken(@Body User user);
-    @POST("api/identity/users/create_user")
+    @POST("identity/users/create_user")
     Call<GetToken> getToken(@Body CUser cUser);
 }

@@ -14,4 +14,7 @@
     <color name="colorAccentDark">#dfe3ee</color>
     <color name="colorAccent">#f7f7f7</color>
     <color name="colorAccentLight">#ffffff</color>
+    <color name="red">#FF0000</color>
+    <color name="green">#4CAF50</color>
+    <color name="dark_green">#2E7D32</color>
 </resources>

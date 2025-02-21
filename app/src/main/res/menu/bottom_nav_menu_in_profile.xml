@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_edit"
+        android:title="Chỉnh sửa thông tin"
+        android:icon="@drawable/edit" />
+
+    <item
+        android:id="@+id/menu_changepassword"
+        android:title="Thay đổi mật khẩu"
+        android:icon="@drawable/changepassword" />
+
+    <item
+        android:id="@+id/menu_transalate"
+        android:title="Ngôn ngữ"
+        android:icon="@drawable/translate" />
+
+    <item
+        android:id="@+id/menu_logout"
+        android:title="Đăng xuất"
+        android:icon="@drawable/logout" />
+
+    <item
+        android:id="@+id/menu_version"
+        android:title="Version: 2.6.5"
+        android:icon="@drawable/version" />
+    <item
+        android:id="@+id/menu_deleteaccount"
+        android:title="Xóa tài khỏan"
+        android:icon="@drawable/delete" />
+</menu>

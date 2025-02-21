@@ -2,18 +2,12 @@ package SEP490.G9;
 
 import android.os.Bundle;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
 import com.google.android.material.textfield.TextInputEditText;
-
 import Api.ApiService;
 import Model.GetToken;
 import Model.User;
@@ -22,21 +16,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
-
-import Api.ApiService;
-import Model.GetToken;
-import Model.User;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText edtUsername, edtPassword;
@@ -58,8 +37,17 @@ public class LoginActivity extends AppCompatActivity {
             }
 
         });
+
         // Ánh xạ nút Sign up
         TextView tvSignUp = findViewById(R.id.btnSignup);
+
+        edtPassword.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_GO) {
+                btnLogin.performClick(); // Giả lập click vào nút Login
+                return true;
+            }
+            return false;
+        });
 
         // Xử lý sự kiện khi bấm nút Sign up
         tvSignUp.setOnClickListener(v -> {
