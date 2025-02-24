@@ -6,11 +6,20 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/green"
-    tools:context="Fragment.ClubsFragment">
+    >
 
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rcvClubs"
+    <TextView
+        android:id="@+id/tvId"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:text="Id: 123"/>
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Title: 124"
+        android:textSize="14sp"/>
+
 </LinearLayout>

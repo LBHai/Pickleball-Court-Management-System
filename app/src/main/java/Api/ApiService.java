@@ -3,7 +3,10 @@ package Api;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.util.List;
+
 import Model.CUser;
+import Model.Clubs;
 import Model.GetToken;
 import Model.User;
 import retrofit2.Call;
@@ -30,5 +33,7 @@ public interface ApiService {
     @POST("identity/auth/token")
     Call<GetToken> getToken(@Body User user);
     @POST("identity/users/create_user")
-    Call<GetToken> getToken(@Body CUser cUser);
+    Call<GetToken> registerUser(@Body CUser cUser);
+    @POST("identity/court/public/getAll")
+    Call<List<Clubs>> getlistClubs(@Body Clubs clubs);
 }

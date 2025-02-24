@@ -15,11 +15,12 @@
         <ImageView
             android:id="@+id/imageView"
             style="@style/imgBG"
+            android:layout_marginTop="16dp"
             android:contentDescription="Pickleball"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline"
@@ -36,7 +37,7 @@
             app:layout_constraintGuide_end="32dp" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/edtUsername"
+            android:id="@+id/layoutUsername"
             style="@style/layoutUsername"
             app:boxBackgroundColor="@color/input_background"
             app:boxStrokeWidth="0dp"
@@ -44,76 +45,102 @@
             app:layout_constraintStart_toStartOf="@id/guideline"
             app:layout_constraintTop_toBottomOf="@id/imageView">
 
-            <com.google.android.material.textfield.TextInputEditText style="@style/txtUsername" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtUsername"
+                style="@style/txtUsername"
+
+                />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/edtPassword"
+            android:id="@+id/layoutPassword"
             style="@style/layoutPassword"
             app:boxBackgroundColor="@color/input_background"
             app:boxStrokeWidth="0dp"
             app:layout_constraintEnd_toStartOf="@id/guideline2"
             app:layout_constraintStart_toStartOf="@id/guideline"
-            app:layout_constraintTop_toBottomOf="@id/edtUsername"
+            app:layout_constraintTop_toBottomOf="@id/layoutUsername"
             android:layout_marginTop="5dp">
 
-            <com.google.android.material.textfield.TextInputEditText style="@style/txtPassword"/>
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtPassword"
+                style="@style/txtPassword"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/edtFirstName"
+            android:id="@+id/layoutFirstName"
             style="@style/layoutUsername"
             app:boxBackgroundColor="@color/input_background"
             app:boxStrokeWidth="0dp"
             app:layout_constraintEnd_toStartOf="@id/guideline2"
             app:layout_constraintStart_toStartOf="@id/guideline"
-            app:layout_constraintTop_toBottomOf="@id/edtPassword"
+            app:layout_constraintTop_toBottomOf="@id/layoutPassword"
             android:layout_marginTop="5dp">
 
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtFirstName"
                 style="@style/txtUsername"
                 android:hint="First Name"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/edtLastName"
+            android:id="@+id/layoutLastName"
             style="@style/layoutUsername"
             app:boxBackgroundColor="@color/input_background"
             app:boxStrokeWidth="0dp"
             app:layout_constraintEnd_toStartOf="@id/guideline2"
             app:layout_constraintStart_toStartOf="@id/guideline"
-            app:layout_constraintTop_toBottomOf="@id/edtFirstName"
+            app:layout_constraintTop_toBottomOf="@id/layoutFirstName"
             android:layout_marginTop="5dp">
 
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtLastName"
                 style="@style/txtUsername"
                 android:hint="Last Name"/>
         </com.google.android.material.textfield.TextInputLayout>
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/edtDOB"
+            android:id="@+id/layoutDOB"
             style="@style/layoutUsername"
             app:boxBackgroundColor="@color/input_background"
             app:boxStrokeWidth="0dp"
             app:layout_constraintEnd_toStartOf="@id/guideline2"
             app:layout_constraintStart_toStartOf="@id/guideline"
-            app:layout_constraintTop_toBottomOf="@id/edtLastName"
+            app:layout_constraintTop_toBottomOf="@id/layoutLastName"
             android:layout_marginTop="5dp">
 
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtDOB"
                 style="@style/txtUsername"
+
                 android:hint="Date of birth"/>
         </com.google.android.material.textfield.TextInputLayout>
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/edtPhoneNumber"
+            android:id="@+id/layoutEmail"
             style="@style/layoutUsername"
             app:boxBackgroundColor="@color/input_background"
             app:boxStrokeWidth="0dp"
             app:layout_constraintEnd_toStartOf="@id/guideline2"
             app:layout_constraintStart_toStartOf="@id/guideline"
-            app:layout_constraintTop_toBottomOf="@id/edtDOB"
+            app:layout_constraintTop_toBottomOf="@id/layoutDOB"
             android:layout_marginTop="5dp">
 
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtEmail"
+                style="@style/txtUsername"
+                android:hint="Email"/>
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutPhoneNumber"
+            style="@style/layoutUsername"
+            app:boxBackgroundColor="@color/input_background"
+            app:boxStrokeWidth="0dp"
+            app:layout_constraintEnd_toStartOf="@id/guideline2"
+            app:layout_constraintStart_toStartOf="@id/guideline"
+            app:layout_constraintTop_toBottomOf="@id/layoutEmail"
+            android:layout_marginTop="5dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtPhoneNumber"
                 style="@style/txtUsername"
                 android:hint="Phone Number"/>
         </com.google.android.material.textfield.TextInputLayout>
@@ -123,7 +150,7 @@
             style="@style/btnSignup"
             app:layout_constraintEnd_toStartOf="@+id/guideline2"
             app:layout_constraintStart_toStartOf="@+id/guideline"
-            app:layout_constraintTop_toBottomOf="@+id/edtPhoneNumber" />
+            app:layout_constraintTop_toBottomOf="@+id/layoutPhoneNumber" />
 
 
         <TextView
