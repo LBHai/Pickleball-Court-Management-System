@@ -13,6 +13,8 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 
@@ -34,6 +36,7 @@ public interface ApiService {
     Call<GetToken> getToken(@Body User user);
     @POST("identity/users/create_user")
     Call<GetToken> registerUser(@Body CUser cUser);
-    @POST("identity/court/public/getAll")
-    Call<List<Clubs>> getlistClubs(@Body Clubs clubs);
+    @GET("court/public/getAll")
+    Call<List<Clubs>> getlistClubs();
+
 }
