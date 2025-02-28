@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import Model.Clubs;
+import SEP490.G9.BookingTableActivity;
 import SEP490.G9.R;
 
 public class ClubsAdapter extends RecyclerView.Adapter<ClubsAdapter.ClubsViewHolder> {
@@ -64,8 +65,8 @@ public class ClubsAdapter extends RecyclerView.Adapter<ClubsAdapter.ClubsViewHol
 
         // Xử lý nút "Đặt Sân"
         holder.btnBook.setOnClickListener(v -> {
-            // Ví dụ: Chuyển đến trang đặt sân (có thể truyền dữ liệu nếu cần)
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://example.com/book?club_id=" + club.getId()));
+            Intent intent = new Intent(context, BookingTableActivity.class);
+            intent.putExtra("club_id", club.getId());
             context.startActivity(intent);
         });
 

@@ -16,10 +16,11 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".ClubDetailFragment"
+            android:name=".BookingTableActivity"
             android:exported="false" />
-
-<!--        hyp-->
+<!--        <activity-->
+<!--            android:name=".ClubDetailFragment"-->
+<!--            android:exported="false" /> &lt;!&ndash; hyp &ndash;&gt;-->
         <activity
             android:name=".MainActivity"
             android:exported="false"
@@ -34,6 +35,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ConfirmActivity"
+            android:exported="true" />
         <activity
             android:name=".SignUpActivity"
             android:exported="true" />

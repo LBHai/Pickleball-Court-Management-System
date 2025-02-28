@@ -7,6 +7,7 @@ import java.util.List;
 
 import Model.CUser;
 import Model.Clubs;
+import Model.CourtSlot;
 import Model.GetToken;
 import Model.User;
 import retrofit2.Call;
@@ -33,10 +34,15 @@ public interface ApiService {
             .create(ApiService.class);
 
     @POST("identity/auth/token")
-    Call<GetToken> getToken(@Body User user);
+        //Login xong se tao ra Token -> luu vao session
+    Call<GetToken> getToken(@Header("Authentization") String token,@Body User user);
     @POST("identity/users/create_user")
     Call<GetToken> registerUser(@Body CUser cUser);
     @GET("court/public/getAll")
     Call<List<Clubs>> getlistClubs();
-
+    @GET("court/public/booking_slot")
+    Call<List<CourtSlot>> getBookingSlots(
+            @Query("courtId") String courtId,
+            @Query("dateBooking") String dateBooking
+    );
 }

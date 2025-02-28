@@ -66,7 +66,8 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         User user = new User(username, password);
-        ApiService.apiService.getToken(user).enqueue(new Callback<GetToken>() {
+        //Login xong se tao ra Token -> luu vao session
+        ApiService.apiService.getToken("Bearer ", user).enqueue(new Callback<GetToken>() {
             @Override
             public void onResponse(Call<GetToken> call, Response<GetToken> response) {
                 if (response.isSuccessful() && response.code() == 200) {
