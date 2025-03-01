@@ -13,7 +13,7 @@ public class OptionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.fragment_account);
 
         ImageButton optionsButton = findViewById(R.id.options);
         optionsButton.setOnClickListener(new View.OnClickListener() {

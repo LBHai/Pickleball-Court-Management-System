@@ -4,7 +4,7 @@
         android:icon="@drawable/map"
         android:title=""/>
     <item
-        android:id="@+id/nav_clubs"
+        android:id="@+id/nav_courts"
         android:icon="@drawable/list"
         android:title=""/>
     <item

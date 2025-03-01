@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:padding="8dp"
     android:background="@color/green"
-    tools:context="Fragment.ClubsFragment">
+    tools:context="Fragment.CourtsFragment">
 
     <!-- Thanh tìm kiếm -->
     <EditText

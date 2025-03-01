@@ -1,6 +1,8 @@
 package Fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -9,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -16,7 +19,13 @@ import androidx.fragment.app.Fragment;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+import Api.ApiService;
+import SEP490.G9.LoginActivity;
 import SEP490.G9.R;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 public class AccountFragment extends Fragment {
@@ -55,7 +64,7 @@ public class AccountFragment extends Fragment {
                     // Xử lý "Ngôn ngữ"
                     return true;
                 } else if (id == R.id.menu_logout) {
-                    // Xử lý "Đăng xuất"
+
                     return true;
                 } else if (id == R.id.menu_version) {
                     // Xử lý "Version"
@@ -90,33 +99,7 @@ public class AccountFragment extends Fragment {
             e.printStackTrace();
         }
     }
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        inflater.inflate(R.menu.toolbar_menu, menu); // Inflate menu từ file XML
-        super.onCreateOptionsMenu(menu, inflater);
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int itemId = item.getItemId();
-        if (itemId == R.id.menu_edit_info) {
-            // Handle "Edit your information"
-            return true;
-        } else if (itemId == R.id.menu_change_password) {
-            // Handle "Change password"
-            return true;
-        } else if (itemId == R.id.menu_language) {
-            // Handle "Language"
-            return true;
-        } else if (itemId == R.id.menu_logout) {
-            // Handle "Logout"
-            return true;
-        } else if (itemId == R.id.menu_delete_account) {
-            // Handle "Delete account"
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
 
 }

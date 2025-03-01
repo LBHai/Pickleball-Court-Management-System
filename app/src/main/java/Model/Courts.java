@@ -1,6 +1,6 @@
 package Model;
 
-public class Clubs {
+public class Courts {
     private String id;
     private String name;
     private String address;
@@ -10,10 +10,10 @@ public class Clubs {
     private String link;
     private boolean active;
 
-    public Clubs() {
+    public Courts() {
     }
 
-    public Clubs(String id, String name, String address, String phone, String openTime, String email, String link, boolean active) {
+    public Courts(String id, String name, String address, String phone, String openTime, String email, String link, boolean active) {
         this.id = id;
         this.name = name;
         this.address = address;

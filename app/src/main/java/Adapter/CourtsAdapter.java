@@ -14,41 +14,41 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-import Model.Clubs;
+import Model.Courts;
 import SEP490.G9.BookingTableActivity;
 import SEP490.G9.R;
 
-public class ClubsAdapter extends RecyclerView.Adapter<ClubsAdapter.ClubsViewHolder> {
+public class CourtsAdapter extends RecyclerView.Adapter<CourtsAdapter.ClubsViewHolder> {
 
     private Context context;
-    private List<Clubs> clubsList;
+    private List<Courts> courtsList;
     private OnItemClickListener listener;
 
     public interface OnItemClickListener {
-        void onItemClick(Clubs club);
+        void onItemClick(Courts club);
     }
 
-    public ClubsAdapter(Context context, List<Clubs> clubsList, OnItemClickListener listener) {
+    public CourtsAdapter(Context context, List<Courts> courtsList, OnItemClickListener listener) {
         this.context = context;
-        this.clubsList = clubsList;
+        this.courtsList = courtsList;
         this.listener = listener;
     }
 
-    public void updateList(List<Clubs> newList) {
-        clubsList = newList;
+    public void updateList(List<Courts> newList) {
+        courtsList = newList;
         notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public ClubsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_club, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_court, parent, false);
         return new ClubsViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ClubsViewHolder holder, int position) {
-        Clubs club = clubsList.get(position);
+        Courts club = courtsList.get(position);
 
         // Binding dữ liệu
         holder.tvClubName.setText(club.getName());
@@ -83,7 +83,7 @@ public class ClubsAdapter extends RecyclerView.Adapter<ClubsAdapter.ClubsViewHol
 
     @Override
     public int getItemCount() {
-        return clubsList.size();
+        return courtsList.size();
     }
 
     public static class ClubsViewHolder extends RecyclerView.ViewHolder {

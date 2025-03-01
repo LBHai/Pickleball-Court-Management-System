@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -13,7 +12,7 @@ import android.view.MenuItem;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import Fragment.AccountFragment;
-import Fragment.ClubsFragment;
+import Fragment.CourtsFragment;
 import Fragment.MapFragment;
 import Fragment.ProminentFragment;
 
@@ -21,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Fragment
     AccountFragment accountFragment;
-    ClubsFragment clubsFragment;
+    CourtsFragment courtsFragment;
     MapFragment mapFragment;
     ProminentFragment prominentFragment;
 
@@ -34,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Khởi tạo các Fragment
         accountFragment = new AccountFragment();
-        clubsFragment = new ClubsFragment();
+        courtsFragment = new CourtsFragment();
         mapFragment = new MapFragment();
         prominentFragment = new ProminentFragment();
 
@@ -49,8 +48,8 @@ public class MainActivity extends AppCompatActivity {
                 if (itemId == R.id.nav_map) {
                     loadFragment(mapFragment);
                     return true;
-                } else if (itemId == R.id.nav_clubs) {
-                    loadFragment(clubsFragment);
+                } else if (itemId == R.id.nav_courts) {
+                    loadFragment(courtsFragment);
                     return true;
                 } else if (itemId == R.id.nav_prominent) {
                     loadFragment(prominentFragment);

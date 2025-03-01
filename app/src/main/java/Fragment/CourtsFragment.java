@@ -1,6 +1,5 @@
 package Fragment;
 
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -20,27 +19,27 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
-import Adapter.ClubsAdapter;
+import Adapter.CourtsAdapter;
 import Api.ApiService;
-import Model.Clubs;
-import SEP490.G9.ClubDetailFragment;
+import Model.Courts;
+import SEP490.G9.CourtDetailFragment;
 import SEP490.G9.R;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ClubsFragment extends Fragment {
+public class CourtsFragment extends Fragment {
 
     private RecyclerView rcvClubs;
     private EditText edtSearch;
-    private ClubsAdapter clubsAdapter;
-    private List<Clubs> clubsList = new ArrayList<>(); // Danh sách gốc để lọc
+    private CourtsAdapter courtsAdapter;
+    private List<Courts> courtsList = new ArrayList<>(); // Danh sách gốc để lọc
 
 
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_clubs, container, false);
+        View view = inflater.inflate(R.layout.fragment_courts, container, false);
 
         // Ánh xạ view
         rcvClubs = view.findViewById(R.id.rcvClubs);
@@ -69,12 +68,12 @@ public class ClubsFragment extends Fragment {
     }
 
     private void callApiGetClubs() {
-        ApiService.apiService.getlistClubs().enqueue(new Callback<List<Clubs>>() {
+        ApiService.apiService.getCourts().enqueue(new Callback<List<Courts>>() {
             @Override
-            public void onResponse(Call<List<Clubs>> call, Response<List<Clubs>> response) {
+            public void onResponse(Call<List<Courts>> call, Response<List<Courts>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    clubsList = response.body();
-                    setupRecyclerView(clubsList);
+                    courtsList = response.body();
+                    setupRecyclerView(courtsList);
                 } else {
                     Log.e("API_ERROR", "Response body null hoặc lỗi: " + response.errorBody());
                     Toast.makeText(getContext(), "Lỗi API: " + response.code(), Toast.LENGTH_SHORT).show();
@@ -82,16 +81,16 @@ public class ClubsFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<Clubs>> call, Throwable t) {
+            public void onFailure(Call<List<Courts>> call, Throwable t) {
                 Log.e("API_ERROR", "Lỗi gọi API: " + t.getMessage());
                 Toast.makeText(getContext(), "Không thể kết nối đến máy chủ", Toast.LENGTH_SHORT).show();
             }
         });
     }
-    private void setupRecyclerView(List<Clubs> list) {
-        clubsAdapter = new ClubsAdapter(getContext(), list, club -> {
+    private void setupRecyclerView(List<Courts> list) {
+        courtsAdapter = new CourtsAdapter(getContext(), list, club -> {
             // Mở ClubDetailFragment
-            Fragment clubDetailFragment = new ClubDetailFragment();
+            Fragment clubDetailFragment = new CourtDetailFragment();
             Bundle bundle = new Bundle();
             bundle.putString("club_id", club.getId());
             clubDetailFragment.setArguments(bundle);
@@ -102,7 +101,7 @@ public class ClubsFragment extends Fragment {
                     .commit();
         });
 
-        rcvClubs.setAdapter(clubsAdapter);
+        rcvClubs.setAdapter(courtsAdapter);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rcvClubs.getContext(), DividerItemDecoration.VERTICAL);
         rcvClubs.addItemDecoration(dividerItemDecoration);
     }
@@ -111,12 +110,12 @@ public class ClubsFragment extends Fragment {
 
 
     private void filterClubs(String query) {
-        List<Clubs> filteredList = new ArrayList<>();
-        for (Clubs club : clubsList) {
+        List<Courts> filteredList = new ArrayList<>();
+        for (Courts club : courtsList) {
             if (club.getName().toLowerCase().contains(query.toLowerCase())) {
                 filteredList.add(club);
             }
         }
-        clubsAdapter.updateList(filteredList);
+        courtsAdapter.updateList(filteredList);
     }
 }
