@@ -1,5 +1,6 @@
 package SEP490.G9;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -75,6 +76,12 @@ public class LoginActivity extends AppCompatActivity {
                     GetToken getToken = response.body();
                     if (getToken != null && getToken.getResult().isAuthenticated()) {
                         String token = getToken.getResult().getToken();
+
+                        SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString("token", token);
+                        editor.apply();
+
                         Toast.makeText(LoginActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         intent.putExtra("TOKEN", token);

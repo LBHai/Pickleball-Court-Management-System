@@ -9,6 +9,7 @@ import Model.CUser;
 import Model.Courts;
 import Model.CourtSlot;
 import Model.GetToken;
+import Model.Logout;
 import Model.User;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -47,5 +48,5 @@ public interface ApiService {
             @Query("dateBooking") String dateBooking
     );
     @POST("identity/auth/logout")
-    Call<ResponseBody> logout(@Header("Authorization") String token);
+    Call<Logout> logout(@Body Logout logout);
 }
