@@ -1,5 +1,6 @@
 package Fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -17,6 +18,7 @@ import java.lang.reflect.Method;
 
 import Api.ApiService;
 import Model.MyInfoResponse;
+import SEP490.G9.LoginActivity;
 import SEP490.G9.R;
 import Session.SessionManager;
 import retrofit2.Call;
@@ -113,7 +115,7 @@ public class AccountFragment extends Fragment {
                     // Xử lý "Ngôn ngữ"
                     return true;
                 } else if (id == R.id.menu_logout) {
-                    // Xử lý logout (có thể gọi API logout hoặc xóa session)
+                    logoutUser();
                     return true;
                 } else if (id == R.id.menu_version) {
                     // Xử lý "Version"
@@ -128,9 +130,6 @@ public class AccountFragment extends Fragment {
         popupMenu.show();
     }
 
-    /**
-     * Ép buộc hiển thị icon trong PopupMenu.
-     */
     private void forceShowPopupMenuIcons(PopupMenu popupMenu) {
         try {
             Field[] fields = popupMenu.getClass().getDeclaredFields();
@@ -148,4 +147,15 @@ public class AccountFragment extends Fragment {
             e.printStackTrace();
         }
     }
+    private void logoutUser() {
+        // Xóa token khỏi session
+        sessionManager.clearSession();
+
+        // Chuyển về màn hình đăng nhập
+        Intent intent = new Intent(getActivity(), LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Xóa toàn bộ stack
+        startActivity(intent);
+        getActivity().finish(); // Đóng AccountFragment
+    }
+
 }
