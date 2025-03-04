@@ -38,6 +38,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp" />
 
+    <!-- Legend với 3 trạng thái: Trống, Đang đặt, Đã đặt (màu đỏ) -->
     <LinearLayout
         android:id="@+id/legendLayout"
         android:layout_width="match_parent"
@@ -86,27 +87,11 @@
             <View
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:background="#BDBDBD"/>
+                android:background="#FF0000"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Đã đặt"
-                android:layout_marginLeft="4dp"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginRight="16dp">
-            <View
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:background="#EF9A9A"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Cố định"
                 android:layout_marginLeft="4dp"/>
         </LinearLayout>
     </LinearLayout>

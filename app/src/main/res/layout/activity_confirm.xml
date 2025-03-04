@@ -1,13 +1,142 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#1E5128"
     android:padding="16dp">
-    <TextView
-        android:id="@+id/tvSummary"
-        android:layout_width="wrap_content"
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Thông tin slot chọn"/>
-</LinearLayout>
+        android:orientation="vertical">
+
+        <!-- Tiêu đề màn hình -->
+        <TextView
+            android:id="@+id/tvHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Đặt lịch trực quan"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Thông tin sân: Tên sân, địa chỉ, ngày, môn chơi -->
+        <LinearLayout
+            android:id="@+id/layoutStadiumInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@android:color/white"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:id="@+id/tvStadiumName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tên sân: "
+                android:textColor="#000000"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginBottom="4dp"/>
+
+            <TextView
+                android:id="@+id/tvAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Địa chỉ: "
+                android:textColor="#000000"
+                android:layout_marginBottom="4dp"/>
+
+            <TextView
+                android:id="@+id/tvDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ngày: "
+                android:textColor="#000000"
+                android:layout_marginBottom="4dp"/>
+
+            <TextView
+                android:id="@+id/tvGameType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Môn chơi: "
+                android:textColor="#000000"
+                android:layout_marginBottom="4dp"/>
+        </LinearLayout>
+
+        <!-- Tiêu đề Thông tin đặt -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thông tin đặt:"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Danh sách các slot đã chọn -->
+        <LinearLayout
+            android:id="@+id/layoutConfirmOrders"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="12dp">
+            <!-- Sẽ được nạp động các item_confirm_order -->
+        </LinearLayout>
+
+        <!-- Tổng giá tiền -->
+        <TextView
+            android:id="@+id/tvTotalPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tổng giá: 0 đ"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Ô nhập tên -->
+        <EditText
+            android:id="@+id/etName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Tên của bạn"
+            android:layout_marginBottom="8dp"
+            android:background="@android:color/white"
+            android:padding="12dp"/>
+
+        <!-- Ô nhập số điện thoại -->
+        <EditText
+            android:id="@+id/etPhone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Số điện thoại"
+            android:layout_marginBottom="8dp"
+            android:inputType="phone"
+            android:background="@android:color/white"
+            android:padding="12dp"/>
+
+        <!-- Ô nhập ghi chú -->
+        <EditText
+            android:id="@+id/etNote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Ghi chú cho chủ sân"
+            android:layout_marginBottom="12dp"
+            android:background="@android:color/white"
+            android:padding="12dp"/>
+
+        <!-- Nút xác nhận thanh toán -->
+        <Button
+            android:id="@+id/btnConfirm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="XÁC NHẬN THANH TOÁN"
+            android:backgroundTint="@android:color/holo_green_dark"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:padding="12dp"/>
+    </LinearLayout>
+</ScrollView>

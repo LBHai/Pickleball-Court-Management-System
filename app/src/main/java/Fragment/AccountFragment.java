@@ -1,20 +1,28 @@
 package Fragment;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Locale;
 
 import Api.ApiService;
 import Model.MyInfoResponse;
@@ -32,30 +40,28 @@ public class AccountFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate layout cho Fragment
-        View view = inflater.inflate(R.layout.fragment_account, container, false);
-        setHasOptionsMenu(true); // Bật hiển thị menu trong Fragment
+        // Kiểm tra nếu chưa đăng nhập, chuyển về LoginActivity
+        sessionManager = new SessionManager(getContext());
+        if (sessionManager.getToken() == null || sessionManager.getToken().isEmpty()) {
+            Intent intent = new Intent(getActivity(), LoginActivity.class);
+            startActivity(intent);
+            getActivity().finish(); // Đóng MainActivity nếu cần
+            return null;
+        }
 
-        // Ánh xạ các view hiển thị thông tin người dùng
+        View view = inflater.inflate(R.layout.fragment_account, container, false);
+        setHasOptionsMenu(true);
+
         tvUserName = view.findViewById(R.id.userName);
         tvPhoneNumber = view.findViewById(R.id.phoneNumber);
+        getMyInfo(); // Gọi API lấy thông tin người dùng
 
-        // Khởi tạo SessionManager để lấy token đã lưu
-        sessionManager = new SessionManager(getContext());
-
-        // Gọi API lấy thông tin người dùng (getMyInfo)
-        getMyInfo();
-
-        // Cấu hình nút Options trong header
         ImageButton optionsButton = view.findViewById(R.id.options);
-        optionsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showPopupMenu(v);
-            }
-        });
+        optionsButton.setOnClickListener(v -> showPopupMenu(v));
+
         return view;
     }
+
 
     /**
      * Gọi API lấy thông tin người dùng dựa trên token lưu trong session.
@@ -112,7 +118,7 @@ public class AccountFragment extends Fragment {
                     // Xử lý "Thay đổi mật khẩu"
                     return true;
                 } else if (id == R.id.menu_transalate) {
-                    // Xử lý "Ngôn ngữ"
+                    showLanguageDialog();
                     return true;
                 } else if (id == R.id.menu_logout) {
                     logoutUser();
@@ -147,8 +153,7 @@ public class AccountFragment extends Fragment {
             e.printStackTrace();
         }
     }
-    private void logoutUser() {
-        // Xóa token khỏi session
+    private void logoutUser() {        // Xóa token khỏi session
         sessionManager.clearSession();
 
         // Chuyển về màn hình đăng nhập
@@ -156,6 +161,63 @@ public class AccountFragment extends Fragment {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Xóa toàn bộ stack
         startActivity(intent);
         getActivity().finish(); // Đóng AccountFragment
+    }
+    private void showLanguageDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle(getString(R.string.choose_language));
+
+        String[] languages = {"English", "Tiếng Việt"};
+        int[] icons = {R.drawable.usa_flag, R.drawable.vn_flag};
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.select_dialog_item, languages) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                if (convertView == null) {
+                    convertView = LayoutInflater.from(getContext()).inflate(android.R.layout.select_dialog_item, parent, false);
+                }
+
+                TextView textView = convertView.findViewById(android.R.id.text1);
+                textView.setText(languages[position]);
+                textView.setTextSize(18);
+
+                // Load icon an toàn
+                Drawable drawable = ContextCompat.getDrawable(getContext(), icons[position]);
+                if (drawable != null) {
+                    drawable.setBounds(0, 0, 80, 80);
+                    textView.setCompoundDrawables(drawable, null, null, null);
+                    textView.setCompoundDrawablePadding(20);
+                }
+
+                return convertView;
+            }
+        };
+
+        builder.setAdapter(adapter, (dialog, which) -> {
+            String languageCode = (which == 0) ? "en" : "vi";
+            changeLanguage(languageCode);
+        });
+
+        builder.show();
+    }
+
+
+    /**hy
+     * Thay đổi ngôn ngữ cho ứng dụng và khởi động lại Activity hiện tại.
+     * @param languageCode Mã ngôn ngữ (ví dụ: "en", "vi")
+     */
+    private void changeLanguage(String languageCode) {
+        Locale locale = new Locale(languageCode);
+        Locale.setDefault(locale);
+        Resources resources = getResources();
+        Configuration config = resources.getConfiguration();
+        // Với API 17 trở lên nên dùng setLocale thay vì config.locale
+        config.setLocale(locale);
+        resources.updateConfiguration(config, resources.getDisplayMetrics());
+
+        // Khởi động lại Activity để áp dụng thay đổi
+        Intent refresh = getActivity().getIntent();
+        getActivity().finish();
+        startActivity(refresh);
     }
 
 }

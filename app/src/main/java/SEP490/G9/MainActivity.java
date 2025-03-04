@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -15,6 +16,7 @@ import Fragment.AccountFragment;
 import Fragment.CourtsFragment;
 import Fragment.MapFragment;
 import Fragment.ProminentFragment;
+import Session.SessionManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,11 +43,21 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView navigationView = findViewById(R.id.bottom_nav);
 
         // Thiết lập listener cho BottomNavigationView
+        // Thiết lập listener cho BottomNavigationView
         navigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int itemId = item.getItemId();
-                if (itemId == R.id.nav_map) {
+
+                if (itemId == R.id.nav_account) {
+                    if (!isUserLoggedIn()) { // Kiểm tra nếu chưa đăng nhập
+                        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                        startActivity(intent);
+                        return false; // Không load fragment nếu chưa đăng nhập
+                    }
+                    loadFragment(accountFragment);
+                    return true;
+                } else if (itemId == R.id.nav_map) {
                     loadFragment(mapFragment);
                     return true;
                 } else if (itemId == R.id.nav_courts) {
@@ -54,13 +66,13 @@ public class MainActivity extends AppCompatActivity {
                 } else if (itemId == R.id.nav_prominent) {
                     loadFragment(prominentFragment);
                     return true;
-                } else if (itemId == R.id.nav_account) {
-                    loadFragment(accountFragment);
-                    return true;
                 }
                 return false;
             }
         });
+
+
+
 
         // Mặc định hiển thị HomeFragment khi khởi động
         if (savedInstanceState == null) {
@@ -68,7 +80,12 @@ public class MainActivity extends AppCompatActivity {
             loadFragment(mapFragment);
         }
     }
-
+    // Phương thức kiểm tra đăng nhập
+    private boolean isUserLoggedIn() {
+        SessionManager sessionManager = new SessionManager(this);
+        String token = sessionManager.getToken();
+        return token != null && !token.isEmpty();
+    }
     // Phương thức để load Fragment
     private void loadFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();

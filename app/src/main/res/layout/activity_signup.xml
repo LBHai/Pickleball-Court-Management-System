@@ -80,7 +80,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edtFirstName"
                 style="@style/txtUsername"
-                android:hint="First Name"/>
+                android:hint="@string/first_name"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -96,7 +96,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edtLastName"
                 style="@style/txtUsername"
-                android:hint="Last Name"/>
+                android:hint="@string/last_name"/>
         </com.google.android.material.textfield.TextInputLayout>
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/layoutDOB"
@@ -112,7 +112,7 @@
                 android:id="@+id/edtDOB"
                 style="@style/txtUsername"
 
-                android:hint="Date of birth"/>
+                android:hint="@string/date_of_birth"/>
         </com.google.android.material.textfield.TextInputLayout>
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/layoutEmail"
@@ -127,7 +127,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edtEmail"
                 style="@style/txtUsername"
-                android:hint="Email"/>
+                android:hint="@string/email"/>
         </com.google.android.material.textfield.TextInputLayout>
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/layoutPhoneNumber"
@@ -142,7 +142,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edtPhoneNumber"
                 style="@style/txtUsername"
-                android:hint="Phone Number"/>
+                android:hint="@string/phone_number"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <Button

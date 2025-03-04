@@ -2,30 +2,31 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/menu_edit"
-        android:title="Chỉnh sửa thông tin"
+        android:title="@string/menu_edit"
         android:icon="@drawable/edit" />
 
     <item
         android:id="@+id/menu_changepassword"
-        android:title="Thay đổi mật khẩu"
+        android:title="@string/menu_changepassword"
         android:icon="@drawable/changepassword" />
 
     <item
         android:id="@+id/menu_transalate"
-        android:title="Ngôn ngữ"
+        android:title="@string/menu_translate"
         android:icon="@drawable/translate" />
 
     <item
         android:id="@+id/menu_logout"
-        android:title="Đăng xuất"
+        android:title="@string/menu_logout"
         android:icon="@drawable/logout" />
 
     <item
         android:id="@+id/menu_version"
-        android:title="Version: 2.6.5"
+        android:title="@string/menu_version"
         android:icon="@drawable/version" />
+
     <item
         android:id="@+id/menu_deleteaccount"
-        android:title="Xóa tài khỏan"
+        android:title="@string/menu_deleteaccount"
         android:icon="@drawable/delete" />
 </menu>

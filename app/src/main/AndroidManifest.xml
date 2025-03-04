@@ -22,12 +22,12 @@
 <!--            android:name=".ClubDetailFragment"-->
 <!--            android:exported="false" /> &lt;!&ndash; hyp &ndash;&gt;-->
         <activity
-            android:name=".MainActivity"
+            android:name=".LoginActivity"
             android:exported="false"
             android:label="@string/title_activity_main"
             android:theme="@style/Theme.PickleballCourtManagementSystem" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
