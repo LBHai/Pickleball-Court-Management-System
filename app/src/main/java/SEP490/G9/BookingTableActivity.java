@@ -29,7 +29,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Set;
-
 import Api.ApiService;
 import Model.BookingSlot;
 import Model.CourtSlot;
@@ -49,6 +48,7 @@ public class BookingTableActivity extends AppCompatActivity {
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
     private List<CourtSlot> allCourts = new ArrayList<>();
     private List<String> allTimes = new ArrayList<>();
+    // HashSet lưu các ô mà người dùng đã chọn (trạng thái "đang đặt") vĩnh viễn khi đang sử dụng app
     private Set<String> selectedCells = new HashSet<>();
 
     @Override
@@ -70,18 +70,18 @@ public class BookingTableActivity extends AppCompatActivity {
             return;
         }
 
-        // Lấy ngày hiện tại làm mặc định
+        // Thiết lập ngày hiện tại làm mặc định
         Calendar c = Calendar.getInstance();
         selectedDate = sdf.format(c.getTime());
         tvSelectedDate.setText("Ngày: " + selectedDate);
 
-        // Gọi API lấy dữ liệu slot
+        // Gọi API lấy dữ liệu slot cho ngày và sân được chọn
         fetchBookingSlots(courtId, selectedDate);
 
-        // Chọn ngày
+        // Chọn ngày (các ngày quá khứ bị vô hiệu hóa)
         btnSelectDate.setOnClickListener(v -> showDatePickerDialog());
 
-        // Spinner thay đổi -> build lại bảng
+        // Khi thay đổi sân qua spinner, xây dựng lại bảng
         spinnerCourt.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 buildTable();
@@ -89,7 +89,7 @@ public class BookingTableActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        // Nút Next
+        // Nút Next: chuyển sang màn hình xác nhận
         btnNext.setOnClickListener(v -> goToNextScreen());
     }
 
@@ -115,6 +115,8 @@ public class BookingTableActivity extends AppCompatActivity {
                 },
                 year, month, day
         );
+        // Chỉ cho phép chọn ngày hiện tại và tương lai (ngày quá khứ bị vô hiệu hóa và xám đi)
+        datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis());
         datePickerDialog.show();
     }
 
@@ -126,7 +128,7 @@ public class BookingTableActivity extends AppCompatActivity {
                     allCourts = response.body();
                     collectAllStartTimes(allCourts);
                     setupCourtSpinner(allCourts);
-                    selectedCells.clear();
+                    // Lưu ý: Không xóa selectedCells để giữ trạng thái đã chọn trong suốt phiên làm việc của app
                     buildTable();
                 } else {
                     Toast.makeText(BookingTableActivity.this, "Lỗi khi lấy dữ liệu", Toast.LENGTH_SHORT).show();
@@ -176,18 +178,16 @@ public class BookingTableActivity extends AppCompatActivity {
         TextView cornerCell = createCell("Court", true, true);
         headerRow.addView(cornerCell);
 
-        // Thời gian
         for (String time : allTimes) {
-            String displayTime = time.substring(0, 5); // HH:mm
+            String displayTime = time.substring(0, 5); // Hiển thị HH:mm
             TextView cell = createCell(displayTime, true, false);
             headerRow.addView(cell);
         }
         tableLayout.addView(headerRow);
 
-        // Nội dung
         String selectedCourtName = spinnerCourt.getSelectedItem().toString();
         for (CourtSlot court : allCourts) {
-            // Nếu người dùng chọn 1 sân cụ thể
+            // Nếu người dùng chọn 1 sân cụ thể thì chỉ hiển thị sân đó
             if (!selectedCourtName.equals("Tất cả") && !court.getCourtSlotName().equals(selectedCourtName)) {
                 continue;
             }
@@ -211,7 +211,7 @@ public class BookingTableActivity extends AppCompatActivity {
                     String key = court.getCourtSlotId() + "_" + slot.getStartTime();
                     switch (slot.getStatus()) {
                         case "AVAILABLE":
-                            // Chọn/bỏ chọn
+                            // Cho phép người dùng chọn/bỏ chọn ô đặt sân
                             cell.setOnClickListener(v -> {
                                 if (selectedCells.contains(key)) {
                                     selectedCells.remove(key);
@@ -221,7 +221,7 @@ public class BookingTableActivity extends AppCompatActivity {
                                     setCellColor(cell, Color.parseColor("#A5D6A7"));
                                 }
                             });
-                            // Kiểm tra xem ô này đã được chọn trước đó chưa
+                            // Hiển thị màu theo trạng thái đã chọn
                             if (selectedCells.contains(key)) {
                                 setCellColor(cell, Color.parseColor("#A5D6A7"));
                             } else {
@@ -229,23 +229,20 @@ public class BookingTableActivity extends AppCompatActivity {
                             }
                             break;
                         case "BOOKED":
-                            // Màu đỏ
                             setCellColor(cell, Color.RED);
                             cell.setOnClickListener(null);
                             break;
                         case "LOCKED":
-                            // Màu xám
                             setCellColor(cell, Color.parseColor("#BDBDBD"));
                             cell.setOnClickListener(null);
                             break;
                         default:
-                            // Màu xám nhạt
                             setCellColor(cell, Color.parseColor("#E0E0E0"));
                             cell.setOnClickListener(null);
                             break;
                     }
                 } else {
-                    // Không có slot => xám nhạt
+                    // Nếu không có slot thì ô hiển thị màu xám nhạt
                     setCellColor(cell, Color.parseColor("#E0E0E0"));
                     cell.setOnClickListener(null);
                 }
@@ -268,7 +265,6 @@ public class BookingTableActivity extends AppCompatActivity {
         tv.setSingleLine(true);
         tv.setEllipsize(TextUtils.TruncateAt.END);
 
-        // Cột đầu rộng hơn
         if (isFirstColumn) {
             tv.setWidth(440);
         } else {
@@ -294,7 +290,7 @@ public class BookingTableActivity extends AppCompatActivity {
     }
 
     private void goToNextScreen() {
-        // Lấy danh sách slot người dùng đã chọn
+        // Lấy danh sách slot mà người dùng đã chọn
         List<ConfirmOrder> confirmOrders = new ArrayList<>();
         for (CourtSlot court : allCourts) {
             for (BookingSlot slot : court.getBookingSlots()) {
@@ -321,7 +317,6 @@ public class BookingTableActivity extends AppCompatActivity {
         Intent intent = new Intent(BookingTableActivity.this, ConfirmActivity.class);
         intent.putExtra("selectedDate", selectedDate);
         intent.putExtra("confirmOrdersJson", confirmOrdersJson);
-        // QUAN TRỌNG: Truyền club_id sang ConfirmActivity
         intent.putExtra("club_id", courtId);
 
         startActivity(intent);
