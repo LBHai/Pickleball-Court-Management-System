@@ -39,6 +39,9 @@
             android:name=".ConfirmActivity"
             android:exported="true" />
         <activity
+            android:name=".QRCodeActivity"
+            android:exported="true" />
+        <activity
             android:name=".SignUpActivity"
             android:exported="true" />
     </application>

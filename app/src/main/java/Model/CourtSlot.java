@@ -7,16 +7,10 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 public class CourtSlot {
-    @SerializedName("courtSlotId")
     private String courtSlotId;
-
-    @SerializedName("courtSlotName")
     private String courtSlotName;
-
-    @SerializedName("bookingSlots")
     private List<BookingSlot> bookingSlots;
 
-    // Getter, setter...
     public String getCourtSlotId() {
         return courtSlotId;
     }

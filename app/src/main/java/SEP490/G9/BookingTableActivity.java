@@ -292,16 +292,28 @@ public class BookingTableActivity extends AppCompatActivity {
     private void goToNextScreen() {
         // Lấy danh sách slot mà người dùng đã chọn
         List<ConfirmOrder> confirmOrders = new ArrayList<>();
-        for (CourtSlot court : allCourts) {
-            for (BookingSlot slot : court.getBookingSlots()) {
-                String key = court.getCourtSlotId() + "_" + slot.getStartTime();
-                if (selectedCells.contains(key)) {
-                    ConfirmOrder order = new ConfirmOrder();
-                    order.setCourtSlotName(court.getCourtSlotName());
-                    order.setStartTime(slot.getStartTime());
-                    order.setEndTime(slot.getEndTime());
-                    order.setDailyPrice(slot.getDailyPrice());
-                    confirmOrders.add(order);
+        for (String key : selectedCells) {
+            // Tách key thành courtSlotId và startTime
+            String[] parts = key.split("_");
+            String courtSlotId = parts[0];
+            String startTime = parts[1];
+
+            // Tìm courtSlot và bookingSlot tương ứng
+            for (CourtSlot court : allCourts) {
+                if (court.getCourtSlotId().equals(courtSlotId)) {
+                    for (BookingSlot slot : court.getBookingSlots()) {
+                        if (slot.getStartTime().equals(startTime)) {
+                            ConfirmOrder order = new ConfirmOrder();
+                            order.setCourtSlotId(courtSlotId); // <-- Thêm dòng này
+                            order.setCourtSlotName(court.getCourtSlotName());
+                            order.setStartTime(slot.getStartTime());
+                            order.setEndTime(slot.getEndTime());
+                            order.setDailyPrice(slot.getDailyPrice());
+                            confirmOrders.add(order);
+                            break;
+                        }
+                    }
+                    break;
                 }
             }
         }

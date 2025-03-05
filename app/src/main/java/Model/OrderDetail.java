@@ -1,21 +1,19 @@
 package Model;
 
-public class ConfirmOrder {
+public class OrderDetail {
     private String courtSlotId;
     private String courtSlotName;
     private String startTime;
     private String endTime;
-    private double dailyPrice; // hoặc int, tùy thuộc vào yêu cầu
+    private int price;
 
-    // Thêm getter và setter cho courtSlotId
+    // Getters & Setters
     public String getCourtSlotId() {
         return courtSlotId;
     }
     public void setCourtSlotId(String courtSlotId) {
         this.courtSlotId = courtSlotId;
     }
-
-    // Các getter, setter khác
     public String getCourtSlotName() {
         return courtSlotName;
     }
@@ -34,10 +32,10 @@ public class ConfirmOrder {
     public void setEndTime(String endTime) {
         this.endTime = endTime;
     }
-    public double getDailyPrice() {
-        return dailyPrice;
+    public int getPrice() {
+        return price;
     }
-    public void setDailyPrice(double dailyPrice) {
-        this.dailyPrice = dailyPrice;
+    public void setPrice(int price) {
+        this.price = price;
     }
 }
