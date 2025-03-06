@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/layout_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,59 +9,64 @@
     android:padding="16dp"
     android:background="#edfff6">
 
-    <LinearLayout
+    <Button
+        android:id="@+id/btnSelectDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="right"
-        android:orientation="horizontal">
+        android:backgroundTint="#80b69c"
+        android:drawableEnd="@drawable/calendar"
+        android:drawablePadding="8dp"
+        android:padding="16dp"
+        android:text="Chọn ngày"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp" />
 
-        <Button
-            android:id="@+id/btnSelectDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Chọn ngày"
-            android:textColor="@android:color/white"
-            android:backgroundTint="#2196F3" />
 
-        <TextView
-            android:id="@+id/tvSelectedDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:text="Ngày:"
-            android:textStyle="bold"
-            android:textSize="16sp" />
-    </LinearLayout>
+    <TextView
+        android:id="@+id/tvViewCourtsAndPrices"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginTop="4dp"
+        android:text="Xem sân &amp; bảng giá"
+        android:textStyle="bold"
+        android:textColor="#FFC107"
+        android:padding="8dp" />
 
     <Spinner
         android:id="@+id/spinnerCourt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="2dp" />
 
-    <!-- Legend với 3 trạng thái: Trống, Đang đặt, Đã đặt (màu đỏ) -->
     <LinearLayout
         android:id="@+id/legendLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="8dp"
-        android:gravity="center_horizontal">
+        android:gravity="center_horizontal"
+        android:background="#006d38">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginRight="16dp">
+
             <View
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:background="#FFFFFF"/>
+                android:layout_marginTop="20sp"
+                android:background="#FFFFFF" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="20sp"
+                android:layout_marginLeft="4dp"
                 android:text="Trống"
-                android:layout_marginLeft="4dp"/>
+                android:textColor="@color/white" />
         </LinearLayout>
 
         <LinearLayout
@@ -68,15 +74,20 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginRight="16dp">
+
             <View
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:background="#A5D6A7"/>
+                android:layout_marginTop="20sp"
+                android:background="#A5D6A7" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="20sp"
+                android:layout_marginLeft="4dp"
                 android:text="Đang đặt"
-                android:layout_marginLeft="4dp"/>
+                android:textColor="@color/white" />
         </LinearLayout>
 
         <LinearLayout
@@ -84,15 +95,41 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginRight="16dp">
+
             <View
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:background="#FF0000"/>
+                android:layout_marginTop="20sp"
+                android:background="#ff6464" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="20sp"
+                android:layout_marginLeft="4dp"
                 android:text="Đã đặt"
-                android:layout_marginLeft="4dp"/>
+                android:textColor="@color/white" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginRight="16dp">
+
+            <View
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginTop="20sp"
+                android:background="#b2b2b2" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20sp"
+                android:layout_marginLeft="4dp"
+                android:text="Khóa"
+                android:textColor="@color/white" />
         </LinearLayout>
     </LinearLayout>
 
@@ -115,7 +152,7 @@
             <TableLayout
                 android:id="@+id/tableLayout"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
         </HorizontalScrollView>
     </ScrollView>
 
@@ -128,5 +165,6 @@
         android:textSize="18sp"
         android:textColor="#000"
         android:backgroundTint="#FFC107"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="8dp" />
+
 </LinearLayout>

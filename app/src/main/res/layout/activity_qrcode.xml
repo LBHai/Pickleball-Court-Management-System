@@ -9,7 +9,7 @@
     android:background="@drawable/bg_gradient"
     tools:context=".QRCodeActivity">
 
-    <!-- Nút Quay lại sử dụng icon backicon từ drawable -->
+    <!-- Nút Back -->
     <ImageButton
         android:id="@+id/btnBack"
         android:layout_width="48dp"
@@ -21,6 +21,7 @@
         android:contentDescription="Quay lại"
         tools:ignore="TouchTargetSizeCheck"/>
 
+    <!-- Hướng dẫn quét mã -->
     <TextView
         android:id="@+id/tvInstruction"
         android:layout_width="wrap_content"
@@ -33,6 +34,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="24dp"/>
 
+    <!-- CardView chứa QR Code -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardViewQRCode"
         android:layout_width="320dp"
@@ -51,4 +53,29 @@
             android:scaleType="fitCenter"/>
     </androidx.cardview.widget.CardView>
 
+    <TextView
+        android:id="@+id/tvCountdownLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Thời gian thanh toán còn lại 🕛"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_below="@id/cardViewQRCode"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"/>
+
+    <TextView
+        android:id="@+id/tvCountdownTimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/countdown_bg"
+        android:padding="25sp"
+        android:text=""
+        android:textColor="#FFFFFF"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:layout_below="@id/tvCountdownLabel"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"/>
 </RelativeLayout>

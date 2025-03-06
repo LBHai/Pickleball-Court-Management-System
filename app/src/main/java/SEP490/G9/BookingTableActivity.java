@@ -8,6 +8,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
@@ -58,7 +59,7 @@ public class BookingTableActivity extends AppCompatActivity {
 
         tableLayout = findViewById(R.id.tableLayout);
         btnSelectDate = findViewById(R.id.btnSelectDate);
-        tvSelectedDate = findViewById(R.id.tvSelectedDate);
+        tvSelectedDate = findViewById(R.id.btnSelectDate);
         spinnerCourt = findViewById(R.id.spinnerCourt);
         btnNext = findViewById(R.id.btnNext);
 
@@ -175,28 +176,33 @@ public class BookingTableActivity extends AppCompatActivity {
 
         // Hàng header
         TableRow headerRow = new TableRow(this);
-        TextView cornerCell = createCell("Court", true, true);
-        headerRow.addView(cornerCell);
+        headerRow.addView(createCell("Court", true, true));
 
         for (String time : allTimes) {
-            String displayTime = time.substring(0, 5); // Hiển thị HH:mm
-            TextView cell = createCell(displayTime, true, false);
-            headerRow.addView(cell);
+            String displayTime = time.substring(0, 5);
+            headerRow.addView(createCell(displayTime, true, false));
         }
         tableLayout.addView(headerRow);
 
         String selectedCourtName = spinnerCourt.getSelectedItem().toString();
+
+        // Kiểm tra dữ liệu đầu vào
+        if (allCourts.isEmpty() || allTimes.isEmpty()) {
+            TextView tvEmpty = new TextView(this);
+            tvEmpty.setText("Không có dữ liệu");
+            tableLayout.addView(tvEmpty);
+            return;
+        }
+
         for (CourtSlot court : allCourts) {
-            // Nếu người dùng chọn 1 sân cụ thể thì chỉ hiển thị sân đó
-            if (!selectedCourtName.equals("Tất cả") && !court.getCourtSlotName().equals(selectedCourtName)) {
+            if (!selectedCourtName.equals("Tất cả") &&
+                    !court.getCourtSlotName().equals(selectedCourtName)) {
                 continue;
             }
 
             TableRow row = new TableRow(this);
-            TextView courtNameCell = createCell(court.getCourtSlotName(), false, true);
-            row.addView(courtNameCell);
+            row.addView(createCell(court.getCourtSlotName(), false, true));
 
-            // Map thời gian -> slot
             Map<String, BookingSlot> slotMap = new HashMap<>();
             for (BookingSlot slot : court.getBookingSlots()) {
                 slotMap.put(slot.getStartTime(), slot);
@@ -248,34 +254,61 @@ public class BookingTableActivity extends AppCompatActivity {
                 }
                 row.addView(cell);
             }
-            tableLayout.addView(row);
+            tableLayout.addView(row, new TableLayout.LayoutParams(
+                    TableLayout.LayoutParams.MATCH_PARENT,
+                    TableLayout.LayoutParams.WRAP_CONTENT
+            ));
         }
     }
 
     private TextView createCell(String text, boolean isHeader, boolean isFirstColumn) {
         TextView tv = new TextView(this);
+
+        // Thiết lập LayoutParams
         TableRow.LayoutParams params = new TableRow.LayoutParams(
                 TableRow.LayoutParams.WRAP_CONTENT,
                 TableRow.LayoutParams.WRAP_CONTENT
         );
         tv.setLayoutParams(params);
-        tv.setPadding(16, 16, 16, 16);
+
+        // Thiết lập kích thước tối thiểu
+        int minWidth = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                isFirstColumn ? 120 : 80,
+                getResources().getDisplayMetrics()
+        );
+        tv.setMinWidth(minWidth);
+
+        // Thiết lập padding
+        int padding = dpToPx(4);
+        tv.setPadding(padding, padding, padding, padding);
+
+        // Thiết lập text và căn giữa
         tv.setText(text);
         tv.setGravity(Gravity.CENTER);
         tv.setSingleLine(true);
         tv.setEllipsize(TextUtils.TruncateAt.END);
 
-        if (isFirstColumn) {
-            tv.setWidth(440);
-        } else {
-            tv.setWidth(220);
-        }
-
+        // Thiết lập style
         if (isHeader) {
             tv.setTypeface(null, Typeface.BOLD);
+            tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+            tv.setBackgroundColor(Color.parseColor("#EEEEEE"));
+        } else if (isFirstColumn) {
+            tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+            // Tạo drawable cho cell của cột sân với màu nền #FFCC80 và border đen
+            GradientDrawable courtDrawable = new GradientDrawable();
+            courtDrawable.setColor(Color.parseColor("#FFCC80")); // Màu nền dễ nhìn cho tên sân
+            courtDrawable.setStroke(dpToPx(2), Color.BLACK);      // Đường viền dày 2dp, màu đen
+            tv.setBackground(courtDrawable);
+        } else {
+            tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
         }
+
         return tv;
     }
+
+
 
     private GradientDrawable createCellBackground() {
         GradientDrawable gd = new GradientDrawable();
@@ -332,5 +365,12 @@ public class BookingTableActivity extends AppCompatActivity {
         intent.putExtra("club_id", courtId);
 
         startActivity(intent);
+    }
+    private int dpToPx(int dp) {
+        return (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                dp,
+                getResources().getDisplayMetrics()
+        );
     }
 }

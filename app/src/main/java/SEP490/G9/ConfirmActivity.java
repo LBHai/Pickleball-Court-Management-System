@@ -14,6 +14,8 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import Api.ApiService;
@@ -113,8 +115,39 @@ public class ConfirmActivity extends AppCompatActivity {
                 String phone = etPhone.getText().toString().trim();
                 String note = etNote.getText().toString().trim();
 
+                // Kiểm tra thông tin bắt buộc
                 if (name.isEmpty() || phone.isEmpty()) {
                     Toast.makeText(ConfirmActivity.this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // Validate tên: chỉ chứa chữ và khoảng trắng, độ dài >= 2 ký tự
+                if (!name.matches("^[\\p{L}\\s]+$") || name.length() < 2) {
+                    Toast.makeText(ConfirmActivity.this, "Tên chỉ chứa chữ cái và khoảng trắng, ít nhất 2 ký tự", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // Danh sách các từ nhạy cảm (bạn có thể điều chỉnh danh sách này theo nhu cầu)
+                String[] bannedWords = {
+                        // Từ nhạy cảm tiếng Việt
+                        "địt", "lồn", "cặc", "buồi", "đụ", "đéo", "đĩ", "con đĩ",
+                        "địt mẹ", "địt con", "đụ mẹ", "điếm", "điếm gái", "điếm trai", "đồ khốn", "đồ ngu", "đụ má",
+
+                        // Từ nhạy cảm tiếng Anh
+                        "fuck", "fucking", "shit", "bitch", "asshole", "bastard", "dick", "cunt", "motherfucker",
+                        "prick", "whore", "slut", "dumbass", "son of a bitch", "fucker"
+                };
+                for (String bannedWord : bannedWords) {
+                    if (name.toLowerCase().contains(bannedWord.toLowerCase())) {
+                        Toast.makeText(ConfirmActivity.this, "Tên chứa từ nhạy cảm, vui lòng nhập lại", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                }
+
+
+                // Validate số điện thoại: phải có 10 chữ số, bắt đầu bằng số 0
+                if (!phone.matches("0\\d{9}")) {
+                    Toast.makeText(ConfirmActivity.this, "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -122,13 +155,13 @@ public class ConfirmActivity extends AppCompatActivity {
                 int totalAmount = 0;
                 List<OrderDetail> orderDetails = new ArrayList<>();
                 for (ConfirmOrder order : confirmOrders) {
-                    totalAmount += (int) order.getDailyPrice();  // ép kiểu nếu cần
+                    totalAmount += (int) order.getDailyPrice();
                     OrderDetail detail = new OrderDetail();
                     detail.setCourtSlotId(order.getCourtSlotId());
                     detail.setCourtSlotName(order.getCourtSlotName());
                     detail.setStartTime(order.getStartTime());
                     detail.setEndTime(order.getEndTime());
-                    detail.setPrice((int) order.getDailyPrice());  // ép kiểu chuyển double sang int nếu cần
+                    detail.setPrice((int) order.getDailyPrice());
                     orderDetails.add(detail);
                 }
 
@@ -141,10 +174,9 @@ public class ConfirmActivity extends AppCompatActivity {
                 createOrderRequest.setCustomerName(name);
                 createOrderRequest.setPhoneNumber(phone);
                 createOrderRequest.setTotalAmount(totalAmount);
-                createOrderRequest.setDiscountCode(null); // nếu không có
+                createOrderRequest.setDiscountCode(null);
                 createOrderRequest.setNote(note);
                 createOrderRequest.setDiscountAmount(0);
-                //totalAmount
                 createOrderRequest.setPaymentAmount(2000); // giá trị fake để test
                 createOrderRequest.setPaymentStatus("Đặt cọc");
                 createOrderRequest.setOrderDetails(orderDetails);
@@ -156,13 +188,26 @@ public class ConfirmActivity extends AppCompatActivity {
                 ApiService.apiService.createOrder(createOrderRequest).enqueue(new Callback<CreateOrderResponse>() {
                     @Override
                     public void onResponse(Call<CreateOrderResponse> call, Response<CreateOrderResponse> response) {
-                        // Trong onResponse của API tạo đơn hàng
                         if (response.isSuccessful() && response.body() != null) {
                             CreateOrderResponse orderResponse = response.body();
                             Log.d("CreateOrder", "Order ID: " + orderResponse.getId());
                             if (orderResponse.getQrcode() != null && !orderResponse.getQrcode().isEmpty()) {
+
+                                // Tính toán thời gian kết thúc thanh toán: sử dụng hệ thống thời gian tuyệt đối (epoch millis)
+                                // Ví dụ: thanh toán hết hạn sau 5 phút (5 * 60 * 1000 ms)
+                                long timeoutDuration = 5 * 60 * 1000; // 5 phút
+                                long timeoutTimeMillis = System.currentTimeMillis() + timeoutDuration;
+
+                                // Nếu cần, bạn vẫn có thể định dạng theo chuẩn ISO nếu API cần
+                                LocalDateTime timeoutTime = LocalDateTime.now().plusMinutes(5);
+                                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS");
+                                String paymentTimeout = timeoutTime.format(formatter);
+                                orderResponse.setPaymentTimeout(paymentTimeout);
+
+                                // Truyền QR code và thời gian kết thúc (timeoutTimeMillis) qua Intent
                                 Intent intent = new Intent(ConfirmActivity.this, QRCodeActivity.class);
                                 intent.putExtra("qrCodeData", orderResponse.getQrcode());
+                                intent.putExtra("timeoutTimeMillis", timeoutTimeMillis);
                                 startActivity(intent);
                             } else {
                                 Toast.makeText(ConfirmActivity.this, "Tạo đơn thất bại: QR code không có", Toast.LENGTH_SHORT).show();
