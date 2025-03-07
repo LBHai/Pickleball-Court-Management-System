@@ -9,6 +9,7 @@
     android:padding="16dp"
     android:background="#edfff6">
 
+    <!-- Nút chọn ngày hiển thị ngày hiện tại -->
     <Button
         android:id="@+id/btnSelectDate"
         android:layout_width="match_parent"
@@ -21,7 +22,7 @@
         android:textColor="#FFFFFF"
         android:textSize="16sp" />
 
-
+    <!-- Xem sân & bảng giá -->
     <TextView
         android:id="@+id/tvViewCourtsAndPrices"
         android:layout_width="wrap_content"
@@ -33,12 +34,14 @@
         android:textColor="#FFC107"
         android:padding="8dp" />
 
+    <!-- Spinner chọn sân (hoặc tất cả) -->
     <Spinner
         android:id="@+id/spinnerCourt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp" />
 
+    <!-- Legend -->
     <LinearLayout
         android:id="@+id/legendLayout"
         android:layout_width="match_parent"
@@ -66,7 +69,7 @@
                 android:layout_marginTop="20sp"
                 android:layout_marginLeft="4dp"
                 android:text="Trống"
-                android:textColor="@color/white" />
+                android:textColor="@android:color/white" />
         </LinearLayout>
 
         <LinearLayout
@@ -86,8 +89,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20sp"
                 android:layout_marginLeft="4dp"
-                android:text="Đang đặt"
-                android:textColor="@color/white" />
+                android:text="Đang chọn"
+                android:textColor="@android:color/white" />
         </LinearLayout>
 
         <LinearLayout
@@ -108,7 +111,7 @@
                 android:layout_marginTop="20sp"
                 android:layout_marginLeft="4dp"
                 android:text="Đã đặt"
-                android:textColor="@color/white" />
+                android:textColor="@android:color/white" />
         </LinearLayout>
 
         <LinearLayout
@@ -129,7 +132,7 @@
                 android:layout_marginTop="20sp"
                 android:layout_marginLeft="4dp"
                 android:text="Khóa"
-                android:textColor="@color/white" />
+                android:textColor="@android:color/white" />
         </LinearLayout>
     </LinearLayout>
 
@@ -138,24 +141,46 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:layout_marginTop="8dp"
-        android:focusable="false"
-        android:contentDescription=""
-        android:importantForAccessibility="no">
+        android:focusable="false">
 
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:focusable="false"
-            android:contentDescription=""
-            android:importantForAccessibility="no">
+            android:contentDescription="@string/horizontal_scroll_description"
+            android:importantForAccessibility="yes">
 
             <TableLayout
                 android:id="@+id/tableLayout"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/time_slots_table"
+                android:importantForAccessibility="yes" />
+
         </HorizontalScrollView>
     </ScrollView>
 
+    <TextView
+        android:id="@+id/tvSelectedListHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Danh sách đã chọn"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:padding="8dp"
+         />
+
+
+    <ListView
+        android:id="@+id/lvSelectedBookings"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="1dp"
+        android:padding="8dp"
+        android:layout_marginTop="10dp"
+        />
+
+    <!-- Nút tiếp theo -->
     <Button
         android:id="@+id/btnNext"
         android:layout_width="match_parent"

@@ -21,6 +21,7 @@ import java.util.List;
 
 import Adapter.CourtsAdapter;
 import Api.ApiService;
+import Api.RetrofitClient;
 import Model.Courts;
 import SEP490.G9.CourtDetailFragment;
 import SEP490.G9.R;
@@ -34,8 +35,6 @@ public class CourtsFragment extends Fragment {
     private EditText edtSearch;
     private CourtsAdapter courtsAdapter;
     private List<Courts> courtsList = new ArrayList<>(); // Danh sách gốc để lọc
-
-
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -53,7 +52,7 @@ public class CourtsFragment extends Fragment {
         // Lắng nghe sự kiện nhập vào ô tìm kiếm
         edtSearch.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -61,14 +60,16 @@ public class CourtsFragment extends Fragment {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {}
+            public void afterTextChanged(Editable s) { }
         });
 
         return view;
     }
 
     private void callApiGetClubs() {
-        ApiService.apiService.getCourts().enqueue(new Callback<List<Courts>>() {
+        // Lấy đối tượng ApiService thông qua RetrofitClient
+        ApiService apiService = RetrofitClient.getApiService(getContext());
+        apiService.getCourts().enqueue(new Callback<List<Courts>>() {
             @Override
             public void onResponse(Call<List<Courts>> call, Response<List<Courts>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -87,6 +88,7 @@ public class CourtsFragment extends Fragment {
             }
         });
     }
+
     private void setupRecyclerView(List<Courts> list) {
         courtsAdapter = new CourtsAdapter(getContext(), list, club -> {
             // Mở ClubDetailFragment
@@ -105,9 +107,6 @@ public class CourtsFragment extends Fragment {
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rcvClubs.getContext(), DividerItemDecoration.VERTICAL);
         rcvClubs.addItemDecoration(dividerItemDecoration);
     }
-
-
-
 
     private void filterClubs(String query) {
         List<Courts> filteredList = new ArrayList<>();

@@ -22,7 +22,7 @@
             android:textStyle="bold"
             android:layout_marginBottom="12dp" />
 
-        <!-- Thông tin sân: Tên sân, địa chỉ, ngày, môn chơi -->
+        <!-- Thông tin sân: Tên sân, địa chỉ, liên hệ -->
         <LinearLayout
             android:id="@+id/layoutStadiumInfo"
             android:layout_width="match_parent"
@@ -51,50 +51,52 @@
                 android:layout_marginBottom="4dp"/>
 
             <TextView
-                android:id="@+id/tvDate"
+                android:id="@+id/tvContact"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ngày: "
-                android:textColor="#000000"
-                android:layout_marginBottom="4dp"/>
-
-            <TextView
-                android:id="@+id/tvGameType"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Môn chơi: "
+                android:text="Liên hệ: "
                 android:textColor="#000000"
                 android:layout_marginBottom="4dp"/>
         </LinearLayout>
 
-        <!-- Tiêu đề Thông tin đặt -->
+        <!-- Thông tin đặt: hiển thị các ngày/slot -->
         <TextView
+            android:id="@+id/tvDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Thông tin đặt:"
+            android:text="Thông tin chi tiết:"
             android:textColor="@android:color/white"
+            android:textSize="16sp"
             android:textStyle="bold"
             android:layout_marginBottom="8dp"/>
 
-        <!-- Danh sách các slot đã chọn -->
+        <!-- Layout chứa danh sách slot đã chọn -->
         <LinearLayout
             android:id="@+id/layoutConfirmOrders"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_marginBottom="12dp">
-            <!-- Sẽ được nạp động các item_confirm_order -->
+            <!-- Sẽ được nạp động các TextView -->
         </LinearLayout>
 
-        <!-- Tổng giá tiền -->
+        <!-- 2 dòng: Tổng tiền và Tổng thời gian chơi -->
         <TextView
-            android:id="@+id/tvTotalPrice"
+            android:id="@+id/tvTotalPriceLine"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tổng giá: 0 đ"
             android:textColor="@android:color/white"
-            android:textStyle="bold"
             android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp"/>
+
+        <TextView
+            android:id="@+id/tvTotalTimeLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
             android:layout_marginBottom="12dp"/>
 
         <!-- Ô nhập tên -->

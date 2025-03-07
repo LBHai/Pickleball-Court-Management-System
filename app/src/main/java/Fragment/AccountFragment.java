@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.util.Locale;
 
 import Api.ApiService;
+import Api.RetrofitClient;
 import Model.MyInfoResponse;
 import SEP490.G9.LoginActivity;
 import SEP490.G9.R;
@@ -54,7 +55,9 @@ public class AccountFragment extends Fragment {
 
         tvUserName = view.findViewById(R.id.userName);
         tvPhoneNumber = view.findViewById(R.id.phoneNumber);
-        getMyInfo(); // Gọi API lấy thông tin người dùng
+
+        // Gọi API lấy thông tin người dùng
+        getMyInfo();
 
         ImageButton optionsButton = view.findViewById(R.id.options);
         optionsButton.setOnClickListener(v -> showPopupMenu(v));
@@ -62,20 +65,20 @@ public class AccountFragment extends Fragment {
         return view;
     }
 
-
     /**
      * Gọi API lấy thông tin người dùng dựa trên token lưu trong session.
-     * Ở đây ta kiểm tra HTTP status code thông qua response.isSuccessful()
+     * Sử dụng RetrofitClient để lấy ApiService.
      */
     private void getMyInfo() {
         String token = sessionManager.getToken();
         if (token != null && !token.isEmpty()) {
-            // Tạo header với định dạng "Bearer {token}"
             String authHeader = "Bearer " + token;
-            ApiService.apiService.getMyInfo(authHeader).enqueue(new Callback<MyInfoResponse>() {
+            // Lấy đối tượng ApiService qua RetrofitClient
+            ApiService apiService = RetrofitClient.getApiService(getContext());
+            apiService.getMyInfo(authHeader).enqueue(new Callback<MyInfoResponse>() {
                 @Override
                 public void onResponse(Call<MyInfoResponse> call, Response<MyInfoResponse> response) {
-                    if (response.isSuccessful()) { // Kiểm tra HTTP status code là 200 OK
+                    if (response.isSuccessful()) { // HTTP 200 OK
                         MyInfoResponse myInfoResponse = response.body();
                         if (myInfoResponse != null && myInfoResponse.getResult() != null) {
                             String fullName = myInfoResponse.getResult().getFirstName() + " " +
@@ -86,7 +89,7 @@ public class AccountFragment extends Fragment {
                             Toast.makeText(getContext(), "Dữ liệu trả về không hợp lệ", Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        Toast.makeText(getContext(), "Lấy thông tin thất bại: HTTP " + response.code() + " - " + response.message(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Lấy thông tin thất bại, vui lòng đăng nhập lại!!!", Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -107,31 +110,28 @@ public class AccountFragment extends Fragment {
         PopupMenu popupMenu = new PopupMenu(getContext(), anchorView);
         popupMenu.getMenuInflater().inflate(R.menu.popup_menu_in_option, popupMenu.getMenu());
         forceShowPopupMenuIcons(popupMenu);
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                int id = item.getItemId();
-                if (id == R.id.menu_edit) {
-                    // Xử lý "Chỉnh sửa thông tin"
-                    return true;
-                } else if (id == R.id.menu_changepassword) {
-                    // Xử lý "Thay đổi mật khẩu"
-                    return true;
-                } else if (id == R.id.menu_transalate) {
-                    showLanguageDialog();
-                    return true;
-                } else if (id == R.id.menu_logout) {
-                    logoutUser();
-                    return true;
-                } else if (id == R.id.menu_version) {
-                    // Xử lý "Version"
-                    return true;
-                } else if (id == R.id.menu_deleteaccount) {
-                    // Xử lý "Xóa tài khoản"
-                    return true;
-                }
-                return false;
+        popupMenu.setOnMenuItemClickListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.menu_edit) {
+                // Xử lý "Chỉnh sửa thông tin"
+                return true;
+            } else if (id == R.id.menu_changepassword) {
+                // Xử lý "Thay đổi mật khẩu"
+                return true;
+            } else if (id == R.id.menu_transalate) {
+                showLanguageDialog();
+                return true;
+            } else if (id == R.id.menu_logout) {
+                logoutUser();
+                return true;
+            } else if (id == R.id.menu_version) {
+                // Xử lý "Version"
+                return true;
+            } else if (id == R.id.menu_deleteaccount) {
+                // Xử lý "Xóa tài khoản"
+                return true;
             }
+            return false;
         });
         popupMenu.show();
     }
@@ -153,15 +153,15 @@ public class AccountFragment extends Fragment {
             e.printStackTrace();
         }
     }
-    private void logoutUser() {        // Xóa token khỏi session
-        sessionManager.clearSession();
 
-        // Chuyển về màn hình đăng nhập
+    private void logoutUser() {
+        sessionManager.clearSession();
         Intent intent = new Intent(getActivity(), LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Xóa toàn bộ stack
         startActivity(intent);
-        getActivity().finish(); // Đóng AccountFragment
+        getActivity().finish();
     }
+
     private void showLanguageDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle(getString(R.string.choose_language));
@@ -175,19 +175,15 @@ public class AccountFragment extends Fragment {
                 if (convertView == null) {
                     convertView = LayoutInflater.from(getContext()).inflate(android.R.layout.select_dialog_item, parent, false);
                 }
-
                 TextView textView = convertView.findViewById(android.R.id.text1);
                 textView.setText(languages[position]);
                 textView.setTextSize(18);
-
-                // Load icon an toàn
                 Drawable drawable = ContextCompat.getDrawable(getContext(), icons[position]);
                 if (drawable != null) {
                     drawable.setBounds(0, 0, 80, 80);
                     textView.setCompoundDrawables(drawable, null, null, null);
                     textView.setCompoundDrawablePadding(20);
                 }
-
                 return convertView;
             }
         };
@@ -200,24 +196,17 @@ public class AccountFragment extends Fragment {
         builder.show();
     }
 
-
-    /**hy
-     * Thay đổi ngôn ngữ cho ứng dụng và khởi động lại Activity hiện tại.
-     * @param languageCode Mã ngôn ngữ (ví dụ: "en", "vi")
-     */
     private void changeLanguage(String languageCode) {
         Locale locale = new Locale(languageCode);
         Locale.setDefault(locale);
         Resources resources = getResources();
         Configuration config = resources.getConfiguration();
-        // Với API 17 trở lên nên dùng setLocale thay vì config.locale
         config.setLocale(locale);
         resources.updateConfiguration(config, resources.getDisplayMetrics());
 
-        // Khởi động lại Activity để áp dụng thay đổi
+        // Khởi động lại Activity hiện tại
         Intent refresh = getActivity().getIntent();
         getActivity().finish();
         startActivity(refresh);
     }
-
 }

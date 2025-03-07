@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.textfield.TextInputEditText;
 
 import Api.ApiService;
+import Api.RetrofitClient;
 import Model.CUser;
 import Model.GetToken;
 import Model.User;
@@ -72,7 +73,8 @@ public class SignUpActivity extends AppCompatActivity {
 
         CUser newUser = new CUser(username, password, firstName, lastName, dob, email, phoneNumber);
 
-        ApiService.apiService.registerUser(newUser).enqueue(new Callback<GetToken>() {
+        ApiService apiService = RetrofitClient.getApiService(SignUpActivity.this);
+        apiService.registerUser(newUser).enqueue(new Callback<GetToken>() {
             @Override
             public void onResponse(Call<GetToken> call, Response<GetToken> response) {
                 if (response.isSuccessful() && response.body() != null) {

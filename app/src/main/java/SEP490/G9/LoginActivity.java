@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.textfield.TextInputEditText;
 
 import Api.ApiService;
+import Api.RetrofitClient;
 import Model.GetToken;
 import Model.User;
 import Session.SessionManager;
@@ -75,7 +76,9 @@ public class LoginActivity extends AppCompatActivity {
         User user = new User(username, password);
 
         // Gọi API login để lấy token
-        ApiService.apiService.getToken(user).enqueue(new Callback<GetToken>() {
+
+        ApiService apiService = RetrofitClient.getApiService(LoginActivity.this);
+        apiService.getToken(user).enqueue(new Callback<GetToken>() {
             @Override
             public void onResponse(Call<GetToken> call, Response<GetToken> response) {
                 if (response.isSuccessful() && response.body() != null) {

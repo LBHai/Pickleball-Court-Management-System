@@ -6,7 +6,7 @@ public class ConfirmOrder {
     private String startTime;
     private String endTime;
     private double dailyPrice; // hoặc int, tùy thuộc vào yêu cầu
-
+    private String dayBooking;
     // Thêm getter và setter cho courtSlotId
     public String getCourtSlotId() {
         return courtSlotId;
@@ -39,5 +39,12 @@ public class ConfirmOrder {
     }
     public void setDailyPrice(double dailyPrice) {
         this.dailyPrice = dailyPrice;
+    }
+    public String getDayBooking() {
+        return dayBooking;
+    }
+
+    public void setDayBooking(String dayBooking) {
+        this.dayBooking = dayBooking;
     }
 }
