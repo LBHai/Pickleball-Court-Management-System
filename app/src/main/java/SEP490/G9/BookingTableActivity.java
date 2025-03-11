@@ -16,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TableLayout;
@@ -36,6 +37,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import Api.ApiService;
+import Fragment.CourtsFragment;
+import Fragment.MapFragment;
 import Model.BookingSlot;
 import Model.CourtSlot;
 import Model.ConfirmOrder;
@@ -49,6 +52,7 @@ public class BookingTableActivity extends AppCompatActivity {
     private Button btnSelectDate, btnNext;
     private Spinner spinnerCourt;
     private ListView lvSelectedBookings;
+    private ImageButton btnBack;
 
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
     // Định dạng đầy đủ để so sánh giờ
@@ -80,7 +84,7 @@ public class BookingTableActivity extends AppCompatActivity {
         spinnerCourt = findViewById(R.id.spinnerCourt);
         btnNext = findViewById(R.id.btnNext);
         lvSelectedBookings = findViewById(R.id.lvSelectedBookings);
-
+        btnBack = findViewById(R.id.btnBack);
         selectedBookingsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, selectedBookingsList);
         lvSelectedBookings.setAdapter(selectedBookingsAdapter);
 
@@ -116,8 +120,21 @@ public class BookingTableActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        // Nút tiếp theo
+        TextView tvViewCourtsAndPrices = findViewById(R.id.tvViewCourtsAndPrices);
+        tvViewCourtsAndPrices.setOnClickListener(v -> {
+            Intent intent = new Intent(BookingTableActivity.this, DetailPriceCourtActivity.class);
+            intent.putExtra("club_id", courtId);
+            startActivity(intent);
+        });
+
         btnNext.setOnClickListener(v -> goToNextScreen());
+
+        btnBack.setOnClickListener(v -> {
+            Intent intent = new Intent(BookingTableActivity.this, MainActivity.class);
+            intent.putExtra("showFragment", "courts");
+            startActivity(intent);
+            finish();
+        });
     }
 
     private void showDatePickerDialog() {

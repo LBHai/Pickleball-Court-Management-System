@@ -20,4 +20,8 @@
     <color name="light_green">#8BC34A</color>
     <color name="yellow">#FFC107</color>
     <color name="gray">#9E9E9E</color>
+    <color name="darkGreen">#059862</color>
+    <color name="lightGreen">#0BCB73</color>
+    <color name="buttonGreen">#7FFFC4</color>
+
 </resources>
