@@ -17,7 +17,7 @@
     <string name="menu_slideshow" translatable="false">Slideshow</string>
 
 
-    <string name="username" >Username</string>
+    <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="first_name">First Name</string>
     <string name="last_name">Last Name</string>
@@ -46,7 +46,18 @@
     <string name="menu_deleteaccount">Delete account</string>
 
 
+
+
+
     <string name="horizontal_scroll_description" translatable="false">Khu vực cuộn ngang hiển thị bảng thời gian</string>
     <string name="time_slots_table" translatable="false">Bảng hiển thị các khung giờ có thể đặt</string>
+
+
+    <!-- Mảng gender -->
+    <string-array name="gender_array">
+        <item>Select gender</item>
+        <item>MALE</item>
+        <item>FEMALE</item>
+    </string-array>
 
 </resources>

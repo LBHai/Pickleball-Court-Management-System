@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -12,13 +13,15 @@ import android.widget.Toast;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.google.zxing.BarcodeFormat;
 
+import Socket.PaymentSocketListener;
+
 public class QRCodeActivity extends AppCompatActivity {
 
     private ImageView ivQRCode;
     private ImageButton btnBack;
-    private TextView tvCountdownTimer; // Sử dụng biến tvCountdownTimer
+    private TextView tvCountdownTimer;
     private CountDownTimer countDownTimer;
-    private long timeoutTimeMillis; // Thời gian kết thúc thanh toán (epoch millis)
+    private long timeoutTimeMillis; // thời gian thanh toán hết (epoch millis)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,16 +32,17 @@ public class QRCodeActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
         tvCountdownTimer = findViewById(R.id.tvCountdownTimer);
 
-        // Xử lý nút Back trên layout: chuyển về MainActivity
+        // Nút Back chuyển về MainActivity
         btnBack.setOnClickListener(v -> {
             Intent intent = new Intent(QRCodeActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
         });
 
-        // Lấy dữ liệu được truyền qua Intent
+        // Lấy dữ liệu truyền qua Intent
         String qrCodeData = getIntent().getStringExtra("qrCodeData");
         timeoutTimeMillis = getIntent().getLongExtra("timeoutTimeMillis", 0);
+        String orderId = getIntent().getStringExtra("orderId");
 
         if (qrCodeData == null || qrCodeData.isEmpty()){
             Toast.makeText(this, "Không có dữ liệu QR Code", Toast.LENGTH_SHORT).show();
@@ -57,15 +61,36 @@ public class QRCodeActivity extends AppCompatActivity {
             Toast.makeText(this, "Lỗi tạo QR Code: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
 
-        // Bắt đầu đếm ngược dựa trên thời gian kết thúc đã lưu
+        // Khởi tạo socket sử dụng orderId làm key
+        if (orderId != null && !orderId.isEmpty()) {
+            PaymentSocketListener.PaymentStatusCallback callback = new PaymentSocketListener.PaymentStatusCallback() {
+                @Override
+                public void onPaymentSuccess(String orderId) {
+                    // Khi thanh toán thành công, chuyển sang màn hình cảm ơn
+                    Intent intent = new Intent(QRCodeActivity.this, PaymentSuccessActivity.class);
+                    intent.putExtra("resCode", 200);
+                    intent.putExtra("orderId", orderId);
+                    startActivity(intent);
+                    finish();
+                }
+            };
+            PaymentSocketListener socketListener = new PaymentSocketListener(orderId, callback);
+            socketListener.connect();
+        }
+
+        // Bắt đầu đếm ngược dựa trên thời gian thanh toán hết
         startCountdown();
     }
 
     private void startCountdown() {
-        // Tính toán thời gian còn lại dựa trên thời gian hiện tại
         long remainingTimeMillis = timeoutTimeMillis - System.currentTimeMillis();
         if (remainingTimeMillis <= 0) {
             tvCountdownTimer.setText("Hết thời gian thanh toán");
+            new Handler().postDelayed(() -> {
+                Intent intent = new Intent(QRCodeActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            }, 1500);
             return;
         }
         countDownTimer = new CountDownTimer(remainingTimeMillis, 1000) {
@@ -78,6 +103,11 @@ public class QRCodeActivity extends AppCompatActivity {
             @Override
             public void onFinish() {
                 tvCountdownTimer.setText("Hết thời gian thanh toán");
+                new Handler().postDelayed(() -> {
+                    Intent intent = new Intent(QRCodeActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
+                }, 1500);
             }
         }.start();
     }
@@ -85,20 +115,17 @@ public class QRCodeActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Mỗi khi activity được hiển thị lại, khởi tạo lại CountDownTimer dựa trên thời gian kết thúc đã lưu
         startCountdown();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        // Hủy CountDownTimer khi activity tạm dừng để tránh rò rỉ bộ nhớ
         if (countDownTimer != null) {
             countDownTimer.cancel();
         }
     }
 
-    // Override nút back của hệ thống để chuyển về MainActivity
     @Override
     public void onBackPressed() {
         super.onBackPressed();

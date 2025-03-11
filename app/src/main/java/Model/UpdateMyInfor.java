@@ -1,32 +1,26 @@
 package Model;
 
-import java.util.List;
-
-public class MyInfo {
+public class UpdateMyInfor {
     private String id;
     private String username;
     private String firstName;
     private String lastName;
     private String dob;
-    private List<Role> roles;
     private String email;
     private String phoneNumber;
     private String userRank;
-    private String gender;
+    private String gender;  // đổi từ String sang int (0: MALE, 1: FEMALE)
     private boolean student;
 
-    // Getters và setters
-
-    public MyInfo() {
+    public UpdateMyInfor() {
     }
 
-    public MyInfo(String id, String username, String firstName, String lastName, String dob, List<Role> roles, String email, String phoneNumber, String userRank, String gender, boolean student) {
+    public UpdateMyInfor(String id, String username, String firstName, String lastName, String dob, String email, String phoneNumber, String userRank, String gender, boolean student) {
         this.id = id;
         this.username = username;
         this.firstName = firstName;
         this.lastName = lastName;
         this.dob = dob;
-        this.roles = roles;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.userRank = userRank;
@@ -72,14 +66,6 @@ public class MyInfo {
 
     public void setDob(String dob) {
         this.dob = dob;
-    }
-
-    public List<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(List<Role> roles) {
-        this.roles = roles;
     }
 
     public String getEmail() {

@@ -11,8 +11,10 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -22,6 +24,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TreeMap;
 import java.util.Map;
+
 import Api.ApiService;
 import Api.RetrofitClient;
 import Model.ConfirmOrder;
@@ -38,7 +41,7 @@ import retrofit2.Response;
 public class ConfirmActivity extends AppCompatActivity {
 
     private TextView tvHeader, tvStadiumName, tvAddress, tvDate;
-    private TextView tvTotalPriceLine, tvTotalTimeLine; // 2 TextView mới
+    private TextView tvTotalPriceLine, tvTotalTimeLine;
     private LinearLayout layoutConfirmOrders;
     private EditText etName, etPhone, etNote;
     private Button btnConfirm;
@@ -48,12 +51,15 @@ public class ConfirmActivity extends AppCompatActivity {
     private String confirmOrdersJson;
     private List<ConfirmOrder> confirmOrders;
 
+    // Biến userId: nếu người dùng đăng nhập thì sẽ có giá trị, nếu không thì null
+    private String userId = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_confirm);
 
-        // Ánh xạ View
+        // Ánh xạ view
         tvHeader = findViewById(R.id.tvHeader);
         tvStadiumName = findViewById(R.id.tvStadiumName);
         tvAddress = findViewById(R.id.tvAddress);
@@ -77,15 +83,13 @@ public class ConfirmActivity extends AppCompatActivity {
             selectedDate = sdf.format(new Date());
         }
 
-        // Label "Thông tin chi tiết:"
         tvDate.setText("Thông tin chi tiết:");
 
-        // Kiểm tra token => Nếu có token, lấy thông tin người dùng
+        // Kiểm tra token: nếu có token thì gọi API lấy thông tin người dùng
         SessionManager sessionManager = new SessionManager(this);
         String token = sessionManager.getToken();
         if (token != null && !token.isEmpty()) {
             String authHeader = "Bearer " + token;
-            // Lấy ApiService từ RetrofitClient
             ApiService apiService = RetrofitClient.getApiService(ConfirmActivity.this);
             apiService.getMyInfo(authHeader).enqueue(new Callback<MyInfoResponse>() {
                 @Override
@@ -93,10 +97,13 @@ public class ConfirmActivity extends AppCompatActivity {
                     if (response.isSuccessful()) {
                         MyInfoResponse myInfoResponse = response.body();
                         if (myInfoResponse != null && myInfoResponse.getResult() != null) {
+                            // Lấy thông tin tên và số điện thoại
                             String fullName = myInfoResponse.getResult().getFirstName() + " " +
                                     myInfoResponse.getResult().getLastName();
                             etName.setText(fullName);
                             etPhone.setText(myInfoResponse.getResult().getPhoneNumber());
+                            // Lấy userId từ API (giả sử có phương thức getId())
+                            userId = myInfoResponse.getResult().getId();
                         } else {
                             Toast.makeText(ConfirmActivity.this, "Dữ liệu trả về không hợp lệ", Toast.LENGTH_SHORT).show();
                         }
@@ -124,7 +131,7 @@ public class ConfirmActivity extends AppCompatActivity {
         // Xây dựng UI hiển thị slot
         buildConfirmOrdersUI();
 
-        // Xử lý nút Xác nhận
+        // Xử lý nút xác nhận
         btnConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -163,7 +170,7 @@ public class ConfirmActivity extends AppCompatActivity {
                 // Tính tổng tiền từ tất cả các slot
                 int overallTotalPrice = 0;
                 for (ConfirmOrder order : confirmOrders) {
-                    overallTotalPrice += order.getDailyPrice();
+                    overallTotalPrice += (int)order.getDailyPrice();
                 }
 
                 // Tạo đối tượng CreateOrderRequest
@@ -173,15 +180,16 @@ public class ConfirmActivity extends AppCompatActivity {
                 createOrderRequest.setAddress(tvAddress.getText().toString());
                 createOrderRequest.setBookingDate(selectedDate);
                 createOrderRequest.setCustomerName(name);
+                // Nếu người dùng đã đăng nhập, userId có giá trị, ngược lại sẽ là null
+                createOrderRequest.setUserId(userId);
                 createOrderRequest.setPhoneNumber(phone);
-                createOrderRequest.setTotalAmount(overallTotalPrice);
+                createOrderRequest.setTotalAmount(2000);//overallTotalPrice
                 createOrderRequest.setDiscountCode(null);
-                createOrderRequest.setNote(note);
+                createOrderRequest.setNote(note.isEmpty() ? null : note);
                 createOrderRequest.setDiscountAmount(0);
-                createOrderRequest.setPaymentAmount(2000); // Giá trị test
                 createOrderRequest.setPaymentStatus("Đặt cọc");
+                createOrderRequest.setPaymentAmount(2000);//overallTotalPrice
 
-                // Xây dựng danh sách OrderDetail
                 List<OrderDetail> orderDetails = new ArrayList<>();
                 for (ConfirmOrder order : confirmOrders) {
                     OrderDetail detail = new OrderDetail();
@@ -189,14 +197,13 @@ public class ConfirmActivity extends AppCompatActivity {
                     detail.setCourtSlotName(order.getCourtSlotName());
                     detail.setStartTime(order.getStartTime());
                     detail.setEndTime(order.getEndTime());
-                    detail.setPrice((int) order.getDailyPrice());
+                    detail.setPrice((int)order.getDailyPrice());
                     orderDetails.add(detail);
                 }
                 createOrderRequest.setOrderDetails(orderDetails);
 
                 Log.d("CreateOrder", "Request: " + new Gson().toJson(createOrderRequest));
 
-                // Lấy đối tượng ApiService từ RetrofitClient và gọi API tạo đơn hàng
                 ApiService apiService = RetrofitClient.getApiService(ConfirmActivity.this);
                 apiService.createOrder(createOrderRequest).enqueue(new Callback<CreateOrderResponse>() {
                     @Override
@@ -212,6 +219,7 @@ public class ConfirmActivity extends AppCompatActivity {
                                 Intent intent = new Intent(ConfirmActivity.this, QRCodeActivity.class);
                                 intent.putExtra("qrCodeData", orderResponse.getQrcode());
                                 intent.putExtra("timeoutTimeMillis", timeoutTimeMillis);
+                                intent.putExtra("orderId", orderResponse.getId());
                                 startActivity(intent);
                             } else {
                                 Toast.makeText(ConfirmActivity.this, "Tạo đơn thất bại: QR code không có", Toast.LENGTH_SHORT).show();
@@ -241,7 +249,7 @@ public class ConfirmActivity extends AppCompatActivity {
         });
     }
 
-    // Gọi API lấy thông tin sân
+    // Hàm gọi API lấy thông tin sân
     private void fetchCourtDetails(String clubId) {
         ApiService apiService = RetrofitClient.getApiService(ConfirmActivity.this);
         apiService.getCourtById(clubId).enqueue(new Callback<Courts>() {
@@ -252,7 +260,6 @@ public class ConfirmActivity extends AppCompatActivity {
                     tvStadiumName.setText(court.getName());
                     tvAddress.setText("Địa chỉ: " + court.getAddress());
 
-                    // Hiển thị liên hệ (giả sử tvContact có trong layout)
                     TextView tvContact = findViewById(R.id.tvContact);
                     if (court.getPhone() != null) {
                         tvContact.setText("Liên hệ: " + court.getPhone());
@@ -270,7 +277,7 @@ public class ConfirmActivity extends AppCompatActivity {
         });
     }
 
-    // Hàm parse "HH:mm" => số phút
+    // Hàm chuyển đổi "HH:mm" sang số phút
     private int toMinutes(String time) {
         String[] parts = time.split(":");
         int hour = Integer.parseInt(parts[0]);
@@ -278,29 +285,23 @@ public class ConfirmActivity extends AppCompatActivity {
         return hour * 60 + minute;
     }
 
-    // Định dạng tiền theo kiểu "300.000 ₫"
+    // Hàm định dạng tiền
     private String formatMoney(int amount) {
         DecimalFormat formatter = new DecimalFormat("#,###");
         return formatter.format(amount) + " ₫";
     }
 
-    /**
-     * Xây dựng UI "Thông tin chi tiết":
-     *   - Nhóm theo dayBooking, sắp xếp ngày và giờ
-     *   - Hiển thị slot
-     *   - Tính tổng giá và tổng giờ => hiển thị ở 2 dòng (tvTotalPriceLine, tvTotalTimeLine)
-     */
+    // Hàm xây dựng UI cho danh sách ConfirmOrder
     private void buildConfirmOrdersUI() {
         if (confirmOrders == null || confirmOrders.isEmpty()) {
             return;
         }
 
-        // Gom các ConfirmOrder theo ngày (dayBooking) và sắp xếp tăng dần theo ngày
         TreeMap<String, List<ConfirmOrder>> ordersByDay = new TreeMap<>();
         for (ConfirmOrder order : confirmOrders) {
             String day = order.getDayBooking();
             if (day == null || day.isEmpty()) {
-                day = "9999-12-31"; // Nếu không có ngày, đưa về cuối danh sách
+                day = "9999-12-31";
             }
             if (!ordersByDay.containsKey(day)) {
                 ordersByDay.put(day, new ArrayList<>());
@@ -308,29 +309,23 @@ public class ConfirmActivity extends AppCompatActivity {
             ordersByDay.get(day).add(order);
         }
 
-        // Xoá view cũ
         layoutConfirmOrders.removeAllViews();
 
-        // Biến tính tổng cho tất cả các ngày
         int overallTotalPrice = 0;
         int overallTotalMinutes = 0;
 
-        // Lặp qua từng ngày đã sắp xếp
         for (Map.Entry<String, List<ConfirmOrder>> entry : ordersByDay.entrySet()) {
             String day = entry.getKey();
             List<ConfirmOrder> dayOrders = entry.getValue();
 
-            // Sắp xếp slot theo giờ bắt đầu tăng dần
             dayOrders.sort((o1, o2) -> Integer.compare(toMinutes(o1.getStartTime()), toMinutes(o2.getStartTime())));
 
-            // Thêm header ngày
             TextView tvDayHeader = new TextView(this);
             tvDayHeader.setTextColor(getResources().getColor(android.R.color.white));
             tvDayHeader.setTextSize(16);
             tvDayHeader.setText("Ngày: " + day);
             layoutConfirmOrders.addView(tvDayHeader);
 
-            // Hiển thị các slot của ngày
             for (ConfirmOrder order : dayOrders) {
                 overallTotalPrice += order.getDailyPrice();
                 overallTotalMinutes += (toMinutes(order.getEndTime()) - toMinutes(order.getStartTime()));
@@ -347,12 +342,10 @@ public class ConfirmActivity extends AppCompatActivity {
             }
         }
 
-        // Tính tổng thời gian chơi
         int hours = overallTotalMinutes / 60;
         int mins = overallTotalMinutes % 60;
         String timeStr = String.format(Locale.getDefault(), "%dh%02d", hours, mins);
 
-        // Hiển thị 2 dòng tổng tiền và tổng thời gian chơi
         String moneyHtml = "Tổng tiền: <b>" + formatMoney(overallTotalPrice) + "</b>";
         tvTotalPriceLine.setText(Html.fromHtml(moneyHtml));
         tvTotalTimeLine.setText("Tổng thời gian chơi: " + timeStr);
