@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,6 +46,7 @@ public class ConfirmActivity extends AppCompatActivity {
     private LinearLayout layoutConfirmOrders;
     private EditText etName, etPhone, etNote;
     private Button btnConfirm;
+    private ImageButton btnBack;
 
     private String clubId;
     private String selectedDate;
@@ -71,6 +73,7 @@ public class ConfirmActivity extends AppCompatActivity {
         etPhone = findViewById(R.id.etPhone);
         etNote = findViewById(R.id.etNote);
         btnConfirm = findViewById(R.id.btnConfirm);
+        btnBack = findViewById(R.id.btnBack);
 
         // Lấy dữ liệu từ Intent
         clubId = getIntent().getStringExtra("club_id");
@@ -246,6 +249,11 @@ public class ConfirmActivity extends AppCompatActivity {
                     }
                 });
             }
+        });
+        btnBack.setOnClickListener(v -> {
+            Intent intent = new Intent(ConfirmActivity.this, BookingTableActivity.class);
+            startActivity(intent);
+            finish();
         });
     }
 

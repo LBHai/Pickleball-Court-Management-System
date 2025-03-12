@@ -6,14 +6,15 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.google.zxing.BarcodeFormat;
-
 import Socket.PaymentSocketListener;
+import Socket.PaymentSocketListener.ExtendedPaymentStatusCallback;
 
 public class QRCodeActivity extends AppCompatActivity {
 
@@ -21,7 +22,21 @@ public class QRCodeActivity extends AppCompatActivity {
     private ImageButton btnBack;
     private TextView tvCountdownTimer;
     private CountDownTimer countDownTimer;
-    private long timeoutTimeMillis; // thời gian thanh toán hết (epoch millis)
+    private long timeoutTimeMillis;
+
+    private PaymentSocketListener socketListener;
+    // Handler định kỳ kiểm tra trạng thái kết nối của socket
+    private Handler socketHandler = new Handler();
+    private Runnable socketCheckRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (socketListener != null && !socketListener.isConnected()) {
+                Log.d("QRCodeActivity", "Socket disconnected, attempting to reconnect...");
+                socketListener.connect();
+            }
+            socketHandler.postDelayed(this, 500);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,12 +54,13 @@ public class QRCodeActivity extends AppCompatActivity {
             finish();
         });
 
-        // Lấy dữ liệu truyền qua Intent
+        // Lấy dữ liệu từ Intent
         String qrCodeData = getIntent().getStringExtra("qrCodeData");
         timeoutTimeMillis = getIntent().getLongExtra("timeoutTimeMillis", 0);
         String orderId = getIntent().getStringExtra("orderId");
 
-        if (qrCodeData == null || qrCodeData.isEmpty()){
+        // Kiểm tra dữ liệu
+        if (qrCodeData == null || qrCodeData.isEmpty()) {
             Toast.makeText(this, "Không có dữ liệu QR Code", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -53,32 +69,49 @@ public class QRCodeActivity extends AppCompatActivity {
             return;
         }
 
+        // Tạo mã QR hiển thị
         try {
             BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
             Bitmap bitmap = barcodeEncoder.encodeBitmap(qrCodeData, BarcodeFormat.QR_CODE, 320, 320);
             ivQRCode.setImageBitmap(bitmap);
-        } catch(Exception e) {
+        } catch (Exception e) {
             Toast.makeText(this, "Lỗi tạo QR Code: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
 
-        // Khởi tạo socket sử dụng orderId làm key
         if (orderId != null && !orderId.isEmpty()) {
-            PaymentSocketListener.PaymentStatusCallback callback = new PaymentSocketListener.PaymentStatusCallback() {
+            // Sử dụng ExtendedPaymentStatusCallback để bắt cả thành công và lỗi
+            ExtendedPaymentStatusCallback callback = new ExtendedPaymentStatusCallback() {
                 @Override
                 public void onPaymentSuccess(String orderId) {
-                    // Khi thanh toán thành công, chuyển sang màn hình cảm ơn
-                    Intent intent = new Intent(QRCodeActivity.this, PaymentSuccessActivity.class);
-                    intent.putExtra("resCode", 200);
-                    intent.putExtra("orderId", orderId);
-                    startActivity(intent);
-                    finish();
+                    runOnUiThread(() -> {
+                        Log.d("QRCodeActivity", "onPaymentSuccess called with orderId: " + orderId);
+                        // Chuyển sang màn hình PaymentSuccessActivity
+                        Intent intent = new Intent(QRCodeActivity.this, PaymentSuccessActivity.class);
+                        intent.putExtra("resCode", 200);
+                        intent.putExtra("orderId", orderId);
+                        startActivity(intent);
+                        finish();
+                    });
+                }
+
+                @Override
+                public void onPaymentFailure(String error) {
+                    runOnUiThread(() -> {
+                        Log.e("QRCodeActivity", "Payment failure: " + error);
+                        Toast.makeText(QRCodeActivity.this, "Thanh toán thất bại: " + error, Toast.LENGTH_SHORT).show();
+                        // Chuyển về MainActivity khi có lỗi xảy ra
+                        Intent intent = new Intent(QRCodeActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        finish();
+                    });
                 }
             };
-            PaymentSocketListener socketListener = new PaymentSocketListener(orderId, callback);
+            socketListener = new PaymentSocketListener(orderId, callback);
             socketListener.connect();
+            socketHandler.postDelayed(socketCheckRunnable, 500);
         }
 
-        // Bắt đầu đếm ngược dựa trên thời gian thanh toán hết
+        // Bắt đầu đếm ngược
         startCountdown();
     }
 
@@ -116,6 +149,9 @@ public class QRCodeActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         startCountdown();
+        if (socketListener != null) {
+            socketHandler.postDelayed(socketCheckRunnable, 500);
+        }
     }
 
     @Override
@@ -124,6 +160,7 @@ public class QRCodeActivity extends AppCompatActivity {
         if (countDownTimer != null) {
             countDownTimer.cancel();
         }
+        socketHandler.removeCallbacks(socketCheckRunnable);
     }
 
     @Override

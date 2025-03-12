@@ -10,63 +10,111 @@ import okhttp3.WebSocketListener;
 import okio.ByteString;
 
 public class PaymentSocketListener extends WebSocketListener {
+    private static final String TAG = "PaymentSocket";
     private static final int NORMAL_CLOSURE_STATUS = 1000;
+
     private String key;
+    private boolean connected = false;
     private PaymentStatusCallback callback;
 
-    // key ở đây chính là id từ CreateOrderResponse
+    private OkHttpClient client;
+    private WebSocket webSocket;
+
     public PaymentSocketListener(String key, PaymentStatusCallback callback) {
         this.key = key;
         this.callback = callback;
     }
 
     public void connect() {
-        OkHttpClient client = new OkHttpClient();
+        if (connected) {
+            Log.d(TAG, "Already connected, skip...");
+            return;
+        }
+        Log.d(TAG, "Attempting to connect with key: " + key);
+        client = new OkHttpClient();
         Request request = new Request.Builder()
                 .url("ws://203.145.46.242:8081/identity/ws/notifications?key=" + key)
                 .build();
-        client.newWebSocket(request, this);
-        client.dispatcher().executorService().shutdown();
+        webSocket = client.newWebSocket(request, this);
     }
 
     @Override
     public void onOpen(WebSocket webSocket, Response response) {
-        Log.d("PaymentSocket", "Connected with key: " + key);
+        connected = true;
+        Log.d(TAG, "onOpen => Connected with key: " + key);
+        // Gửi thông điệp test ban đầu
+        webSocket.send("{\"action\":\"test\",\"key\":\"" + key + "\"}");
     }
 
     @Override
     public void onMessage(WebSocket webSocket, String text) {
-        Log.d("PaymentSocket", "Received: " + text);
+        Log.d(TAG, "onMessage => Received raw: " + text);
         try {
             JSONObject json = new JSONObject(text);
-            int resCode = json.getInt("resCode");
-            String orderId = json.getString("orderId");
-            if (resCode == 200) {
-                // Khi nhận được thanh toán thành công, gọi callback
-                callback.onPaymentSuccess(orderId);
+            String resCode = json.optString("resCode", "");
+            String resDesc = json.optString("resDesc", "");
+            Log.d(TAG, "resCode: " + resCode + ", resDesc: " + resDesc);
+
+            // Kiểm tra thành công theo điều kiện: resCode = "200" và resDesc = "Payment successfully"
+            if (resCode.equals("200") && resDesc.equals("Payment successfully")) {
+                String orderId = json.optString("orderId", "");
+                if (callback != null) {
+                    callback.onPaymentSuccess(orderId);
+                }
+            } else if (resCode.equals("400")) {
+                String errorMessage = "Thanh toán không thành công: " + resDesc;
+                if (callback != null && callback instanceof ExtendedPaymentStatusCallback) {
+                    ((ExtendedPaymentStatusCallback) callback).onPaymentFailure(errorMessage);
+                }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Error parsing message: " + e.getMessage());
         }
     }
 
     @Override
     public void onMessage(WebSocket webSocket, ByteString bytes) {
-        // Không xử lý trường hợp binary nếu không cần
+        Log.d(TAG, "onMessage => Received bytes: " + bytes.hex());
     }
 
     @Override
     public void onClosing(WebSocket webSocket, int code, String reason) {
+        connected = false;
         webSocket.close(NORMAL_CLOSURE_STATUS, null);
-        Log.d("PaymentSocket", "Closing: " + code + "/" + reason);
+        Log.d(TAG, "onClosing => code: " + code + ", reason: " + reason);
     }
 
     @Override
     public void onFailure(WebSocket webSocket, Throwable t, Response response) {
-        Log.e("PaymentSocket", "Error: " + t.getMessage());
+        connected = false;
+        String errorMessage = (t != null ? t.toString() : "Unknown error");
+        Log.e(TAG, "onFailure => " + errorMessage);
+        if (callback != null && callback instanceof ExtendedPaymentStatusCallback) {
+            ((ExtendedPaymentStatusCallback) callback).onPaymentFailure(errorMessage);
+        }
     }
 
+    public boolean isConnected() {
+        return connected;
+    }
+
+    public void close() {
+        connected = false;
+        if (webSocket != null) {
+            webSocket.close(NORMAL_CLOSURE_STATUS, "Activity destroyed");
+        }
+        if (client != null) {
+            client.dispatcher().executorService().shutdown();
+        }
+    }
+
+    // Callback cơ bản cho thanh toán thành công
     public interface PaymentStatusCallback {
         void onPaymentSuccess(String orderId);
+    }
+
+    // Callback mở rộng để xử lý lỗi thanh toán
+    public interface ExtendedPaymentStatusCallback extends PaymentStatusCallback {
+        void onPaymentFailure(String error);
     }
 }
