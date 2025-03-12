@@ -24,4 +24,8 @@
     <color name="lightGreen">#0BCB73</color>
     <color name="buttonGreen">#7FFFC4</color>
 
+        <color name="greenBackground">#246d35</color> <!-- Màu xanh ví dụ -->
+        <!-- ... các màu khác -->
+
+
 </resources>
