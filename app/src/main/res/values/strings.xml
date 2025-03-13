@@ -57,42 +57,42 @@
         <item>FEMALE</item>
     </string-array>
 
-        <string name="avatar">Ảnh đại diện</string>
-        <string name="enter_full_name" translatable="false">Enter First Name</string>
-        <string name="enter_last_name" translatable="false">Enter Last Name</string>
-        <string name="enter_phone_number" translatable="false">Enter Phone Number</string>
-        <string name="user_rank" translatable="false">User Rank</string>
-        <string name="enter_user_rank" translatable="false">User Rank</string>
-        <string name="gender" translatable="false">Gender</string>
-        <string name="ngay_sinh">Ngày sinh</string>
-        <string name="luu">Lưu</string>
+    <string name="avatar">Ảnh đại diện</string>
+    <string name="enter_full_name" translatable="false">Enter First Name</string>
+    <string name="enter_last_name" translatable="false">Enter Last Name</string>
+    <string name="enter_phone_number" translatable="false">Enter Phone Number</string>
+    <string name="user_rank" translatable="false">User Rank</string>
+    <string name="enter_user_rank" translatable="false">User Rank</string>
+    <string name="gender" translatable="false">Gender</string>
+    <string name="ngay_sinh">Ngày sinh</string>
+    <string name="luu">Lưu</string>
 
-        <!-- Mảng ngày (1-31) -->
-        <string-array name="day_array">
-            <item>1</item>
-            <item>2</item>
-            <item>3</item>
-            <!-- ... -->
-            <item>31</item>
-        </string-array>
+    <!-- Mảng ngày (1-31) -->
+    <string-array name="day_array">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <!-- ... -->
+        <item>31</item>
+    </string-array>
 
-        <!-- Mảng tháng (1-12) -->
-        <string-array name="month_array">
-            <item>1</item>
-            <item>2</item>
-            <item>3</item>
-            <!-- ... -->
-            <item>12</item>
-        </string-array>
+    <!-- Mảng tháng (1-12) -->
+    <string-array name="month_array">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <!-- ... -->
+        <item>12</item>
+    </string-array>
 
-        <!-- Mảng năm (ví dụ 1980 - 2030) -->
-        <string-array name="year_array">
-            <item>1980</item>
-            <item>1981</item>
-            <item>1982</item>
-            <!-- ... -->
-            <item>2030</item>
-        </string-array>
+    <!-- Mảng năm (ví dụ 1980 - 2030) -->
+    <string-array name="year_array">
+        <item>1980</item>
+        <item>1981</item>
+        <item>1982</item>
+        <!-- ... -->
+        <item>2030</item>
+    </string-array>
 
 
 </resources>

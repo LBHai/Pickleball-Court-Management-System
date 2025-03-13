@@ -18,6 +18,7 @@ import android.widget.Toast;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Locale;
@@ -73,9 +74,6 @@ public class AccountFragment extends Fragment {
         return view;
     }
 
-    /**
-     * Gọi API lấy thông tin người dùng và lưu dữ liệu vào các biến toàn cục.
-     */
     private void getMyInfo() {
         String token = sessionManager.getToken();
         if (token != null && !token.isEmpty()) {
@@ -87,7 +85,7 @@ public class AccountFragment extends Fragment {
                     if (response.isSuccessful()) {
                         MyInfoResponse myInfoResponse = response.body();
                         if (myInfoResponse != null && myInfoResponse.getResult() != null) {
-                            // Lưu dữ liệu lấy được từ API vào các biến
+                            // Lưu dữ liệu lấy được từ API vào các biến và cập nhật giao diện
                             id = myInfoResponse.getResult().getId();
                             username = myInfoResponse.getResult().getUsername();
                             firstName = myInfoResponse.getResult().getFirstName();
@@ -97,14 +95,28 @@ public class AccountFragment extends Fragment {
                             gender = myInfoResponse.getResult().getGender();
                             dob = myInfoResponse.getResult().getDob();
 
-                            // Cập nhật giao diện (chỉ hiển thị tên và số điện thoại)
                             tvUserName.setText(firstName + " " + lastName);
                             tvPhoneNumber.setText(myInfoResponse.getResult().getPhoneNumber());
                         } else {
                             Toast.makeText(getContext(), "Dữ liệu trả về không hợp lệ", Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        Toast.makeText(getContext(), "Lấy thông tin thất bại, vui lòng đăng nhập lại!", Toast.LENGTH_SHORT).show();
+                        if (response.code() == 401 || response.code() == 403) {
+                            try {
+                                String errorMessage = response.errorBody().string();
+                                if (errorMessage.contains("expired") || errorMessage.contains("hết hạn")) {
+                                    // Lỗi do token hết hạn
+                                    Toast.makeText(getContext(), "Lấy thông tin thất bại, vui lòng đăng nhập lại!", Toast.LENGTH_SHORT).show();
+                                    // Nếu muốn, bạn có thể chuyển hướng đăng xuất tại đây
+                                } else {
+                                    // Lỗi do đăng nhập đồng thời: không làm gì cả, để cả 2 thiết bị cùng hoạt động
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            Toast.makeText(getContext(), "Lấy thông tin thất bại, vui lòng đăng nhập lại!", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
 
@@ -117,6 +129,7 @@ public class AccountFragment extends Fragment {
             Toast.makeText(getContext(), "Token không tồn tại, vui lòng đăng nhập lại!", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     /**
      * Hiển thị PopupMenu và xử lý sự kiện khi chọn từng mục.

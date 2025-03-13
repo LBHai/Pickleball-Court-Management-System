@@ -88,7 +88,6 @@ public class ConfirmActivity extends AppCompatActivity {
 
         tvDate.setText("Thông tin chi tiết:");
 
-        // Kiểm tra token: nếu có token thì gọi API lấy thông tin người dùng
         SessionManager sessionManager = new SessionManager(this);
         String token = sessionManager.getToken();
         if (token != null && !token.isEmpty()) {
@@ -108,19 +107,34 @@ public class ConfirmActivity extends AppCompatActivity {
                             // Lấy userId từ API (giả sử có phương thức getId())
                             userId = myInfoResponse.getResult().getId();
                         } else {
-                            Toast.makeText(ConfirmActivity.this, "Dữ liệu trả về không hợp lệ", Toast.LENGTH_SHORT).show();
+                            // Xử lý lỗi khi dữ liệu trả về không hợp lệ
+                            if (response.code() == 401 || response.code() == 403) {
+                                try {
+                                    String errorMessage = response.errorBody().string();
+                                    if (errorMessage.contains("expired") || errorMessage.contains("hết hạn")) {
+                                        // Lỗi do token hết hạn
+                                        Toast.makeText(ConfirmActivity.this, "Lấy thông tin thất bại, vui lòng đăng nhập lại!", Toast.LENGTH_SHORT).show();
+                                        // Nếu muốn, bạn có thể chuyển hướng đăng xuất tại đây
+                                    } else {
+                                        // Lỗi do đăng nhập đồng thời: không làm gì cả, để cả 2 thiết bị cùng hoạt động
+                                    }
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            } else {
+                                Toast.makeText(ConfirmActivity.this, "Lấy thông tin thất bại, vui lòng đăng nhập lại!", Toast.LENGTH_SHORT).show();
+                            }
                         }
-                    } else {
-                        Toast.makeText(ConfirmActivity.this, "Bạn đang đặt sân với tư cách là Guest", Toast.LENGTH_SHORT).show();
                     }
                 }
+
                 @Override
                 public void onFailure(Call<MyInfoResponse> call, Throwable t) {
                     Toast.makeText(ConfirmActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
-            Toast.makeText(ConfirmActivity.this, "Bạn đang đặt sân với tư cách là Guest", Toast.LENGTH_SHORT).show();
+            Toast.makeText(ConfirmActivity.this, "Token không tồn tại, vui lòng đăng nhập lại!", Toast.LENGTH_SHORT).show();
         }
 
         // Parse JSON -> danh sách ConfirmOrder
@@ -252,9 +266,12 @@ public class ConfirmActivity extends AppCompatActivity {
         });
         btnBack.setOnClickListener(v -> {
             Intent intent = new Intent(ConfirmActivity.this, BookingTableActivity.class);
+            // Truyền lại club_id sang BookingTableActivity
+            intent.putExtra("club_id", clubId);
             startActivity(intent);
             finish();
         });
+
     }
 
     // Hàm gọi API lấy thông tin sân
