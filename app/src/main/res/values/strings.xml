@@ -65,7 +65,7 @@
     <string name="enter_user_rank" translatable="false">User Rank</string>
     <string name="gender" translatable="false">Gender</string>
     <string name="ngay_sinh">Ngày sinh</string>
-    <string name="luu">Lưu</string>
+    <string name="save">Save</string>
 
     <!-- Mảng ngày (1-31) -->
     <string-array name="day_array">
