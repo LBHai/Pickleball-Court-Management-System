@@ -8,13 +8,14 @@
     android:layout_height="match_parent"
     android:fillViewport="true"
     android:background="@color/greenBackground"
-    tools:context=".test">
+    tools:context=".EditInformationActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clRoot"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp">
+
         <!-- Avatar -->
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/imgAvatar"
@@ -28,251 +29,187 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
-        <!-- TextView Label: Email -->
+        <!-- Label: Email -->
         <TextView
             android:id="@+id/tvEmailLabel"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginTop="8dp"
             android:text="@string/email"
             android:textColor="@android:color/white"
-            android:textSize="14sp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/imgAvatar"
-            app:layout_constraintStart_toStartOf="parent" />
+            android:textSize="20sp"
+            app:layout_constraintTop_toBottomOf="@id/imgAvatar"
+            app:layout_constraintStart_toStartOf="parent"/>
 
-        <!-- TextInputLayout - Email -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilEmail"
-            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.Dense"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+        <!-- EditText: Email -->
+        <EditText
+            android:id="@+id/etEmail"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
             android:layout_marginTop="4dp"
-            app:boxBackgroundMode="filled"
-            app:boxCornerRadiusTopStart="8dp"
-            app:boxCornerRadiusTopEnd="8dp"
-            app:boxCornerRadiusBottomStart="8dp"
-            app:boxCornerRadiusBottomEnd="8dp"
-            app:boxBackgroundColor="@android:color/white"
-            app:layout_constraintTop_toBottomOf="@+id/tvEmailLabel"
+            android:inputType="textEmailAddress"
+            android:background="@drawable/bg_edittext"
+            android:padding="8dp"
+            android:textColor="@android:color/black"
+            android:textColorHint="#888888"
+            android:hint="@string/email"
+            app:layout_constraintTop_toBottomOf="@id/tvEmailLabel"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintEnd_toEndOf="parent"/>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etEmail"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/email"
-                android:inputType="textEmailAddress"
-                android:textColor="@android:color/black"
-                android:textColorHint="#888888"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- TextView Label: Số điện thoại -->
+        <!-- Label: First Name -->
         <TextView
-            android:id="@+id/tvPhoneLabel"
+            android:id="@+id/tvFirstNameLabel"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="30dp"
             android:text="@string/first_name"
             android:textColor="@android:color/white"
-            android:textSize="14sp"
+            android:textSize="20sp"
             android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/tilEmail"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/etEmail"
+            app:layout_constraintStart_toStartOf="parent"/>
 
-        <LinearLayout
-            android:id="@+id/llPhoneContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
+        <!-- EditText: First Name -->
+        <EditText
+            android:id="@+id/etFirstName"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
             android:layout_marginTop="4dp"
-            app:layout_constraintTop_toBottomOf="@+id/tvPhoneLabel"
+            android:inputType="textPersonName"
+            android:background="@drawable/bg_edittext"
+            android:padding="8dp"
+            android:textColor="@android:color/black"
+            android:textColorHint="#888888"
+            android:hint="@string/first_name"
+            app:layout_constraintTop_toBottomOf="@id/tvFirstNameLabel"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintEnd_toEndOf="parent"/>
 
-            <!-- TextView +84 -->
-
-            <!-- TextInputLayout - Số điện thoại -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/tilPhone"
-                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.Dense"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                app:boxBackgroundMode="filled"
-                app:boxCornerRadiusTopStart="8dp"
-                app:boxCornerRadiusTopEnd="8dp"
-                app:boxCornerRadiusBottomStart="8dp"
-                app:boxCornerRadiusBottomEnd="8dp"
-                app:boxBackgroundColor="@android:color/white">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etPhone"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/enter_full_name"
-                    android:inputType="phone"
-                    android:textColor="@android:color/black"
-                    android:textColorHint="#888888"/>
-            </com.google.android.material.textfield.TextInputLayout>
-        </LinearLayout>
-
-        <!-- TextView Label: Tên đầy đủ -->
+        <!-- Label: Last Name -->
         <TextView
-            android:id="@+id/tvFullNameLabel"
+            android:id="@+id/tvLastNameLabel"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="30dp"
             android:text="@string/last_name"
             android:textColor="@android:color/white"
-            android:textSize="14sp"
+            android:textSize="20sp"
             android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/llPhoneContainer"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/etFirstName"
+            app:layout_constraintStart_toStartOf="parent"/>
 
-        <!-- TextInputLayout - Tên đầy đủ, có nút clear -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilFullName"
-            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.Dense"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+        <!-- EditText: Last Name -->
+        <EditText
+            android:id="@+id/etLastName"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
             android:layout_marginTop="4dp"
-            app:endIconMode="clear_text"
-            app:endIconDrawable="@android:drawable/ic_menu_close_clear_cancel"
-            app:boxBackgroundMode="filled"
-            app:boxCornerRadiusTopStart="8dp"
-            app:boxCornerRadiusTopEnd="8dp"
-            app:boxCornerRadiusBottomStart="8dp"
-            app:boxCornerRadiusBottomEnd="8dp"
-            app:boxBackgroundColor="@android:color/white"
-            app:layout_constraintTop_toBottomOf="@+id/tvFullNameLabel"
+            android:inputType="textPersonName"
+            android:background="@drawable/bg_edittext"
+            android:padding="8dp"
+            android:textColor="@android:color/black"
+            android:textColorHint="#888888"
+            android:hint="@string/last_name"
+            app:layout_constraintTop_toBottomOf="@id/tvLastNameLabel"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintEnd_toEndOf="parent"/>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etFullName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/enter_last_name"
-                android:textColor="@android:color/black"
-                android:textColorHint="#888888"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
+        <!-- Label: Phone Number -->
         <TextView
             android:id="@+id/tvPhoneNumberLabel"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="30dp"
             android:text="@string/phone_number"
             android:textColor="@android:color/white"
-            android:textSize="14sp"
+            android:textSize="20sp"
             android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/tilFullName"
-            app:layout_constraintStart_toStartOf="parent" />
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilPhoneNumber"
-            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.Dense"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            app:endIconMode="clear_text"
-            app:endIconDrawable="@android:drawable/ic_menu_close_clear_cancel"
-            app:boxBackgroundMode="filled"
-            app:boxCornerRadiusTopStart="8dp"
-            app:boxCornerRadiusTopEnd="8dp"
-            app:boxCornerRadiusBottomStart="8dp"
-            app:boxCornerRadiusBottomEnd="8dp"
-            app:boxBackgroundColor="@android:color/white"
-            app:layout_constraintTop_toBottomOf="@+id/tvPhoneNumberLabel"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintTop_toBottomOf="@id/etLastName"
+            app:layout_constraintStart_toStartOf="parent"/>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etPhoneNumber"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/enter_phone_number"
-                android:textColor="@android:color/black"
-                android:textColorHint="#888888"
-                android:enabled="false"/>
-        </com.google.android.material.textfield.TextInputLayout>
+        <!-- EditText: Phone Number -->
+        <EditText
+            android:id="@+id/etPhoneNumber"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="4dp"
+            android:inputType="phone"
+            android:background="@drawable/bg_edittext"
+            android:padding="8dp"
+            android:textColor="@android:color/black"
+            android:textColorHint="#888888"
+            android:enabled="false"
+            android:hint="@string/phone_number"
+            app:layout_constraintTop_toBottomOf="@id/tvPhoneNumberLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <!-- Label: User Rank -->
         <TextView
             android:id="@+id/tvUserRankLabel"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="30dp"
             android:text="@string/user_rank"
             android:textColor="@android:color/white"
-            android:textSize="14sp"
+            android:textSize="20sp"
             android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/tilPhoneNumber"
-            app:layout_constraintStart_toStartOf="parent" />
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilUserRank"
-            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.Dense"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            app:endIconMode="clear_text"
-            app:endIconDrawable="@android:drawable/ic_menu_close_clear_cancel"
-            app:boxBackgroundMode="filled"
-            app:boxCornerRadiusTopStart="8dp"
-            app:boxCornerRadiusTopEnd="8dp"
-            app:boxCornerRadiusBottomStart="8dp"
-            app:boxCornerRadiusBottomEnd="8dp"
-            app:boxBackgroundColor="@android:color/white"
-            app:layout_constraintTop_toBottomOf="@+id/tvUserRankLabel"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintTop_toBottomOf="@id/etPhoneNumber"
+            app:layout_constraintStart_toStartOf="parent"/>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etUserRank"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/enter_user_rank"
-                android:textColor="@android:color/black"
-                android:textColorHint="#888888"/>
-        </com.google.android.material.textfield.TextInputLayout>
-        <!-- TextView Label: Giới tính -->
+        <!-- EditText: User Rank -->
+        <EditText
+            android:id="@+id/etUserRank"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="4dp"
+            android:inputType="text"
+            android:background="@drawable/bg_edittext"
+            android:padding="8dp"
+            android:textColor="@android:color/black"
+            android:textColorHint="#888888"
+            android:hint="@string/user_rank"
+            app:layout_constraintTop_toBottomOf="@id/tvUserRankLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <!-- Label: Gender -->
         <TextView
             android:id="@+id/tvGenderLabel"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="30dp"
             android:text="@string/gender"
             android:textColor="@android:color/white"
-            android:textSize="14sp"
+            android:textSize="20sp"
             android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/tilUserRank"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/etUserRank"
+            app:layout_constraintStart_toStartOf="parent"/>
 
-        <!-- Spinner - Giới tính (dùng bg_text_field để bo góc, nền trắng) -->
+        <!-- Spinner: Gender -->
         <Spinner
             android:id="@+id/spGender"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
             android:layout_marginTop="4dp"
             android:spinnerMode="dropdown"
             android:entries="@array/gender_array"
             android:popupBackground="@android:color/white"
-            android:background="@drawable/bg_text_field"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
-            app:layout_constraintTop_toBottomOf="@+id/tvGenderLabel"
+            android:background="@drawable/bg_edittext"
+            android:padding="8dp"
+            android:gravity="center_vertical|start"
+            app:layout_constraintTop_toBottomOf="@id/tvGenderLabel"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
-
-
-        <!-- ============ DATE OF BIRTH (3 cột) ============ -->
-        <!-- Mỗi cột: Label (Day of Birth / Month of Birth / Year of Birth) + Spinner -->
+        <!-- Date of Birth Container (3 columns) -->
         <LinearLayout
             android:id="@+id/llDobContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="12dp"
-            app:layout_constraintTop_toBottomOf="@+id/spGender"
+            app:layout_constraintTop_toBottomOf="@id/spGender"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <!-- CỘT 1: Day of Birth -->
+            <!-- Column 1: Day of Birth -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -282,25 +219,26 @@
 
                 <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="30dp"
                     android:text="Day of Birth"
                     android:gravity="center"
                     android:textColor="@android:color/white"
-                    android:textSize="14sp"/>
+                    android:textSize="18sp"/>
 
                 <Spinner
                     android:id="@+id/spDay"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="50dp"
                     android:layout_marginTop="4dp"
+                    android:layout_gravity="center"
                     android:spinnerMode="dropdown"
                     android:popupBackground="@android:color/white"
-                    android:background="@drawable/bg_text_field"
-                    android:paddingLeft="12dp"
-                    android:paddingRight="12dp"/>
+                    android:background="@drawable/bg_edittext"
+                    android:padding="8dp"
+                    />
             </LinearLayout>
 
-            <!-- CỘT 2: Month of Birth -->
+            <!-- Column 2: Month of Birth -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -310,25 +248,25 @@
 
                 <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="30dp"
                     android:text="Month of Birth"
                     android:gravity="center"
                     android:textColor="@android:color/white"
-                    android:textSize="14sp"/>
+                    android:textSize="18sp"/>
 
                 <Spinner
                     android:id="@+id/spMonth"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="50dp"
                     android:layout_marginTop="4dp"
                     android:spinnerMode="dropdown"
                     android:popupBackground="@android:color/white"
-                    android:background="@drawable/bg_text_field"
-                    android:paddingLeft="12dp"
-                    android:paddingRight="12dp"/>
+                    android:background="@drawable/bg_edittext"
+                    android:padding="8dp"
+                    android:gravity="center_vertical|start"/>
             </LinearLayout>
 
-            <!-- CỘT 3: Year of Birth -->
+            <!-- Column 3: Year of Birth -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -337,46 +275,50 @@
 
                 <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="30dp"
                     android:text="Year of Birth"
                     android:gravity="center"
                     android:textColor="@android:color/white"
-                    android:textSize="14sp"/>
+                    android:textSize="18sp"/>
 
                 <Spinner
                     android:id="@+id/spYear"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="50dp"
                     android:layout_marginTop="4dp"
                     android:spinnerMode="dropdown"
                     android:popupBackground="@android:color/white"
-                    android:background="@drawable/bg_text_field"
-                    android:paddingLeft="12dp"
-                    android:paddingRight="12dp"/>
+                    android:background="@drawable/bg_edittext"
+                    android:padding="8dp"
+                    android:gravity="center_vertical|start"/>
             </LinearLayout>
         </LinearLayout>
+
+        <!-- CheckBox: Student -->
         <CheckBox
             android:id="@+id/cbStudent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Student"
+            android:textSize="20sp"
             android:textColor="@android:color/white"
             android:layout_marginTop="12dp"
-            app:layout_constraintTop_toBottomOf="@+id/llDobContainer"
+            app:layout_constraintTop_toBottomOf="@id/llDobContainer"
             app:layout_constraintStart_toStartOf="parent"
             android:enabled="false"/>
-        <!-- Nút Lưu (nền vàng) -->
+
+        <!-- Button: Save -->
         <Button
             android:id="@+id/btnSave"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/luu"
+            android:text="@string/save"
             android:textAllCaps="false"
             android:textColor="@android:color/black"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
             android:background="@drawable/bg_button"
-            app:layout_constraintTop_toBottomOf="@+id/cbStudent"
+            app:layout_constraintTop_toBottomOf="@id/cbStudent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
