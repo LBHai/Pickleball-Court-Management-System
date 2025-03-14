@@ -38,6 +38,7 @@ public class CourtsFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Inflate file layout riêng dành cho fragment
         View view = inflater.inflate(R.layout.fragment_courts, container, false);
 
         // Ánh xạ view
@@ -67,7 +68,6 @@ public class CourtsFragment extends Fragment {
     }
 
     private void callApiGetClubs() {
-        // Lấy đối tượng ApiService thông qua RetrofitClient
         ApiService apiService = RetrofitClient.getApiService(getContext());
         apiService.getCourts().enqueue(new Callback<List<Courts>>() {
             @Override
@@ -91,7 +91,7 @@ public class CourtsFragment extends Fragment {
 
     private void setupRecyclerView(List<Courts> list) {
         courtsAdapter = new CourtsAdapter(getContext(), list, club -> {
-            // Mở ClubDetailFragment
+            // Mở CourtDetailFragment khi item được nhấn
             Fragment clubDetailFragment = new CourtDetailFragment();
             Bundle bundle = new Bundle();
             bundle.putString("club_id", club.getId());
