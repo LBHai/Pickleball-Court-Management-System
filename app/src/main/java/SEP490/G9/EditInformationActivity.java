@@ -13,7 +13,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import Api.ApiService;
-import Api.NetworkUtils;
 import Api.RetrofitClient;
 import Model.UpdateMyInfor;
 import Session.SessionManager;
@@ -26,17 +25,12 @@ import java.util.List;
 
 public class EditInformationActivity extends AppCompatActivity {
 
-    // Các view tham chiếu từ XML (sử dụng EditText thay vì TextInputEditText)
     private EditText etEmail, etFirstName, etLastName, etPhoneNumber, etUserRank;
     private Spinner spGender, spDay, spMonth, spYear;
     private CheckBox cbStudent;
     private Button btnSave;
 
-    // Các view không cần dùng code: TextView labels, avatar đã hiển thị từ XML
-
-    // Biến lưu trữ username, id
-    private String username;
-    private String id;
+    private String username, id;
 
     // Adapter cho Spinner ngày, tháng, năm
     private ArrayAdapter<String> dayAdapter, monthAdapter, yearAdapter;
@@ -45,9 +39,8 @@ public class EditInformationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_information);
-        // XML file đã được cập nhật để sử dụng EditText và TextView làm nhãn
 
-        // Ánh xạ các view
+        // Ánh xạ view từ XML
         etEmail       = findViewById(R.id.etEmail);
         etFirstName   = findViewById(R.id.etFirstName);
         etLastName    = findViewById(R.id.etLastName);
@@ -60,7 +53,15 @@ public class EditInformationActivity extends AppCompatActivity {
         cbStudent     = findViewById(R.id.cbStudent);
         btnSave       = findViewById(R.id.btnSave);
 
-        // Thiết lập Spinner Gender từ resources (ví dụ: gender_array = {"MALE","FEMALE","OTHER"})
+        setupSpinners();
+        loadIntentData();
+
+        btnSave.setOnClickListener(v -> saveUserInfo());
+    }
+
+    // Thiết lập dữ liệu cho các Spinner: Gender, Day, Month, Year
+    private void setupSpinners() {
+        // Spinner giới tính: sử dụng resource đã cập nhật gồm "Select gender", "Male", "Female"
         ArrayAdapter<CharSequence> genderAdapter = ArrayAdapter.createFromResource(
                 this,
                 R.array.gender_array,
@@ -69,7 +70,7 @@ public class EditInformationActivity extends AppCompatActivity {
         genderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spGender.setAdapter(genderAdapter);
 
-        // Thiết lập Spinner cho Day (1..31)
+        // Spinner ngày (1..31)
         List<String> dayList = new ArrayList<>();
         for (int d = 1; d <= 31; d++) {
             dayList.add(String.valueOf(d));
@@ -78,7 +79,7 @@ public class EditInformationActivity extends AppCompatActivity {
         dayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spDay.setAdapter(dayAdapter);
 
-        // Thiết lập Spinner cho Month (1..12)
+        // Spinner tháng (1..12)
         List<String> monthList = new ArrayList<>();
         for (int m = 1; m <= 12; m++) {
             monthList.add(String.valueOf(m));
@@ -87,7 +88,7 @@ public class EditInformationActivity extends AppCompatActivity {
         monthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spMonth.setAdapter(monthAdapter);
 
-        // Thiết lập Spinner cho Year (1900..2100)
+        // Spinner năm (1900..2100)
         List<String> yearList = new ArrayList<>();
         for (int y = 1900; y <= 2100; y++) {
             yearList.add(String.valueOf(y));
@@ -95,56 +96,64 @@ public class EditInformationActivity extends AppCompatActivity {
         yearAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, yearList);
         yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spYear.setAdapter(yearAdapter);
+    }
 
-        // Nhận dữ liệu từ Intent
+    // Load dữ liệu từ Intent (truyền từ Activity khác) và hiển thị
+    private void loadIntentData() {
         Intent intent = getIntent();
         if (intent != null) {
-            // Lấy id, username
             id = intent.getStringExtra("id");
             username = intent.getStringExtra("username");
             Log.d("EditInfo", "ID: " + id + ", username: " + username);
 
-            // Set dữ liệu cho các trường
             etEmail.setText(intent.getStringExtra("email"));
             etFirstName.setText(intent.getStringExtra("firstName"));
             etLastName.setText(intent.getStringExtra("lastName"));
             etPhoneNumber.setText(intent.getStringExtra("phoneNumber"));
             etUserRank.setText(intent.getStringExtra("userRank"));
 
-            // Xử lý giới tính
-            String genderFromIntent = intent.getStringExtra("gender");
-            if (genderFromIntent != null) {
-                for (int i = 0; i < genderAdapter.getCount(); i++) {
-                    if (genderAdapter.getItem(i).toString().equalsIgnoreCase(genderFromIntent)) {
-                        spGender.setSelection(i);
-                        break;
+            // Thiết lập giới tính: nếu gender null, hiển thị "Select gender"
+            String genderFromIntent = intent.getStringExtra("gender"); // expected "MALE"/"FEMALE" hoặc null
+            ArrayAdapter<CharSequence> genderAdapter = (ArrayAdapter<CharSequence>) spGender.getAdapter();
+            if (genderFromIntent == null) {
+                spGender.setSelection(0);  // "Select gender"
+            } else {
+                if (genderFromIntent.equalsIgnoreCase("MALE")) {
+                    for (int i = 0; i < genderAdapter.getCount(); i++) {
+                        if (genderAdapter.getItem(i).toString().equalsIgnoreCase("Male")) {
+                            spGender.setSelection(i);
+                            break;
+                        }
                     }
+                } else if (genderFromIntent.equalsIgnoreCase("FEMALE")) {
+                    for (int i = 0; i < genderAdapter.getCount(); i++) {
+                        if (genderAdapter.getItem(i).toString().equalsIgnoreCase("Female")) {
+                            spGender.setSelection(i);
+                            break;
+                        }
+                    }
+                } else {
+                    spGender.setSelection(0);
                 }
             }
 
-            // Xử lý ngày sinh với định dạng "YYYY-MM-DD"
+            // Thiết lập ngày sinh theo định dạng "YYYY-MM-DD"
             String dob = intent.getStringExtra("dob");
             if (dob != null && dob.contains("-")) {
                 String[] dobParts = dob.split("-");
                 if (dobParts.length == 3) {
                     String yearStr  = dobParts[0];
-                    String monthStr = dobParts[1];
-                    String dayStr   = dobParts[2];
+                    String monthStr = String.valueOf(Integer.parseInt(dobParts[1]));
+                    String dayStr   = String.valueOf(Integer.parseInt(dobParts[2]));
 
                     int yearPos = yearAdapter.getPosition(yearStr);
-                    if (yearPos >= 0) {
-                        spYear.setSelection(yearPos);
-                    }
+                    if (yearPos >= 0) spYear.setSelection(yearPos);
 
-                    int monthPos = monthAdapter.getPosition(String.valueOf(Integer.parseInt(monthStr)));
-                    if (monthPos >= 0) {
-                        spMonth.setSelection(monthPos);
-                    }
+                    int monthPos = monthAdapter.getPosition(monthStr);
+                    if (monthPos >= 0) spMonth.setSelection(monthPos);
 
-                    int dayPos = dayAdapter.getPosition(String.valueOf(Integer.parseInt(dayStr)));
-                    if (dayPos >= 0) {
-                        spDay.setSelection(dayPos);
-                    }
+                    int dayPos = dayAdapter.getPosition(dayStr);
+                    if (dayPos >= 0) spDay.setSelection(dayPos);
                 }
             }
 
@@ -154,30 +163,40 @@ public class EditInformationActivity extends AppCompatActivity {
                 cbStudent.setChecked(Boolean.parseBoolean(studentStr));
             }
         }
-
-        // Sự kiện bấm nút Save
-        btnSave.setOnClickListener(v -> saveUserInfo());
     }
 
+    // Gọi API cập nhật thông tin người dùng
     private void saveUserInfo() {
-        // Lấy dữ liệu từ UI
+        // Lấy dữ liệu từ giao diện
         String email       = etEmail.getText().toString().trim();
         String firstName   = etFirstName.getText().toString().trim();
         String lastName    = etLastName.getText().toString().trim();
         String phoneNumber = etPhoneNumber.getText().toString().trim();
         String userRank    = etUserRank.getText().toString().trim();
-        String gender      = spGender.getSelectedItem().toString().toUpperCase();
-        boolean student    = cbStudent.isChecked();
 
-        // Lấy ngày, tháng, năm từ Spinner
+        // Lấy giá trị gender từ Spinner
+        String spinnerGender = spGender.getSelectedItem().toString();
+        String gender;
+        if (spinnerGender.equalsIgnoreCase("Select gender")) {
+            gender = null;
+        } else if (spinnerGender.equalsIgnoreCase("Male")) {
+            gender = "MALE";
+        } else if (spinnerGender.equalsIgnoreCase("Female")) {
+            gender = "FEMALE";
+        } else {
+            gender = null;
+        }
+
+        boolean student = cbStudent.isChecked();
+
+        // Lấy dữ liệu ngày, tháng, năm và định dạng DOB theo "YYYY-MM-DD"
         String day   = spDay.getSelectedItem().toString();
         String month = spMonth.getSelectedItem().toString();
         String year  = spYear.getSelectedItem().toString();
+        String dob   = year + "-" + String.format("%02d", Integer.parseInt(month))
+                + "-" + String.format("%02d", Integer.parseInt(day));
 
-        // Tạo chuỗi dob theo định dạng "YYYY-MM-DD"
-        String dob = year + "-" + String.format("%02d", Integer.parseInt(month)) + "-" + String.format("%02d", Integer.parseInt(day));
-
-        // Tạo đối tượng UpdateMyInfor và gán dữ liệu
+        // Tạo đối tượng UpdateMyInfor với các dữ liệu lấy được
         UpdateMyInfor updateUser = new UpdateMyInfor();
         updateUser.setId(id);
         updateUser.setUsername(username);
@@ -186,8 +205,8 @@ public class EditInformationActivity extends AppCompatActivity {
         updateUser.setLastName(lastName);
         updateUser.setDob(dob);
         updateUser.setPhoneNumber(phoneNumber);
-        updateUser.setUserRank(null);
-        updateUser.setGender(gender);
+        updateUser.setUserRank(userRank.isEmpty() ? null : userRank);
+        updateUser.setGender(gender);  // "MALE"/"FEMALE" hoặc null nếu chưa chọn
         updateUser.setStudent(student);
 
         // Lấy token từ SessionManager
@@ -204,19 +223,32 @@ public class EditInformationActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<UpdateMyInfor> call, Response<UpdateMyInfor> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Toast.makeText(EditInformationActivity.this, "Cập nhật thông tin thành công!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EditInformationActivity.this,
+                            "Cập nhật thông tin thành công!",
+                            Toast.LENGTH_SHORT).show();
+                    // Thực hiện các hành động khác nếu cần (ví dụ: kết thúc Activity)
                 } else {
                     try {
-                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
-                        Toast.makeText(EditInformationActivity.this, "Vui lòng chọn giới tính", Toast.LENGTH_SHORT).show();
+                        String errorBody = (response.errorBody() != null)
+                                ? response.errorBody().string()
+                                : "Không có thông tin lỗi";
+                        Toast.makeText(EditInformationActivity.this,
+                                "Cập nhật thất bại: " + errorBody,
+                                Toast.LENGTH_LONG).show();
                     } catch (Exception e) {
                         e.printStackTrace();
+                        Toast.makeText(EditInformationActivity.this,
+                                "Cập nhật thất bại!",
+                                Toast.LENGTH_SHORT).show();
                     }
                 }
             }
+
             @Override
             public void onFailure(Call<UpdateMyInfor> call, Throwable t) {
-                Toast.makeText(EditInformationActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditInformationActivity.this,
+                        "Lỗi kết nối: " + t.getMessage(),
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
