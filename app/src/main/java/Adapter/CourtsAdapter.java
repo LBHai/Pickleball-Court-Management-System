@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -88,7 +89,8 @@ public class CourtsAdapter extends RecyclerView.Adapter<CourtsAdapter.ClubsViewH
 
     public static class ClubsViewHolder extends RecyclerView.ViewHolder {
         TextView tvClubName, tvAddress, tvOpenTime, tvPhone;
-        Button btnBook, btnMap;
+        Button btnBook;
+        ImageView btnMap;
 
         public ClubsViewHolder(@NonNull View itemView) {
             super(itemView);

@@ -1,65 +1,173 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="10dp"
-    android:background="@android:color/holo_green_light">
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:cardUseCompatPadding="true"
+    android:clipToOutline="true"
+    android:foreground="?android:attr/selectableItemBackground">
 
-    <TextView
-        android:id="@+id/tvClubName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:text="@string/club_name"/>
-
-    <TextView
-        android:id="@+id/tvAddress"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="14sp"
-        android:text="@string/address"
-        />
-
-    <TextView
-        android:id="@+id/tvOpenTime"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="14sp"
-        android:text="@string/open_time"/>
-
-    <TextView
-        android:id="@+id/tvPhone"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="14sp"
-        android:text="@string/phone"/>
-
-    <TextView
-        android:id="@+id/tvStatus"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="14sp"
-        android:text="@string/status"/>
-
+    <!-- Container chính với padding đủ để tạo khoảng trống nội dung -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="end">
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <Button
-            android:id="@+id/btnBook"
-            android:layout_width="wrap_content"
+        <!-- Row 1: Logo + Club Name & Address (Left Part) và Icon (Right Part) -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/book" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-        <Button
-            android:id="@+id/btnMap"
-            android:layout_width="wrap_content"
+            <!-- Left Part: Logo và thông tin CLB -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:id="@+id/imgClubLogo"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/logo"
+                    android:contentDescription="@string/app_name" />
+
+                <!-- Vertical container chứa Club Name và Address -->
+                <LinearLayout
+                    android:layout_width="169dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvClubName"
+                        android:layout_width="169dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/club_name"
+                        android:textColor="@android:color/black"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvAddress"
+                        android:layout_width="169dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/address"
+                        android:textColor="#666666"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Right Part: Icon trái tim & Bản đồ -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:id="@+id/imgHeart"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@mipmap/ic_heart"
+                    android:layout_marginEnd="12dp" />
+
+                <ImageView
+                    android:id="@+id/btnMap"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/map" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Row 2: Container thông tin Open Time & Phone và nút BOOK trong cùng một hàng -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/map"
-            android:layout_marginStart="8dp"/>
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Container thông tin Open Time & Phone -->
+            <LinearLayout
+                android:layout_width="238dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Row 2.1: Open Time -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/imgDongho"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/dongho" />
+
+                    <TextView
+                        android:id="@+id/tvOpenTime"
+                        android:layout_width="213dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:gravity="center"
+                        android:text="@string/open_time"
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <!-- Row 2.2: Phone -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/imgPhone"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:scaleType="centerInside"
+                        android:src="@mipmap/ic_dienthoai" />
+
+                    <TextView
+                        android:id="@+id/tvPhone"
+                        android:layout_width="214dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:gravity="center"
+                        android:text="@string/phone"
+                        android:textColor="#4CAF50"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Nút BOOK nằm cùng hàng với container thông tin -->
+            <Button
+                android:id="@+id/btnBook"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/book"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:backgroundTint="#FFD429" />
+        </LinearLayout>
+
     </LinearLayout>
-
-</LinearLayout>
+</androidx.cardview.widget.CardView>
