@@ -14,20 +14,19 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import Api.ApiService;
+import Api.NetworkUtils;
 import Api.RetrofitClient;
 import Model.UpdateMyInfor;
 import Session.SessionManager;
 import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class EditInformationActivity extends AppCompatActivity {
 
-    // View tham chiếu từ layout mới
+    // View tham chiếu từ layout
     private ShapeableImageView imgAvatar;
     private TextInputEditText etEmail, etPhone, etFullName, etPhoneNumber, etUserRank;
     private Spinner spGender, spDay, spMonth, spYear;
@@ -45,15 +44,14 @@ public class EditInformationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_information);
-        // (Đảm bảo file XML của bạn tên "activity_edit_information" hoặc đổi lại cho khớp)
 
         // Ánh xạ view
         imgAvatar     = findViewById(R.id.imgAvatar);
         etEmail       = findViewById(R.id.etEmail);
         etPhone       = findViewById(R.id.etPhone);        // Layout "tilPhone"
-        etFullName    = findViewById(R.id.etFullName);     // Layout "tilFullName"
-        etPhoneNumber = findViewById(R.id.etPhoneNumber);  // Layout "tilPhoneNumber"
-        etUserRank    = findViewById(R.id.etUserRank);     // Layout "tilUserRank"
+        etFullName    = findViewById(R.id.etFullName);       // Layout "tilFullName"
+        etPhoneNumber = findViewById(R.id.etPhoneNumber);    // Layout "tilPhoneNumber"
+        etUserRank    = findViewById(R.id.etUserRank);       // Layout "tilUserRank"
         spGender      = findViewById(R.id.spGender);
         spDay         = findViewById(R.id.spDay);
         spMonth       = findViewById(R.id.spMonth);
@@ -107,15 +105,14 @@ public class EditInformationActivity extends AppCompatActivity {
 
             // Set các trường
             etEmail.setText(intent.getStringExtra("email"));
-            etPhone.setText(intent.getStringExtra("firstName"));      // Tuỳ bạn map field "firstName" => etPhone
-            etFullName.setText(intent.getStringExtra("lastName"));    // lastName => etFullName
+            etPhone.setText(intent.getStringExtra("firstName"));      // Map field "firstName" => etPhone
+            etFullName.setText(intent.getStringExtra("lastName"));      // Map field "lastName"  => etFullName
             etPhoneNumber.setText(intent.getStringExtra("phoneNumber"));
             etUserRank.setText(intent.getStringExtra("userRank"));
 
             // Giới tính
             String genderFromIntent = intent.getStringExtra("gender");
             if (genderFromIntent != null) {
-                // Tìm vị trí trong adapter
                 for (int i = 0; i < genderAdapter.getCount(); i++) {
                     if (genderAdapter.getItem(i).toString().equalsIgnoreCase(genderFromIntent)) {
                         spGender.setSelection(i);
@@ -129,24 +126,20 @@ public class EditInformationActivity extends AppCompatActivity {
             if (dob != null && dob.contains("-")) {
                 String[] dobParts = dob.split("-");
                 if (dobParts.length == 3) {
-                    // dobParts[0] = YYYY, dobParts[1] = MM, dobParts[2] = DD
                     String yearStr  = dobParts[0];
                     String monthStr = dobParts[1];
                     String dayStr   = dobParts[2];
 
-                    // Tìm index trong yearAdapter
                     int yearPos = yearAdapter.getPosition(yearStr);
                     if (yearPos >= 0) {
                         spYear.setSelection(yearPos);
                     }
 
-                    // Tìm index trong monthAdapter
                     int monthPos = monthAdapter.getPosition(String.valueOf(Integer.parseInt(monthStr)));
                     if (monthPos >= 0) {
                         spMonth.setSelection(monthPos);
                     }
 
-                    // Tìm index trong dayAdapter
                     int dayPos = dayAdapter.getPosition(String.valueOf(Integer.parseInt(dayStr)));
                     if (dayPos >= 0) {
                         spDay.setSelection(dayPos);
@@ -161,15 +154,15 @@ public class EditInformationActivity extends AppCompatActivity {
             }
         }
 
-        // Sự kiện bấm nút Save
+        // Sự kiện bấm nút Save: sử dụng NetworkUtils để gọi API updateMyInfo
         btnSave.setOnClickListener(v -> saveUserInfo());
     }
 
     private void saveUserInfo() {
         // Lấy dữ liệu từ UI
         String email       = etEmail.getText().toString().trim();
-        String firstName   = etPhone.getText().toString().trim();      // map field firstName => etPhone
-        String lastName    = etFullName.getText().toString().trim();   // map field lastName  => etFullName
+        String firstName   = etPhone.getText().toString().trim();      // Map field firstName => etPhone
+        String lastName    = etFullName.getText().toString().trim();     // Map field lastName  => etFullName
         String phoneNumber = etPhoneNumber.getText().toString().trim();
         String userRank    = etUserRank.getText().toString().trim();
 
@@ -177,15 +170,12 @@ public class EditInformationActivity extends AppCompatActivity {
         boolean student    = cbStudent.isChecked();
 
         // Lấy day/month/year từ Spinner
-        String day   = spDay.getSelectedItem().toString();   // "1".."31"
-        String month = spMonth.getSelectedItem().toString(); // "1".."12"
-        String year  = spYear.getSelectedItem().toString();  // "1900".."2100"
+        String day   = spDay.getSelectedItem().toString();
+        String month = spMonth.getSelectedItem().toString();
+        String year  = spYear.getSelectedItem().toString();
 
         // Tạo chuỗi dob dạng "YYYY-MM-DD"
-        // (nhớ format tháng/ngày 2 chữ số nếu cần)
-        String dob = year + "-"
-                + String.format("%02d", Integer.parseInt(month)) + "-"
-                + String.format("%02d", Integer.parseInt(day));
+        String dob = year + "-" + String.format("%02d", Integer.parseInt(month)) + "-" + String.format("%02d", Integer.parseInt(day));
 
         // Tạo đối tượng UpdateMyInfor
         UpdateMyInfor updateUser = new UpdateMyInfor();
@@ -196,11 +186,11 @@ public class EditInformationActivity extends AppCompatActivity {
         updateUser.setLastName(lastName);
         updateUser.setDob(dob);
         updateUser.setPhoneNumber(phoneNumber);
-        updateUser.setUserRank(null);
+        updateUser.setUserRank(userRank);
         updateUser.setGender(gender);
         updateUser.setStudent(student);
 
-        // Lấy token
+        // Lấy token từ SessionManager
         SessionManager sessionManager = new SessionManager(this);
         String token = sessionManager.getToken();
         if (token == null || token.isEmpty()) {
@@ -208,27 +198,17 @@ public class EditInformationActivity extends AppCompatActivity {
             return;
         }
 
-        // Gọi API update
+        // Gọi API update thông qua NetworkUtils
         ApiService apiService = RetrofitClient.getApiService(this);
-        apiService.updateMyInfo("Bearer " + token, updateUser).enqueue(new Callback<UpdateMyInfor>() {
+        Call<UpdateMyInfor> call = apiService.updateMyInfo("Bearer " + token, updateUser);
+        NetworkUtils.callApi(call, EditInformationActivity.this, new NetworkUtils.ApiCallback<UpdateMyInfor>() {
             @Override
-            public void onResponse(Call<UpdateMyInfor> call, Response<UpdateMyInfor> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Toast.makeText(EditInformationActivity.this, "Cập nhật thông tin thành công!", Toast.LENGTH_SHORT).show();
-                } else {
-                    // Có lỗi từ server
-                    try {
-                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
-                        Toast.makeText(EditInformationActivity.this, "Vui lòng chọn giới tính", Toast.LENGTH_SHORT).show();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+            public void onSuccess(UpdateMyInfor updateResponse) {
+                Toast.makeText(EditInformationActivity.this, "Cập nhật thông tin thành công!", Toast.LENGTH_SHORT).show();
             }
-
             @Override
-            public void onFailure(Call<UpdateMyInfor> call, Throwable t) {
-                Toast.makeText(EditInformationActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            public void onError(String errorMessage) {
+                Toast.makeText(EditInformationActivity.this, "Cập nhật thông tin thất bại: " + errorMessage, Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -27,6 +27,9 @@ import Api.ApiService;
 import Api.RetrofitClient;
 import Model.MyInfo;
 import Model.MyInfoResponse;
+import SEP490.G9.BookingTableActivity;
+import SEP490.G9.ConfirmActivity;
+import SEP490.G9.DetailBookingActivity;
 import SEP490.G9.EditInformationActivity;
 import SEP490.G9.LoginActivity;
 import SEP490.G9.R;
@@ -43,7 +46,7 @@ public class AccountFragment extends Fragment {
     private String id, username, email, firstName, lastName, userRank, gender, dob;
 
     private SessionManager sessionManager;
-
+    private ImageButton btnNoti;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Kiểm tra trạng thái đăng nhập
@@ -63,7 +66,13 @@ public class AccountFragment extends Fragment {
         // Ánh xạ các view từ XML
         tvUserName = view.findViewById(R.id.userName);
         tvPhoneNumber = view.findViewById(R.id.phoneNumber);
-
+        btnNoti = view.findViewById(R.id.notification);
+        btnNoti.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), DetailBookingActivity.class);
+            startActivity(intent);
+            // Nếu muốn đóng Activity chứa Fragment, uncomment dòng dưới:
+            // getActivity().finish();
+        });
         // Gọi API để lấy thông tin người dùng
         getMyInfo();
 

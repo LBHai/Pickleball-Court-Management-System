@@ -3,6 +3,7 @@ package SEP490.G9;
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -14,7 +15,7 @@ public class PaymentSuccessActivity extends AppCompatActivity {
     private TextView tvTitle, tvSubTitle;
     private Button btnXemLichDatChiTiet, btnQuayVe;
     private ImageButton btnBack;
-
+    private String orderId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,6 +26,7 @@ public class PaymentSuccessActivity extends AppCompatActivity {
         tvSubTitle = findViewById(R.id.tvSubTitle);
         btnXemLichDatChiTiet = findViewById(R.id.btnXemLichDatChiTiet);
         btnQuayVe = findViewById(R.id.btnQuayVe);
+        orderId = getIntent().getStringExtra("orderId");
 
         btnBack.setOnClickListener(v -> {
             Intent intent = new Intent(PaymentSuccessActivity.this, MainActivity.class);
@@ -39,6 +41,9 @@ public class PaymentSuccessActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(PaymentSuccessActivity.this, DetailBookingActivity.class);
+                intent.putExtra("orderId", orderId);
+                Log.d("PaymentSuccessActivity", "orderId nhận được: " + orderId);
+
                 startActivity(intent);
                 finish();
             }

@@ -15,12 +15,7 @@
         android:theme="@style/Theme.PickleballCourtManagementSystem"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
-        <activity
-            android:name=".testttt"
-            android:exported="false" />
-        <activity
-            android:name=".test"
-            android:exported="false" />
+
         <activity
             android:name=".EditInformationActivity"
             android:exported="false" />
@@ -62,7 +57,6 @@
             android:name=".DetailBookingActivity"
             android:exported="true" />
 
-        <receiver android:name=".AlarmReceiver" />
     </application>
 
 </manifest>

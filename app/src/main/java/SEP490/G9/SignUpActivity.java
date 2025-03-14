@@ -12,16 +12,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.textfield.TextInputEditText;
 
 import Api.ApiService;
+import Api.NetworkUtils;
 import Api.RetrofitClient;
 import Model.CUser;
 import Model.GetToken;
 import Model.User;
 import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class SignUpActivity extends AppCompatActivity {
-    private TextInputEditText edtUsername, edtPassword, edtFirstName, edtLastName, edtDOB, edtPhoneNumber,edtEmai;
+    private TextInputEditText edtUsername, edtPassword, edtFirstName, edtLastName, edtDOB, edtPhoneNumber, edtEmai;
     private Button btnSignup;
 
     @Override
@@ -64,9 +63,10 @@ public class SignUpActivity extends AppCompatActivity {
         String lastName = edtLastName.getText().toString().trim();
         String dob = edtDOB.getText().toString().trim();
         String phoneNumber = edtPhoneNumber.getText().toString().trim();
-        String email = edtPhoneNumber.getText().toString().trim();
+        String email = edtEmai.getText().toString().trim();
 
-        if (username.isEmpty() || password.isEmpty() || firstName.isEmpty() || lastName.isEmpty() || dob.isEmpty()|| email.isEmpty() || phoneNumber.isEmpty()) {
+        if (username.isEmpty() || password.isEmpty() || firstName.isEmpty() ||
+                lastName.isEmpty() || dob.isEmpty() || email.isEmpty() || phoneNumber.isEmpty()) {
             Toast.makeText(this, "Vui lòng điền đầy đủ thông tin!", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -74,22 +74,20 @@ public class SignUpActivity extends AppCompatActivity {
         CUser newUser = new CUser(username, password, firstName, lastName, dob, email, phoneNumber);
 
         ApiService apiService = RetrofitClient.getApiService(SignUpActivity.this);
-        apiService.registerUser(newUser).enqueue(new Callback<GetToken>() {
+        Call<GetToken> call = apiService.registerUser(newUser);
+        // Sử dụng NetworkUtils để gọi API, bắt lỗi và hiển thị thông báo cho người dùng
+        NetworkUtils.callApi(call, SignUpActivity.this, new NetworkUtils.ApiCallback<GetToken>() {
             @Override
-            public void onResponse(Call<GetToken> call, Response<GetToken> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Toast.makeText(SignUpActivity.this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
-                    startActivity(intent);
-                    finish();
-                } else {
-                    Toast.makeText(SignUpActivity.this, "Đăng ký thất bại!", Toast.LENGTH_SHORT).show();
-                }
+            public void onSuccess(GetToken data) {
+                Toast.makeText(SignUpActivity.this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
+                startActivity(intent);
+                finish();
             }
 
             @Override
-            public void onFailure(Call<GetToken> call, Throwable t) {
-                Toast.makeText(SignUpActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            public void onError(String errorMessage) {
+                Toast.makeText(SignUpActivity.this, "Đăng ký thất bại: " + errorMessage, Toast.LENGTH_SHORT).show();
             }
         });
     }

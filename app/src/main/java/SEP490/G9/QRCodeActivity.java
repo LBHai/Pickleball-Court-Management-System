@@ -23,9 +23,9 @@ public class QRCodeActivity extends AppCompatActivity {
     private TextView tvCountdownTimer;
     private CountDownTimer countDownTimer;
     private long timeoutTimeMillis;
+    private String orderId;
 
     private PaymentSocketListener socketListener;
-    // Handler định kỳ kiểm tra trạng thái kết nối của socket
     private Handler socketHandler = new Handler();
     private Runnable socketCheckRunnable = new Runnable() {
         @Override
@@ -57,9 +57,8 @@ public class QRCodeActivity extends AppCompatActivity {
         // Lấy dữ liệu từ Intent
         String qrCodeData = getIntent().getStringExtra("qrCodeData");
         timeoutTimeMillis = getIntent().getLongExtra("timeoutTimeMillis", 0);
-        String orderId = getIntent().getStringExtra("orderId");
+        orderId = getIntent().getStringExtra("orderId");
 
-        // Kiểm tra dữ liệu
         if (qrCodeData == null || qrCodeData.isEmpty()) {
             Toast.makeText(this, "Không có dữ liệu QR Code", Toast.LENGTH_SHORT).show();
             return;
@@ -69,7 +68,6 @@ public class QRCodeActivity extends AppCompatActivity {
             return;
         }
 
-        // Tạo mã QR hiển thị
         try {
             BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
             Bitmap bitmap = barcodeEncoder.encodeBitmap(qrCodeData, BarcodeFormat.QR_CODE, 320, 320);
@@ -79,13 +77,12 @@ public class QRCodeActivity extends AppCompatActivity {
         }
 
         if (orderId != null && !orderId.isEmpty()) {
-            // Sử dụng ExtendedPaymentStatusCallback để bắt cả thành công và lỗi
             ExtendedPaymentStatusCallback callback = new ExtendedPaymentStatusCallback() {
                 @Override
                 public void onPaymentSuccess(String orderId) {
                     runOnUiThread(() -> {
                         Log.d("QRCodeActivity", "onPaymentSuccess called with orderId: " + orderId);
-                        // Chuyển sang màn hình PaymentSuccessActivity
+                        // Ở đây chuyển sang PaymentSuccessActivity và truyền club_id
                         Intent intent = new Intent(QRCodeActivity.this, PaymentSuccessActivity.class);
                         intent.putExtra("resCode", 200);
                         intent.putExtra("orderId", orderId);
@@ -99,7 +96,6 @@ public class QRCodeActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         Log.e("QRCodeActivity", "Payment failure: " + error);
                         Toast.makeText(QRCodeActivity.this, "Thanh toán thất bại: " + error, Toast.LENGTH_SHORT).show();
-                        // Chuyển về MainActivity khi có lỗi xảy ra
                         Intent intent = new Intent(QRCodeActivity.this, MainActivity.class);
                         startActivity(intent);
                         finish();
@@ -111,7 +107,6 @@ public class QRCodeActivity extends AppCompatActivity {
             socketHandler.postDelayed(socketCheckRunnable, 500);
         }
 
-        // Bắt đầu đếm ngược
         startCountdown();
     }
 

@@ -1,15 +1,15 @@
 package Model;
 
 public class GetToken {
-    private String code;
+    private int  code;
     private String message;
     private Result result;
 
-    public String getCode() {
+    public int getCode() {
         return code;
     }
 
-    public void setCode(String code) {
+    public void setCode(int code) {
         this.code = code;
     }
 

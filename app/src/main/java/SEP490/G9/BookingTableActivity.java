@@ -1,8 +1,11 @@
 package SEP490.G9;
 
+import Api.ApiService;
+import Api.NetworkUtils;
 import Api.RetrofitClient;
-import androidx.appcompat.app.AppCompatActivity;
-
+import Model.BookingSlot;
+import Model.CourtSlot;
+import Model.ConfirmOrder;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.graphics.Color;
@@ -23,9 +26,8 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import androidx.appcompat.app.AppCompatActivity;
 import com.google.gson.Gson;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -35,14 +37,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import Api.ApiService;
-import Model.BookingSlot;
-import Model.CourtSlot;
-import Model.ConfirmOrder;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class BookingTableActivity extends AppCompatActivity {
 
@@ -106,7 +100,7 @@ public class BookingTableActivity extends AppCompatActivity {
         selectedOrdersByDate.clear();
         selectedOrdersByDate.put(selectedDate, new HashMap<>());
 
-        // Gọi API ban đầu
+        // Gọi API ban đầu với NetworkUtils
         fetchBookingSlots(courtId, selectedDate);
 
         // Sự kiện nút chọn ngày
@@ -178,27 +172,31 @@ public class BookingTableActivity extends AppCompatActivity {
         datePickerDialog.show();
     }
 
-    /** Lấy dữ liệu slot từ API */
+    /** Lấy dữ liệu slot từ API sử dụng NetworkUtils */
     private void fetchBookingSlots(String clubId, String dateBooking) {
         ApiService apiService = RetrofitClient.getApiService(this);
-        apiService.getBookingSlots(clubId, dateBooking).enqueue(new Callback<List<CourtSlot>>() {
-            @Override
-            public void onResponse(Call<List<CourtSlot>> call, Response<List<CourtSlot>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    courtsByDate.put(dateBooking, response.body());
-                    collectAllStartTimesForCurrentDay(response.body());
-                    setupCourtSpinner(response.body());
-                    buildTableForDate(dateBooking);
-                    updateSelectedBookings();
-                } else {
-                    Toast.makeText(BookingTableActivity.this, "Lỗi khi lấy dữ liệu", Toast.LENGTH_SHORT).show();
+        NetworkUtils.callApi(
+                apiService.getBookingSlots(clubId, dateBooking),
+                this,
+                new NetworkUtils.ApiCallback<List<CourtSlot>>() {
+                    @Override
+                    public void onSuccess(List<CourtSlot> courtSlots) {
+                        if (courtSlots != null) {
+                            courtsByDate.put(dateBooking, courtSlots);
+                            collectAllStartTimesForCurrentDay(courtSlots);
+                            setupCourtSpinner(courtSlots);
+                            buildTableForDate(dateBooking);
+                            updateSelectedBookings();
+                        } else {
+                            Toast.makeText(BookingTableActivity.this, "Không có dữ liệu slot", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    @Override
+                    public void onError(String errorMessage) {
+                        // Thông báo lỗi đã được hiển thị qua Toast trong NetworkUtils
+                    }
                 }
-            }
-            @Override
-            public void onFailure(Call<List<CourtSlot>> call, Throwable t) {
-                Toast.makeText(BookingTableActivity.this, "Kết nối thất bại: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        );
     }
 
     /** Thu thập tất cả thời gian bắt đầu trong ngày */
