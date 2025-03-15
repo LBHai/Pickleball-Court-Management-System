@@ -9,6 +9,8 @@ import Model.CreateOrderRequest;
 import Model.CreateOrderResponse;
 import Model.GetToken;
 import Model.MyInfoResponse;
+import Model.OrderDetail;
+import Model.Orders;
 import Model.User;
 import Model.UpdateMyInfor;
 import retrofit2.Call;
@@ -48,5 +50,10 @@ public interface ApiService {
     @PUT("identity/users/update")
     Call<UpdateMyInfor> updateMyInfo(@Header("Authorization") String authHeader, @Body UpdateMyInfor updateUser);
 
+    @GET("identity/public/getOrders")
+    Call<List<Orders>> getOrders(@Query("value") String UserId);
+
+//    @GET("/identity/public/getOrders")
+//    Call<OrderDetail> getOrderById(@Body UpdateMyInfor updateUser);
 
 }

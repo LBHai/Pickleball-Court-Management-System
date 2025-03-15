@@ -14,70 +14,66 @@
         android:orientation="vertical"
         android:padding="12dp">
 
-        <!-- Row 1: "Đơn ngày" (trái) + Trạng thái (phải) -->
+        <!-- Hàng đầu tiên: Loại đơn và Trạng thái -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-            <!-- "Đơn ngày" bo góc, nền xanh -->
+            <!-- TextView: Đơn ngày -->
             <TextView
-                android:id="@+id/tvLabel"
+                android:id="@+id/tvDonNgay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_rounded_green"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"
                 android:text="Đơn ngày"
                 android:textColor="@android:color/white"
-                android:textSize="14sp" />
+                android:background="@drawable/bg_rounded_green"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp"
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
-            <!-- Khoảng trống đẩy status sang phải -->
-            <View
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1" />
-
-            <!-- Trạng thái: "Chờ xác nhận", "Đã hủy", ... -->
+            <!-- TextView: Trạng thái -->
             <TextView
                 android:id="@+id/tvStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Chờ xác nhận"
-                android:textColor="@android:color/holo_orange_dark"
-                android:textSize="14sp" />
+                android:layout_marginStart="16dp"
+                android:text="Hủy do quá giờ thanh toán"
+                android:textColor="@android:color/holo_red_dark"
+                android:textSize="14sp"
+                android:drawablePadding="4dp" />
         </LinearLayout>
 
-        <!-- Tên CLB -->
+        <!-- Tên sân / CLB -->
         <TextView
-            android:id="@+id/tvClubName"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="Câu Lạc Bộ Cầu Lông - Pickleball - HD 12286"
+            android:layout_marginTop="8dp"
+            android:text="Tên sân / CLB"
             android:textColor="@android:color/black"
-            android:textSize="15sp"
+            android:textSize="16sp"
             android:textStyle="bold" />
 
-        <!-- Chi tiết thời gian -->
+        <!-- Chi tiết -->
         <TextView
             android:id="@+id/tvDetail"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="Chi tiết: C.Lông 3: 12h - 12h30 | Ngày 11/03/2025"
+            android:layout_marginTop="4dp"
+            android:text="Chi tiết: Thời gian, giá,..."
             android:textColor="@android:color/black"
             android:textSize="14sp" />
 
         <!-- Địa chỉ -->
         <TextView
             android:id="@+id/tvAddress"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="Địa chỉ: Số nhà 190 đường 420 thôn Yên Mỹ - Bình Yên - Thạch Thất - HN"
+            android:layout_marginTop="4dp"
+            android:text="Địa chỉ"
             android:textColor="@android:color/black"
             android:textSize="14sp" />
 

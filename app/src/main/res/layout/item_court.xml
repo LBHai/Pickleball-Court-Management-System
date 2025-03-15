@@ -91,7 +91,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Row 2: Container thông tin Open Time & Phone và nút BOOK trong cùng một hàng -->
+        <!-- Row 2: Container thông tin Open Time & Phone -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -101,7 +101,7 @@
 
             <!-- Container thông tin Open Time & Phone -->
             <LinearLayout
-                android:layout_width="238dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
@@ -121,7 +121,7 @@
 
                     <TextView
                         android:id="@+id/tvOpenTime"
-                        android:layout_width="213dp"
+                        android:layout_width="324dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
                         android:gravity="center"
@@ -147,7 +147,7 @@
 
                     <TextView
                         android:id="@+id/tvPhone"
-                        android:layout_width="214dp"
+                        android:layout_width="324dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
                         android:gravity="center"
@@ -156,18 +156,19 @@
                         android:textSize="14sp" />
                 </LinearLayout>
             </LinearLayout>
-
-            <!-- Nút BOOK nằm cùng hàng với container thông tin -->
-            <Button
-                android:id="@+id/btnBook"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="@string/book"
-                android:textAllCaps="false"
-                android:textColor="@android:color/white"
-                android:backgroundTint="#FFD429" />
         </LinearLayout>
+
+        <!-- Row 3: Nút BOOK đặt bên dưới thông tin Open Time & Phone -->
+        <Button
+            android:id="@+id/btnBook"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/book"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#FFD429"
+            android:layout_gravity="center_horizontal" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

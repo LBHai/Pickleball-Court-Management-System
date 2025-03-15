@@ -219,7 +219,7 @@
 
                 <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="30dp"
+                    android:layout_height="40dp"
                     android:text="Day of Birth"
                     android:gravity="center"
                     android:textColor="@android:color/white"
@@ -248,7 +248,7 @@
 
                 <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="30dp"
+                    android:layout_height="40dp"
                     android:text="Month of Birth"
                     android:gravity="center"
                     android:textColor="@android:color/white"
@@ -275,7 +275,7 @@
 
                 <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="30dp"
+                    android:layout_height="40dp"
                     android:text="Year of Birth"
                     android:gravity="center"
                     android:textColor="@android:color/white"

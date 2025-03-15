@@ -17,16 +17,21 @@ import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import Api.ApiService;
 import Api.RetrofitClient;
 import Model.MyInfo;
 import Model.MyInfoResponse;
+import Model.Orders;
 import SEP490.G9.BookingTableActivity;
 import SEP490.G9.ConfirmActivity;
 import SEP490.G9.DetailBookingActivity;
@@ -34,6 +39,7 @@ import SEP490.G9.EditInformationActivity;
 import SEP490.G9.LoginActivity;
 import SEP490.G9.R;
 import Session.SessionManager;
+import Adapter.OrderAdapter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -44,9 +50,14 @@ public class AccountFragment extends Fragment {
     private TextView tvUserName, tvPhoneNumber;
     // Các biến lưu trữ dữ liệu người dùng lấy từ API
     private String id, username, email, firstName, lastName, userRank, gender, dob;
-
     private SessionManager sessionManager;
     private ImageButton btnNoti;
+
+    // Khai báo RecyclerView và các biến adapter cho danh sách đơn đặt (orders)
+    private RecyclerView recyclerOrder;
+    private OrderAdapter orderAdapter;
+    private List<Orders> orderList; // Lưu danh sách đơn đặt
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Kiểm tra trạng thái đăng nhập
@@ -70,19 +81,29 @@ public class AccountFragment extends Fragment {
         btnNoti.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), DetailBookingActivity.class);
             startActivity(intent);
-            // Nếu muốn đóng Activity chứa Fragment, uncomment dòng dưới:
-            // getActivity().finish();
         });
+
+        // Khởi tạo RecyclerView và adapter cho danh sách đơn đặt
+        recyclerOrder = view.findViewById(R.id.listOrderHistory);
+        recyclerOrder.setLayoutManager(new LinearLayoutManager(getContext()));
+        orderList = new ArrayList<>();  // Khởi tạo danh sách rỗng
+        orderAdapter = new OrderAdapter(orderList, getContext());
+        recyclerOrder.setAdapter(orderAdapter);
+
         // Gọi API để lấy thông tin người dùng
         getMyInfo();
 
-        // Xử lý nút Options (PopupMenu) có trong layout với id: options
+        // Xử lý nút Options (PopupMenu)
         ImageButton optionsButton = view.findViewById(R.id.options);
         optionsButton.setOnClickListener(v -> showPopupMenu(v));
 
         return view;
     }
 
+    /**
+     * Gọi API lấy thông tin người dùng và cập nhật lên giao diện.
+     * Sau khi lấy thông tin thành công, gọi thêm API lấy danh sách đơn đặt (orders).
+     */
     private void getMyInfo() {
         String token = sessionManager.getToken();
         if (token != null && !token.isEmpty()) {
@@ -95,17 +116,21 @@ public class AccountFragment extends Fragment {
                         MyInfoResponse myInfoResponse = response.body();
                         if (myInfoResponse != null && myInfoResponse.getResult() != null) {
                             // Lưu dữ liệu lấy được từ API vào các biến và cập nhật giao diện
-                            id = myInfoResponse.getResult().getId();
-                            username = myInfoResponse.getResult().getUsername();
-                            firstName = myInfoResponse.getResult().getFirstName();
-                            lastName = myInfoResponse.getResult().getLastName();
-                            email = myInfoResponse.getResult().getEmail();
-                            userRank = myInfoResponse.getResult().getUserRank();
-                            gender = myInfoResponse.getResult().getGender();
-                            dob = myInfoResponse.getResult().getDob();
+                            MyInfo info = myInfoResponse.getResult();
+                            id = info.getId();
+                            username = info.getUsername();
+                            firstName = info.getFirstName();
+                            lastName = info.getLastName();
+                            email = info.getEmail();
+                            userRank = info.getUserRank();
+                            gender = info.getGender();
+                            dob = info.getDob();
 
                             tvUserName.setText(firstName + " " + lastName);
-                            tvPhoneNumber.setText(myInfoResponse.getResult().getPhoneNumber());
+                            tvPhoneNumber.setText(info.getPhoneNumber());
+
+                            // Sau khi lấy thông tin, gọi API lấy danh sách đơn đặt theo userId
+                            getOrderList(id);
                         } else {
                             Toast.makeText(getContext(), "Dữ liệu trả về không hợp lệ", Toast.LENGTH_SHORT).show();
                         }
@@ -114,11 +139,7 @@ public class AccountFragment extends Fragment {
                             try {
                                 String errorMessage = response.errorBody().string();
                                 if (errorMessage.contains("expired") || errorMessage.contains("hết hạn")) {
-                                    // Lỗi do token hết hạn
                                     Toast.makeText(getContext(), "Lấy thông tin thất bại, vui lòng đăng nhập lại!", Toast.LENGTH_SHORT).show();
-                                    // Nếu muốn, bạn có thể chuyển hướng đăng xuất tại đây
-                                } else {
-                                    // Lỗi do đăng nhập đồng thời: không làm gì cả, để cả 2 thiết bị cùng hoạt động
                                 }
                             } catch (IOException e) {
                                 e.printStackTrace();
@@ -139,6 +160,34 @@ public class AccountFragment extends Fragment {
         }
     }
 
+    /**
+     * Gọi API để lấy danh sách đơn đặt (orders) dựa theo userId.
+     */
+    private void getOrderList(String userId) {
+        ApiService apiService = RetrofitClient.getApiService(getContext());
+        apiService.getOrders(userId).enqueue(new Callback<List<Orders>>() {
+            @Override
+            public void onResponse(Call<List<Orders>> call, Response<List<Orders>> response) {
+                if (response.isSuccessful()) {
+                    List<Orders> orders = response.body();
+                    if (orders != null) {
+                        orderList.clear();
+                        orderList.addAll(orders);
+                        orderAdapter.notifyDataSetChanged();
+                    } else {
+                        Toast.makeText(getContext(), "Không có đơn đặt sân nào", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(getContext(), "Lấy danh sách đơn đặt thất bại", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Orders>> call, Throwable t) {
+                Toast.makeText(getContext(), "Lỗi API: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
     /**
      * Hiển thị PopupMenu và xử lý sự kiện khi chọn từng mục.
@@ -150,7 +199,6 @@ public class AccountFragment extends Fragment {
         popupMenu.setOnMenuItemClickListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.menu_edit) {
-                // Khi chọn "Edit", tạo Intent và truyền dữ liệu qua extras
                 Intent intent = new Intent(getActivity(), EditInformationActivity.class);
                 intent.putExtra("id", id);
                 intent.putExtra("username", username);
