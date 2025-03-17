@@ -32,11 +32,10 @@ import Api.RetrofitClient;
 import Model.MyInfo;
 import Model.MyInfoResponse;
 import Model.Orders;
-import SEP490.G9.BookingTableActivity;
-import SEP490.G9.ConfirmActivity;
 import SEP490.G9.DetailBookingActivity;
 import SEP490.G9.EditInformationActivity;
 import SEP490.G9.LoginActivity;
+import SEP490.G9.NotificationActivity;
 import SEP490.G9.R;
 import Session.SessionManager;
 import Adapter.OrderAdapter;
@@ -48,12 +47,14 @@ public class AccountFragment extends Fragment {
 
     // Các view hiển thị trên AccountFragment
     private TextView tvUserName, tvPhoneNumber;
+    private TextView tvTabBooked, tvTabInfoMember, tvMemberInfo; // Thêm cho phần tab
+    private ImageButton btnNoti;
+
     // Các biến lưu trữ dữ liệu người dùng lấy từ API
     private String id, username, email, firstName, lastName, userRank, gender, dob;
     private SessionManager sessionManager;
-    private ImageButton btnNoti;
 
-    // Khai báo RecyclerView và các biến adapter cho danh sách đơn đặt (orders)
+    // Khai báo RecyclerView và adapter cho danh sách đơn đặt (orders)
     private RecyclerView recyclerOrder;
     private OrderAdapter orderAdapter;
     private List<Orders> orderList; // Lưu danh sách đơn đặt
@@ -71,38 +72,79 @@ public class AccountFragment extends Fragment {
 
         // Inflate layout cho Fragment
         View view = inflater.inflate(R.layout.fragment_account, container, false);
-        // Bắt buộc sử dụng options menu nếu cần
         setHasOptionsMenu(true);
 
         // Ánh xạ các view từ XML
         tvUserName = view.findViewById(R.id.userName);
         tvPhoneNumber = view.findViewById(R.id.phoneNumber);
         btnNoti = view.findViewById(R.id.notification);
+
+        // Ánh xạ các tab
+        tvTabBooked = view.findViewById(R.id.tvTabBooked);
+        tvTabInfoMember = view.findViewById(R.id.tvTabInfoMember);
+        tvMemberInfo = view.findViewById(R.id.tvMemberInfo);
+
+        // Xử lý click vào nút thông báo (nếu có)
         btnNoti.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), DetailBookingActivity.class);
+            Intent intent = new Intent(getActivity(), NotificationActivity.class);
             startActivity(intent);
         });
 
         // Khởi tạo RecyclerView và adapter cho danh sách đơn đặt
         recyclerOrder = view.findViewById(R.id.listOrderHistory);
         recyclerOrder.setLayoutManager(new LinearLayoutManager(getContext()));
-        orderList = new ArrayList<>();  // Khởi tạo danh sách rỗng
+        orderList = new ArrayList<>();
         orderAdapter = new OrderAdapter(orderList, getContext());
         recyclerOrder.setAdapter(orderAdapter);
 
-        // Gọi API để lấy thông tin người dùng
+        // Gọi API lấy thông tin người dùng
         getMyInfo();
 
         // Xử lý nút Options (PopupMenu)
         ImageButton optionsButton = view.findViewById(R.id.options);
-        optionsButton.setOnClickListener(v -> showPopupMenu(v));
+        optionsButton.setOnClickListener(this::showPopupMenu);
+
+        // Đặt mặc định hiển thị tab "Lịch đã đặt"
+        showBookedTab();
+
+        // Bắt sự kiện click cho 2 "tab"
+        tvTabBooked.setOnClickListener(v -> showBookedTab());
+        tvTabInfoMember.setOnClickListener(v -> showMemberInfoTab());
 
         return view;
     }
 
     /**
-     * Gọi API lấy thông tin người dùng và cập nhật lên giao diện.
-     * Sau khi lấy thông tin thành công, gọi thêm API lấy danh sách đơn đặt (orders).
+     * Hiển thị tab "Lịch đã đặt"
+     */
+    private void showBookedTab() {
+        // Đổi màu text cho biết tab nào đang được chọn
+        tvTabBooked.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
+        tvTabInfoMember.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.darker_gray));
+
+        // Hiển thị danh sách đặt
+        recyclerOrder.setVisibility(View.VISIBLE);
+        // Ẩn nội dung thông tin thành viên
+        tvMemberInfo.setVisibility(View.GONE);
+    }
+
+    /**
+     * Hiển thị tab "Thông tin thành viên"
+     */
+    private void showMemberInfoTab() {
+        // Đổi màu text cho biết tab nào đang được chọn
+        tvTabBooked.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.darker_gray));
+        tvTabInfoMember.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
+
+        // Ẩn danh sách đặt
+        recyclerOrder.setVisibility(View.GONE);
+        // Hiển thị nội dung thành viên
+        tvMemberInfo.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Gọi API lấy thông tin người dùng và cập nhật giao diện.
+     * Sau khi lấy thông tin thành công, gọi tiếp API lấy danh sách đơn đặt.
      */
     private void getMyInfo() {
         String token = sessionManager.getToken();
@@ -115,7 +157,6 @@ public class AccountFragment extends Fragment {
                     if (response.isSuccessful()) {
                         MyInfoResponse myInfoResponse = response.body();
                         if (myInfoResponse != null && myInfoResponse.getResult() != null) {
-                            // Lưu dữ liệu lấy được từ API vào các biến và cập nhật giao diện
                             MyInfo info = myInfoResponse.getResult();
                             id = info.getId();
                             username = info.getUsername();
@@ -129,7 +170,7 @@ public class AccountFragment extends Fragment {
                             tvUserName.setText(firstName + " " + lastName);
                             tvPhoneNumber.setText(info.getPhoneNumber());
 
-                            // Sau khi lấy thông tin, gọi API lấy danh sách đơn đặt theo userId
+                            // Sau khi lấy xong thông tin, gọi API lấy danh sách đặt
                             getOrderList(id);
                         } else {
                             Toast.makeText(getContext(), "Dữ liệu trả về không hợp lệ", Toast.LENGTH_SHORT).show();
@@ -161,7 +202,7 @@ public class AccountFragment extends Fragment {
     }
 
     /**
-     * Gọi API để lấy danh sách đơn đặt (orders) dựa theo userId.
+     * Gọi API để lấy danh sách đơn đặt dựa theo userId.
      */
     private void getOrderList(String userId) {
         ApiService apiService = RetrofitClient.getApiService(getContext());
@@ -309,6 +350,7 @@ public class AccountFragment extends Fragment {
         Configuration config = resources.getConfiguration();
         config.setLocale(locale);
         resources.updateConfiguration(config, resources.getDisplayMetrics());
+
         // Khởi động lại Activity hiện tại
         Intent refresh = getActivity().getIntent();
         getActivity().finish();

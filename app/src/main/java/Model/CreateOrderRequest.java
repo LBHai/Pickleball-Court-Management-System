@@ -16,7 +16,13 @@ public class CreateOrderRequest {
     private int discountAmount;
     private int paymentAmount;
     private String paymentStatus;
+    private String depositAmount;
+    private String signature;
+    private String orderType;
     private List<OrderDetail> orderDetails;
+
+    public CreateOrderRequest() {
+    }
 
     public String getCourtId() {
         return courtId;
@@ -122,6 +128,30 @@ public class CreateOrderRequest {
         this.paymentStatus = paymentStatus;
     }
 
+    public String getDepositAmount() {
+        return depositAmount;
+    }
+
+    public void setDepositAmount(String depositAmount) {
+        this.depositAmount = depositAmount;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
+    }
+
+    public String getOrderType() {
+        return orderType;
+    }
+
+    public void setOrderType(String orderType) {
+        this.orderType = orderType;
+    }
+
     public List<OrderDetail> getOrderDetails() {
         return orderDetails;
     }
@@ -130,10 +160,7 @@ public class CreateOrderRequest {
         this.orderDetails = orderDetails;
     }
 
-    public CreateOrderRequest() {
-    }
-
-    public CreateOrderRequest(String courtId, String courtName, String address, String bookingDate, String customerName, String userId, String phoneNumber, int totalAmount, String discountCode, String note, int discountAmount, int paymentAmount, String paymentStatus, List<OrderDetail> orderDetails) {
+    public CreateOrderRequest(String courtId, String courtName, String address, String bookingDate, String customerName, String userId, String phoneNumber, int totalAmount, String discountCode, String note, int discountAmount, int paymentAmount, String paymentStatus, String depositAmount, String signature, String orderType, List<OrderDetail> orderDetails) {
         this.courtId = courtId;
         this.courtName = courtName;
         this.address = address;
@@ -147,6 +174,9 @@ public class CreateOrderRequest {
         this.discountAmount = discountAmount;
         this.paymentAmount = paymentAmount;
         this.paymentStatus = paymentStatus;
+        this.depositAmount = depositAmount;
+        this.signature = signature;
+        this.orderType = orderType;
         this.orderDetails = orderDetails;
     }
 }

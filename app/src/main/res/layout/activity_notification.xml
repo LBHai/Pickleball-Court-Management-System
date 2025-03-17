@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#006d38"
+    tools:context=".NotificationActivity">
+
+    <!-- Thanh toolbar tùy chỉnh -->
+<LinearLayout
+    android:id="@+id/toolbarLayout"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="16dp"
+    android:background="#004f2c"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent">
+
+    <!-- Nút back -->
+    <ImageButton
+    android:id="@+id/btnBack"
+    android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/backicon"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Quay lại"
+    tools:ignore="TouchTargetSizeCheck"/>
+
+    <!-- Tiêu đề toolbar: Thông báo -->
+        <TextView
+        android:id="@+id/tvToolbarTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="Thông báo"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:textSize="18sp"/>
+
+    <!-- Nút xóa tất cả hoặc chức năng khác -->
+        <ImageButton
+        android:id="@+id/btnClearAll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/bin"
+    android:background="?attr/selectableItemBackgroundBorderless"
+    android:contentDescription="Xóa tất cả"
+    tools:ignore="TouchTargetSizeCheck"/>
+    </LinearLayout>
+
+    <!-- Danh sách thông báo -->
+<androidx.recyclerview.widget.RecyclerView
+android:id="@+id/rvNotifications"
+android:layout_width="0dp"
+android:layout_height="0dp"
+android:padding="8dp"
+app:layout_constraintTop_toBottomOf="@id/toolbarLayout"
+app:layout_constraintBottom_toBottomOf="parent"
+app:layout_constraintStart_toStartOf="parent"
+app:layout_constraintEnd_toEndOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>

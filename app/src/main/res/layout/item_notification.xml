@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="#004f2c"
+    android:padding="8dp">
+
+    <!-- Icon thông báo bên trái -->
+    <ImageView
+    android:id="@+id/imgNotificationIcon"
+    android:layout_width="40dp"
+    android:layout_height="40dp"
+    android:src="@drawable/notification"
+    android:contentDescription="Icon thông báo" />
+
+        <!-- Nội dung thông báo (tiêu đề, mô tả, thời gian) -->
+    <LinearLayout
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:orientation="vertical"
+    android:layout_marginStart="8dp">
+
+<!-- Tiêu đề (ví dụ: HỦY LỊCH ĐẶT DO QUÁ THỜI GIAN THANH TOÁN) -->
+    <TextView
+    android:id="@+id/tvTitle"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:textColor="@android:color/white"
+    android:textSize="14sp"
+    android:textStyle="bold"
+    android:text="Tiêu đề thông báo" />
+
+<!-- Mô tả (ví dụ: Lịch đặt tại CLB ... bị hủy) -->
+    <TextView
+    android:id="@+id/tvDescription"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="2dp"
+    android:textColor="@android:color/white"
+    android:textSize="13sp"
+    android:text="Nội dung mô tả" />
+
+<!-- Thời gian (ví dụ: 10 thg 3, lúc 16:27) -->
+    <TextView
+        android:id="@+id/tvTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="12sp"
+        android:text="Thời gian" />
+    </LinearLayout>
+
+    <!-- Nút đóng (X) bên phải -->
+    <ImageButton
+        android:id="@+id/btnCloseNotification"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/close"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Đóng thông báo" />
+    </LinearLayout>

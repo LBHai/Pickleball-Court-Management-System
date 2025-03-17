@@ -9,6 +9,8 @@ import Model.CreateOrderRequest;
 import Model.CreateOrderResponse;
 import Model.GetToken;
 import Model.MyInfoResponse;
+import Model.NotificationRequest;
+import Model.NotificationResponse;
 import Model.OrderDetail;
 import Model.Orders;
 import Model.User;
@@ -53,7 +55,11 @@ public interface ApiService {
     @GET("identity/public/getOrders")
     Call<List<Orders>> getOrders(@Query("value") String UserId);
 
-//    @GET("/identity/public/getOrders")
-//    Call<OrderDetail> getOrderById(@Body UpdateMyInfor updateUser);
+    @POST("identity/public/notification") // Điều chỉnh endpoint theo API của bạn
+    Call<Void> registerNotification(@Body NotificationRequest request);
+
+    // GET danh sách thông báo
+    @GET("identity/public/notification/getNotifications")
+    Call<NotificationResponse> getNotifications(@Query("value") String key);
 
 }

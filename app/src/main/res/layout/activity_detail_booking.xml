@@ -151,8 +151,7 @@
                         android:layout_weight="1"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:layout_marginTop="18dp"
-                        >
+                        android:layout_marginTop="18dp">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -160,10 +159,9 @@
                             android:layout_marginBottom="4dp"
                             android:text="Khách Hàng: Username"
                             android:textColor="#FFFFFF"
-                            android:textSize="14sp"
-                            />
+                            android:textSize="14sp" />
 
-                        <!-- Icon cầu lông + text -->
+                        <!-- Icon + text môn thể thao -->
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -175,7 +173,7 @@
                                 android:layout_width="20dp"
                                 android:layout_height="20dp"
                                 android:layout_marginEnd="4dp"
-                                android:contentDescription="Cầu lông icon"
+                                android:contentDescription="Pickleball icon"
                                 android:src="@drawable/pickleball" />
 
                             <TextView
@@ -213,30 +211,32 @@
                     android:orientation="vertical"
                     android:padding="16dp"
                     android:background="#085c35">
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
-                    android:orientation="horizontal">
-                    <!-- Tiêu đề nhóm -->
-                    <ImageView
-                        android:id="@+id/imgBooking"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginEnd="4dp"
-                        android:contentDescription="Cầu lông icon"
-                        android:src="@drawable/booking" />
-                    <TextView
-                        android:id="@+id/tvBookingInfoTitle"
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="Thông tin Đặt lịch"
-                        android:textColor="#ddfa88"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
+                        android:layout_marginBottom="4dp"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/imgBooking"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_marginEnd="4dp"
+                            android:contentDescription="Booking icon"
+                            android:src="@drawable/booking" />
+
+                        <TextView
+                            android:id="@+id/tvBookingInfoTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:text="Thông tin Đặt lịch"
+                            android:textColor="#ddfa88"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
                     </LinearLayout>
-                    <!-- Tên CLB -->
+
                     <TextView
                         android:id="@+id/tvStadiumName"
                         android:layout_width="wrap_content"
@@ -246,7 +246,6 @@
                         android:textColor="#FFFFFF"
                         android:textSize="14sp" />
 
-                    <!-- Địa chỉ -->
                     <TextView
                         android:id="@+id/tvAddress"
                         android:layout_width="wrap_content"
@@ -256,7 +255,6 @@
                         android:textColor="#FFFFFF"
                         android:textSize="14sp" />
 
-                    <!-- Ngày đặt -->
                     <TextView
                         android:id="@+id/tvBookingDate"
                         android:layout_width="wrap_content"
@@ -266,7 +264,6 @@
                         android:textColor="#FFFFFF"
                         android:textSize="14sp" />
 
-                    <!-- Tổng thời gian chơi -->
                     <TextView
                         android:id="@+id/tvTotalTime"
                         android:layout_width="wrap_content"
@@ -276,7 +273,6 @@
                         android:textColor="#ddfa88"
                         android:textSize="14sp" />
 
-                    <!-- Tổng tiền -->
                     <TextView
                         android:id="@+id/tvTotalPrice"
                         android:layout_width="wrap_content"
@@ -286,7 +282,6 @@
                         android:textColor="#ddfa88"
                         android:textSize="14sp" />
 
-                    <!-- Trạng thái thanh toán -->
                     <TextView
                         android:id="@+id/tvPaymentStatus"
                         android:layout_width="wrap_content"
