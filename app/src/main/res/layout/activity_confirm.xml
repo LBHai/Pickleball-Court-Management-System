@@ -137,16 +137,38 @@
             android:layout_marginBottom="12dp"
             android:background="@android:color/white"
             android:padding="12dp" />
-
-        <Button
-            android:id="@+id/btnConfirm"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="XÁC NHẬN THANH TOÁN"
-            android:backgroundTint="@android:color/holo_green_dark"
-            android:textColor="@android:color/white"
-            android:textStyle="bold"
-            android:padding="12dp" />
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp">
+
+            <Button
+                android:id="@+id/btnDeposit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="ĐẶT CỌC"
+                android:backgroundTint="@android:color/holo_blue_dark"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:padding="12dp"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btnPayment"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="THANH TOÁN"
+                android:backgroundTint="@android:color/holo_green_dark"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:padding="12dp"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>

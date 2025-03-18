@@ -3,6 +3,7 @@ package Api;
 import java.util.List;
 
 import Model.CUser;
+import Model.CourtPrice;
 import Model.Courts;
 import Model.CourtSlot;
 import Model.CreateOrderRequest;
@@ -61,5 +62,7 @@ public interface ApiService {
     // GET danh sách thông báo
     @GET("identity/public/notification/getNotifications")
     Call<NotificationResponse> getNotifications(@Query("value") String key);
-
+    
+    @GET("court/public/court_price/getByCourtId/{courtId}")
+    Call<CourtPrice> getCourtPriceByCourtId(@Path("courtId") String courtId);
 }

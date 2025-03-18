@@ -17,6 +17,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".PaymentFailedActivity"
+            android:exported="false" />
+        <activity
             android:name=".NotificationActivity"
             android:exported="false" />
         <activity
@@ -59,9 +62,6 @@
         <activity
             android:name=".DetailBookingActivity"
             android:exported="true" />
-
-
-
     </application>
 
 </manifest>

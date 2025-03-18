@@ -1,353 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="#006d38"
-    android:padding="16dp">
+    tools:context=".DetailPriceCourtActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <ImageButton
-            android:id="@+id/btnBack"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/backicon"
-            android:contentDescription="Quay lại"
-            tools:ignore="TouchTargetSizeCheck"/>
-
-        <TextView
-            android:id="@+id/tvHeader"
+        <!-- Thanh tiêu đề trên cùng -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Xem sân và bảng giá"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/backicon"
+                android:contentDescription="Quay lại"
+                tools:ignore="TouchTargetSizeCheck"/>
+
+            <TextView
+                android:id="@+id/tvHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Xem sân và bảng giá"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="22sp"
+                android:gravity="center"
+                android:padding="8dp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvCourtPriceTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bảng giá sân"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:layout_marginTop="8dp" />
+
+        <!-- Tên bộ môn (nếu muốn) -->
+        <TextView
+            android:id="@+id/tvPickleballLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pickleball"
             android:textColor="#FFFFFF"
             android:textStyle="bold"
-            android:textSize="22sp"
+            android:textSize="18sp"
             android:gravity="center"
-            android:padding="8dp" />
+            android:layout_marginTop="4dp" />
+
+        <!-- TableLayout "bao" 2 dòng: T2 - T6 và T7 - CN -->
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stretchColumns="*"
+            android:layout_marginTop="8dp"
+            android:background="#FFFFFF"
+            android:padding="1dp">
+
+            <!-- Dòng 1: Label "T2 - T6" (cột 1) và bảng con (cột 2) -->
+            <TableRow>
+
+                <TextView
+                    android:id="@+id/tvLabelWeekday"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/cell_border"
+                    android:gravity="center"
+                    android:minHeight="80dp"
+                    android:padding="8dp"
+                    android:text="T2 - T6"
+                    android:textColor="#000000" />
+
+                <TableLayout
+                    android:id="@+id/tableWeekday"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3">
+                </TableLayout>
+            </TableRow>
+
+            <!-- Dòng 2: Label "T7 - CN" (cột 1) và bảng con (cột 2) -->
+            <TableRow>
+
+                <TextView
+                    android:id="@+id/tvLabelWeekend"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="T7 - CN"
+                    android:textColor="#000000"
+                    android:gravity="center"
+                    android:background="@drawable/cell_border"
+                    android:padding="8dp"
+                    android:minHeight="80dp" />
+
+                <TableLayout
+                    android:id="@+id/tableWeekend"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3">
+                </TableLayout>
+            </TableRow>
+
+        </TableLayout>
+
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/tvCourtPriceTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Bảng giá sân"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        android:layout_marginTop="8dp" />
-
-    <TextView
-        android:id="@+id/tvPickleballLabel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Pickleball"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        android:textSize="18sp"
-        android:gravity="center"
-        android:layout_marginTop="4dp" />
-
-    <TableLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:stretchColumns="*">
-
-        <!-- Dòng Pickleball -->
-        <TableRow>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Pickleball"
-                android:textColor="#000000"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:gravity="center"
-                android:layout_span="4"
-                android:background="@drawable/cell_border"
-                android:padding="12dp" />
-        </TableRow>
-
-        <!-- Tiêu đề bảng -->
-        <TableRow>
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Thứ"
-                android:textStyle="bold"
-                android:textColor="#000000"
-                android:gravity="center"
-                android:background="@drawable/cell_border"
-                android:padding="8dp" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Khung giờ"
-                android:textStyle="bold"
-                android:textColor="#000000"
-                android:gravity="center"
-                android:background="@drawable/cell_border"
-                android:padding="8dp" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Học sinh"
-                android:textStyle="bold"
-                android:textColor="#000000"
-                android:gravity="center"
-                android:background="@drawable/cell_border"
-                android:padding="8dp" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Người lớn"
-                android:textStyle="bold"
-                android:textColor="#000000"
-                android:gravity="center"
-                android:background="@drawable/cell_border"
-                android:padding="8dp" />
-        </TableRow>
-
-        <TableRow>
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:text="T2 - T6"
-                android:textColor="#000000"
-                android:gravity="center"
-                android:background="@drawable/cell_border"
-                android:padding="8dp"
-                android:layout_span="1"
-                android:minHeight="80dp" />
-
-            <TableLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="3">
-                <TableRow>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="5h - 10h"
-                        android:textColor="#000000"
-                        android:gravity="center"
-                        android:background="@drawable/cell_border"
-                        android:padding="8dp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="40.000 đ"
-                        android:textColor="#000000"
-                        android:gravity="center"
-                        android:background="@drawable/cell_border"
-                        android:padding="8dp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="50.000 đ"
-                        android:textColor="#000000"
-                        android:gravity="center"
-                        android:background="@drawable/cell_border"
-                        android:padding="8dp" />
-                </TableRow>
-                <TableRow>
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="10h - 15h"
-                        android:textColor="#000000"
-                        android:gravity="center"
-                        android:background="@drawable/cell_border"
-                        android:padding="8dp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="30.000 đ"
-                        android:textColor="#000000"
-                        android:gravity="center"
-                        android:background="@drawable/cell_border"
-                        android:padding="8dp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="40.000 đ"
-                        android:textColor="#000000"
-                        android:gravity="center"
-                        android:background="@drawable/cell_border"
-                        android:padding="8dp" />
-                </TableRow>
-                <TableRow>
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="15h - 23h"
-                        android:textColor="#000000"
-                        android:gravity="center"
-                        android:background="@drawable/cell_border"
-                        android:padding="8dp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="50.000 đ"
-                        android:textColor="#000000"
-                        android:gravity="center"
-                        android:background="@drawable/cell_border"
-                        android:padding="8dp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="60.000 đ"
-                        android:textColor="#000000"
-                        android:gravity="center"
-                        android:background="@drawable/cell_border"
-                        android:padding="8dp" />
-                </TableRow>
-            </TableLayout>
-        </TableRow>
-        <TableRow>
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:text="T7 - CN"
-                android:textColor="#000000"
-                android:gravity="center"
-                android:background="@drawable/cell_border"
-                android:padding="8dp"
-                android:layout_span="1"
-                android:minHeight="80dp" />
-
-            <TableLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="3">
-                <TableRow>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="5h - 10h"
-                        android:textColor="#000000"
-                        android:gravity="center"
-                        android:background="@drawable/cell_border"
-                        android:padding="8dp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="40.000 đ"
-                        android:textColor="#000000"
-                        android:gravity="center"
-                        android:background="@drawable/cell_border"
-                        android:padding="8dp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="50.000 đ"
-                        android:textColor="#000000"
-                        android:gravity="center"
-                        android:background="@drawable/cell_border"
-                        android:padding="8dp" />
-                </TableRow>
-                <TableRow>
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="10h - 15h"
-                        android:textColor="#000000"
-                        android:gravity="center"
-                        android:background="@drawable/cell_border"
-                        android:padding="8dp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="30.000 đ"
-                        android:textColor="#000000"
-                        android:gravity="center"
-                        android:background="@drawable/cell_border"
-                        android:padding="8dp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="40.000 đ"
-                        android:textColor="#000000"
-                        android:gravity="center"
-                        android:background="@drawable/cell_border"
-                        android:padding="8dp" />
-                </TableRow>
-                <TableRow>
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="15h - 23h"
-                        android:textColor="#000000"
-                        android:gravity="center"
-                        android:background="@drawable/cell_border"
-                        android:padding="8dp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="50.000 đ"
-                        android:textColor="#000000"
-                        android:gravity="center"
-                        android:background="@drawable/cell_border"
-                        android:padding="8dp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="60.000 đ"
-                        android:textColor="#000000"
-                        android:gravity="center"
-                        android:background="@drawable/cell_border"
-                        android:padding="8dp" />
-                </TableRow>
-            </TableLayout>
-        </TableRow>
-
-    </TableLayout>
-</LinearLayout>
+</ScrollView>

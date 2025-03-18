@@ -6,76 +6,108 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
-    android:background="@drawable/bg_gradient"
+    android:background="#006d38"
     tools:context=".QRCodeActivity">
 
-    <!-- Nút Back -->
-    <ImageButton
-        android:id="@+id/btnBack"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="16dp"
-        android:background="@android:color/transparent"
-        android:src="@drawable/backicon"
-        android:contentDescription="Quay lại"
-        tools:ignore="TouchTargetSizeCheck"/>
-
-    <!-- Hướng dẫn quét mã -->
-    <TextView
-        android:id="@+id/tvInstruction"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:id="@+id/layoutHeader"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Quét mã QR để thanh toán ngay 😍"
-        android:textColor="#FFFFFF"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_below="@id/btnBack"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="24dp"/>
+        android:layout_marginBottom="12dp">
 
-    <!-- CardView chứa QR Code -->
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentStart="true"
+            android:background="@android:color/transparent"
+            android:src="@drawable/backicon"
+            android:contentDescription="Quay lại"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <TextView
+            android:id="@+id/tvInstruction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Quét mã QR để thanh toán ngay 😍"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:textStyle="bold" />
+
+        <View
+            android:id="@+id/spaceView"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentEnd="true"
+            android:visibility="invisible" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/layoutWarning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/layoutHeader"
+        android:layout_marginBottom="12dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="12dp"
+        android:background="@drawable/rounded_warning">
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/warning"
+            android:contentDescription="Cảnh báo" />
+        <TextView
+            android:id="@+id/tvWarning"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Vui lòng chuyển khoản 0₫ để hoàn tất đặt lịch!"
+            android:textColor="@android:color/white"
+            android:textSize="16sp" />
+    </LinearLayout>
+
     <androidx.cardview.widget.CardView
         android:id="@+id/cardViewQRCode"
         android:layout_width="320dp"
         android:layout_height="320dp"
-        android:layout_below="@id/tvInstruction"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="32dp"
+        android:layout_below="@id/layoutWarning"
+        android:layout_marginTop="24dp"
         app:cardCornerRadius="16dp"
         app:cardElevation="8dp">
-
         <ImageView
             android:id="@+id/ivQRCode"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:contentDescription="QR Code"
-            android:scaleType="fitCenter"/>
+            android:scaleType="fitCenter" />
     </androidx.cardview.widget.CardView>
 
     <TextView
         android:id="@+id/tvCountdownLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/cardViewQRCode"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
         android:text="Thời gian thanh toán còn lại 🕛"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_below="@id/cardViewQRCode"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="30dp"/>
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/tvCountdownTimer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/countdown_bg"
-        android:padding="25sp"
-        android:text=""
-        android:textColor="#FFFFFF"
-        android:textSize="25sp"
-        android:textStyle="bold"
         android:layout_below="@id/tvCountdownLabel"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="8dp"
+        android:background="@drawable/countdown_bg"
+        android:padding="25sp"
+        android:textColor="#FFFFFF"
+        android:textSize="25sp"
+        android:textStyle="bold" />
 </RelativeLayout>
