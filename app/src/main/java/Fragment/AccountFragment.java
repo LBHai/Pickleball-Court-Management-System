@@ -6,6 +6,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -159,6 +160,8 @@ public class AccountFragment extends Fragment {
                         if (myInfoResponse != null && myInfoResponse.getResult() != null) {
                             MyInfo info = myInfoResponse.getResult();
                             id = info.getId();
+                            Log.d("AccountFragment", "User logged in with ID: " + id);
+
                             username = info.getUsername();
                             firstName = info.getFirstName();
                             lastName = info.getLastName();
@@ -298,6 +301,10 @@ public class AccountFragment extends Fragment {
      * Xử lý đăng xuất người dùng.
      */
     private void logoutUser() {
+        String userId = sessionManager.getUserId();
+
+        Log.d("AccountFragment", "User logged out with ID: " + userId);
+
         sessionManager.clearSession();
         Intent intent = new Intent(getActivity(), LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

@@ -2,6 +2,7 @@ package SEP490.G9;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -19,8 +20,10 @@ public class DetailBookingActivity extends AppCompatActivity {
     private View lineBookingInfo, lineServiceDetail;
     private ScrollView layoutBookingInfo, layoutServiceDetail;
 
-    private TextView tvStadiumName, tvAddress, tvBookingDate, tvTotalTime, tvTotalPrice, tvPaymentStatus;
+    private TextView tvStadiumName, tvAddress, tvBookingDate, tvTotalTime, tvTotalPrice, tvPaymentStatus, tvPhonenumber, tvName;
     private Button btnCancel;
+    private String orderId, courtName, address, totalTime, note, selectedDate, phone, name;
+    private int totalPrice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,57 +33,68 @@ public class DetailBookingActivity extends AppCompatActivity {
         // Ánh xạ các view từ layout
         btnBack = findViewById(R.id.btnBack);
         tvTitleMain = findViewById(R.id.tvTitleMain);
-
-        // Tab
         tvTabBookingInfo = findViewById(R.id.tvTabBookingInfo);
         tvTabServiceDetail = findViewById(R.id.tvTabServiceDetail);
         lineBookingInfo = findViewById(R.id.lineBookingInfo);
         lineServiceDetail = findViewById(R.id.lineServiceDetail);
         layoutBookingInfo = findViewById(R.id.layoutBookingInfo);
         layoutServiceDetail = findViewById(R.id.layoutServiceDetail);
-
-        // Thông tin đặt lịch
         tvStadiumName = findViewById(R.id.tvStadiumName);
         tvAddress = findViewById(R.id.tvAddress);
         tvBookingDate = findViewById(R.id.tvBookingDate);
         tvTotalTime = findViewById(R.id.tvTotalTime);
         tvTotalPrice = findViewById(R.id.tvTotalPrice);
         tvPaymentStatus = findViewById(R.id.tvPaymentStatus);
+        tvName = findViewById(R.id.tvName);
+        tvPhonenumber = findViewById(R.id.tvPhonenumber);
         btnCancel = findViewById(R.id.btnCancel);
 
         // Xử lý sự kiện nút back
         btnBack.setOnClickListener(v -> finish());
 
-        // Nhận dữ liệu từ Intent (nếu có)
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            String orderId = extras.getString("orderId");
-            String selectedDate = extras.getString("selectedDate");
-            String totalPriceExtra = extras.getString("totalPrice");
-            String courtName = extras.getString("courtName");
-            String orderAddress = extras.getString("orderAddress");
-            String paymentStatusExtra = extras.getString("paymentStatus");
-            String totalTimeExtra = extras.getString("totalTime");
+        // Nhận dữ liệu từ Intent
+        orderId = getIntent().getStringExtra("orderId");
+        courtName = getIntent().getStringExtra("courtName");
+        address = getIntent().getStringExtra("address");
+        totalTime = getIntent().getStringExtra("totalTime");
+        note = getIntent().getStringExtra("note");
+        selectedDate = getIntent().getStringExtra("selectedDate");
+        totalPrice = getIntent().getIntExtra("totalPrice", 0);
+        name = getIntent().getStringExtra("name");
+        phone = getIntent().getStringExtra("phone");
+        Log.d("DetailBookingActivity", "Name: " + name + ", Phone: " + phone);
 
-            // Cập nhật thông tin vào giao diện
-            if (courtName != null) {
-                tvStadiumName.setText("Tên sân: " + courtName);
-            }
-            if (orderAddress != null) {
-                tvAddress.setText("Địa chỉ: " + orderAddress);
-            }
-            if (selectedDate != null) {
-                tvBookingDate.setText("Ngày: " + selectedDate);
-            }
-            if (totalTimeExtra != null) {
-                tvTotalTime.setText("Tổng thời gian: " + totalTimeExtra);
-            }
-            if (totalPriceExtra != null) {
-                tvTotalPrice.setText("Tổng tiền: " + totalPriceExtra);
-            }
-            if (paymentStatusExtra != null) {
-                tvPaymentStatus.setText("Trạng thái thanh toán: " + paymentStatusExtra);
-            }
+        // Gán dữ liệu cho các TextView nếu có
+        if (courtName != null) {
+            tvStadiumName.setText("Tên sân: " + courtName);
+        }
+        if (address != null) {
+            tvAddress.setText("Địa chỉ: " + address);
+        }
+        if (totalTime != null) {
+            tvTotalTime.setText("Tổng thời gian: " + totalTime);
+        }
+        if (selectedDate != null) {
+            tvBookingDate.setText("Ngày: " + selectedDate);
+        }
+        if (totalPrice != 0) {
+            tvTotalPrice.setText("Tổng tiền: " + totalPrice + " đ");
+        }
+        String paymentStatusExtra = getIntent().getStringExtra("paymentStatus");
+        if (paymentStatusExtra != null) {
+            tvPaymentStatus.setText("Trạng thái thanh toán: Đã thanh toán");
+        }
+
+        // Hiển thị tên và số điện thoại
+        if (name != null && !name.isEmpty()) {
+            tvName.setText("Khách Hàng: " + name);
+        } else {
+            tvName.setText("Khách Hàng: N/A");
+        }
+        if (phone != null && !phone.isEmpty()) {
+            tvPhonenumber.setText("SDT: " + phone);
+        } else {
+            tvPhonenumber.setText("SDT: N/A");
         }
 
         // Xử lý sự kiện nút hủy đặt lịch
@@ -92,15 +106,12 @@ public class DetailBookingActivity extends AppCompatActivity {
         showBookingInfoTab();
 
         // Xử lý chuyển tab khi ấn vào "Thông tin Đặt lịch"
-        tvTabBookingInfo.setOnClickListener(v -> {
-            showBookingInfoTab();
-        });
+        tvTabBookingInfo.setOnClickListener(v -> showBookingInfoTab());
 
         // Xử lý chuyển tab khi ấn vào "Chi tiết Dịch vụ"
-        tvTabServiceDetail.setOnClickListener(v -> {
-            showServiceDetailTab();
-        });
+        tvTabServiceDetail.setOnClickListener(v -> showServiceDetailTab());
     }
+
 
     /**
      * Hiển thị tab "Thông tin Đặt lịch", ẩn tab "Chi tiết Dịch vụ"

@@ -154,6 +154,7 @@
                         android:layout_marginTop="18dp">
 
                         <TextView
+                            android:id="@+id/tvName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="4dp"
@@ -185,10 +186,11 @@
                         </LinearLayout>
 
                         <TextView
+                            android:id="@+id/tvPhonenumber"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="4dp"
-                            android:text="SDT: 03xxxxxxxxxx"
+                            android:text="Số điện thoại: 0xxxxxxxxxx"
                             android:textColor="#ddfa88"
                             android:textSize="14sp" />
                     </LinearLayout>
@@ -287,7 +289,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Trạng thái thanh toán: Chưa thanh toán"
+                        android:text="Trạng thái thanh toán: Đã thanh toán"
                         android:textColor="#FFFFFF"
                         android:textSize="14sp" />
                 </LinearLayout>
