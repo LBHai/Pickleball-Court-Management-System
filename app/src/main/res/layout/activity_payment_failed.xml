@@ -53,7 +53,7 @@
         app:layout_constraintBottom_toTopOf="@+id/tvMessage"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="40dp" />
+        android:layout_marginTop="100dp" />
 
     <!-- Thông báo lỗi -->
     <TextView

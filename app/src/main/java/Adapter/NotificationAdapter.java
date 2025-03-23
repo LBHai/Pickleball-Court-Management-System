@@ -7,12 +7,9 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.List;
-
 import Model.Notification;
 import SEP490.G9.R;
 
@@ -43,10 +40,12 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     @Override
     public void onBindViewHolder(@NonNull NotificationAdapter.ViewHolder holder, int position) {
         Notification notification = notificationList.get(position);
+
+        // Gán dữ liệu
         holder.tvTitle.setText(notification.getTitle());
         holder.tvDescription.setText(notification.getDescription());
         holder.tvTime.setText(notification.getCreateAt());
-        // Icon hoặc xử lý khác nếu cần
+        // Icon bên trái => holder.imgNotificationIcon.setImageResource(...) nếu cần
     }
 
     @Override
@@ -55,26 +54,26 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView imgNotificationIcon;
+        ImageButton btnBack;
         TextView tvTitle, tvDescription, tvTime;
         ImageButton btnCloseNotification;
 
         public ViewHolder(@NonNull View itemView, OnNotificationItemClickListener listener) {
             super(itemView);
-            imgNotificationIcon = itemView.findViewById(R.id.imgNotificationIcon);
+            btnBack = itemView.findViewById(R.id.btnBack);
             tvTitle = itemView.findViewById(R.id.tvTitle);
             tvDescription = itemView.findViewById(R.id.tvDescription);
             tvTime = itemView.findViewById(R.id.tvTime);
             btnCloseNotification = itemView.findViewById(R.id.btnCloseNotification);
 
-            // Sự kiện click item
+            // Click cả item
             itemView.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onItemClick(getAdapterPosition());
                 }
             });
 
-            // Sự kiện click nút X
+            // Click nút X
             btnCloseNotification.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onCloseClick(getAdapterPosition());

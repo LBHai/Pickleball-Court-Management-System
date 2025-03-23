@@ -1,6 +1,7 @@
 package Model;
 
 import java.util.List;
+import java.util.Locale;
 
 public class Orders {
     private String id;
@@ -43,10 +44,11 @@ public class Orders {
 
     private String qrcode;
 
+    private String createdAt;
     public Orders() {
     }
 
-    public Orders(String id, String courtName, String address, String bookingDate, String userId, String customerName, String phoneNumber, String note, String orderType, String orderStatus, String paymentStatus, String discountCode, int totalAmount, int discountAmount, int paymentAmount, int amountPaid, int amountRefund, String paymentTimeout, List<OrderDetail> orderDetails, String qrcode) {
+    public Orders(String totalTime,String id, String courtName, String address, String bookingDate, String userId, String customerName, String phoneNumber, String note, String orderType, String orderStatus, String paymentStatus, String discountCode, int totalAmount, int discountAmount, int paymentAmount, int amountPaid, int amountRefund, String paymentTimeout, List<OrderDetail> orderDetails, String qrcode, String createdAt) {
         this.id = id;
         this.courtName = courtName;
         this.address = address;
@@ -67,6 +69,7 @@ public class Orders {
         this.paymentTimeout = paymentTimeout;
         this.orderDetails = orderDetails;
         this.qrcode = qrcode;
+        this.createdAt = createdAt;
     }
 
     public String getId() {
@@ -227,5 +230,38 @@ public class Orders {
 
     public void setQrcode(String qrcode) {
         this.qrcode = qrcode;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
+    public String getTotalTime() {
+        if (orderDetails == null || orderDetails.isEmpty()) {
+            return "0h00"; // Giá trị mặc định nếu không có orderDetails
+        }
+        int totalMinutes = 0;
+        for (OrderDetail detail : orderDetails) {
+            totalMinutes += calculateMinutes(detail.getStartTime(), detail.getEndTime());
+        }
+        int hours = totalMinutes / 60;
+        int mins = totalMinutes % 60;
+        return String.format(Locale.getDefault(), "%dh%02d", hours, mins);
+    }
+
+    // Phương thức phụ tính số phút giữa startTime và endTime
+    private int calculateMinutes(String startTime, String endTime) {
+        String[] startParts = startTime.split(":");
+        String[] endParts = endTime.split(":");
+        int startHour = Integer.parseInt(startParts[0]);
+        int startMin = Integer.parseInt(startParts[1]);
+        int endHour = Integer.parseInt(endParts[0]);
+        int endMin = Integer.parseInt(endParts[1]);
+        int startTotalMin = startHour * 60 + startMin;
+        int endTotalMin = endHour * 60 + endMin;
+        return endTotalMin - startTotalMin;
     }
 }

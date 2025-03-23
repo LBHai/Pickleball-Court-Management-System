@@ -98,7 +98,7 @@ public class PaymentSocketListener extends WebSocketListener {
         return connected;
     }
 
-    public void close() {
+    public void disconnect() { // Đổi tên từ close() sang disconnect()
         connected = false;
         if (webSocket != null) {
             webSocket.close(NORMAL_CLOSURE_STATUS, "Activity destroyed");
@@ -107,7 +107,6 @@ public class PaymentSocketListener extends WebSocketListener {
             client.dispatcher().executorService().shutdown();
         }
     }
-
     // Callback cơ bản cho thanh toán thành công
     public interface PaymentStatusCallback {
         void onPaymentSuccess(String orderId);

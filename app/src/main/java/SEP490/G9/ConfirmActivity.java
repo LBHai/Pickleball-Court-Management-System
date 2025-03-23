@@ -21,6 +21,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.Map;
 import javax.crypto.Mac;
@@ -35,6 +36,7 @@ import Model.CreateOrderResponse;
 import Model.MyInfoResponse;
 import Model.NotificationRequest;
 import Model.OrderDetail;
+import Model.Orders;
 import Session.SessionManager;
 import retrofit2.Call;
 
@@ -49,7 +51,7 @@ public class ConfirmActivity extends AppCompatActivity {
     private List<ConfirmOrder> confirmOrders;
     private static final String HMAC_SHA256 = "HmacSHA256";
     private static final String SALT = "dHRzX2phdmFfMDFAaHlwZXJsb2d5LmNvbTpIeXBlckAxMjN0dHNfamF2YV8wMUBoeXBlcmxvZ3kuY29t";
-    private SessionManager sessionManager;
+
     // Các biến mới để truyền sang QRCodeActivity
     private String courtName;     // Tên sân (không kèm tiền tố)
     private String courtAddress;  // Địa chỉ sân
@@ -75,6 +77,7 @@ public class ConfirmActivity extends AppCompatActivity {
         clubId = getIntent().getStringExtra("club_id");
         selectedDate = getIntent().getStringExtra("selectedDate");
         confirmOrdersJson = getIntent().getStringExtra("confirmOrdersJson");
+
         if (selectedDate == null || selectedDate.trim().isEmpty()) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
             selectedDate = sdf.format(new Date());
@@ -93,6 +96,7 @@ public class ConfirmActivity extends AppCompatActivity {
                         etName.setText(fullName);
                         etPhone.setText(r.getResult().getPhoneNumber());
                         userId = r.getResult().getId();
+                        sessionManager.saveUserId(userId);
                     } else {
                         Toast.makeText(ConfirmActivity.this, "Lấy thông tin thất bại, vui lòng đăng nhập lại!", Toast.LENGTH_SHORT).show();
                     }
@@ -124,6 +128,7 @@ public class ConfirmActivity extends AppCompatActivity {
         String name = etName.getText().toString().trim();
         String phone = etPhone.getText().toString().trim();
         String note = etNote.getText().toString().trim();
+
         if (name.isEmpty() || phone.isEmpty()) {
             Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
             return;
@@ -158,14 +163,11 @@ public class ConfirmActivity extends AppCompatActivity {
         String paymentStatus = "";
 
         if (n == 1) {
-            // Nếu chỉ book 1 slot, bắt buộc phải thanh toán đầy đủ
             depositAmount = totalAmount;
             paymentAmount = totalAmount;
             paymentStatus = "Chưa thanh toán";
         } else {
-            // Giả sử các slot có giá bằng nhau (nếu không, cần tính theo từng slot)
             int pricePerSlot = overallTotalPrice / n;
-            // Số slot tính cọc theo mức 3,6,9,...
             int depositSlots = (int) Math.ceil(n / 3.0);
             depositAmount = pricePerSlot * depositSlots;
             if (isDeposit) {
@@ -177,7 +179,6 @@ public class ConfirmActivity extends AppCompatActivity {
             }
         }
 
-        // Khai báo các biến final để sử dụng bên trong inner class
         final int finalTotalAmount = totalAmount;
         final int finalDepositAmount = depositAmount;
         final int finalPaymentAmount = paymentAmount;
@@ -200,7 +201,6 @@ public class ConfirmActivity extends AppCompatActivity {
         req.setPaymentStatus(paymentStatus);
         req.setDepositAmount(String.valueOf(finalDepositAmount));
 
-        // Gọi hàm genSignature với 4 tham số: total, payment, deposit và bookingDate
         req.setSignature(genSignature(
                 String.valueOf(finalTotalAmount),
                 String.valueOf(finalPaymentAmount),
@@ -219,7 +219,8 @@ public class ConfirmActivity extends AppCompatActivity {
             orderDetails.add(d);
         }
         req.setOrderDetails(orderDetails);
-// Gọi API tạo đơn hàng
+
+        // Gọi API tạo đơn hàng
         ApiService api = RetrofitClient.getApiService(ConfirmActivity.this);
         NetworkUtils.callApi(api.createOrder(req), this, new NetworkUtils.ApiCallback<CreateOrderResponse>() {
             @Override
@@ -230,10 +231,11 @@ public class ConfirmActivity extends AppCompatActivity {
                             // Parse paymentTimeout từ chuỗi ISO sang thời gian milliseconds
                             String paymentTimeoutStr = r.getPaymentTimeout();
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS", Locale.getDefault());
+                            sdf.setTimeZone(TimeZone.getTimeZone("GMT+7"));
                             Date timeoutDate = sdf.parse(paymentTimeoutStr);
                             long timeoutTimeMillis = timeoutDate.getTime();
 
-                            // Khởi tạo Intent chuyển sang QRCodeActivity và truyền timeoutTimeMillis
+                            // Khởi tạo Intent chuyển sang QRCodeActivity và truyền timeoutTimeMillis từ API
                             Intent i = new Intent(ConfirmActivity.this, QRCodeActivity.class);
                             i.putExtra("qrCodeData", r.getQrcode());
                             i.putExtra("timeoutTimeMillis", timeoutTimeMillis);
@@ -241,15 +243,13 @@ public class ConfirmActivity extends AppCompatActivity {
                             i.putExtra("overallTotalPrice", finalTotalAmount);
                             i.putExtra("depositAmount", finalDepositAmount);
                             i.putExtra("isDeposit", isDeposit);
-                            // Truyền thêm các thông tin khác nếu cần
-                            i.putExtra("courtName", courtName);
-                            i.putExtra("address", courtAddress);
                             i.putExtra("totalTime", totalTime);
-                            i.putExtra("note", note);
                             i.putExtra("selectedDate", selectedDate);
                             i.putExtra("totalPrice", finalTotalAmount);
-                            i.putExtra("name", name);
-                            i.putExtra("phone", phone);
+                            Orders newOrder = new Orders();
+                            newOrder.setId(r.getId());
+                            newOrder.setBookingDate(selectedDate);
+                            newOrder.setTotalAmount(finalTotalAmount);
                             registerNotification();
                             startActivity(i);
                         } catch (Exception e) {
@@ -284,7 +284,6 @@ public class ConfirmActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Courts c) {
                 if (c != null) {
-                    // Lưu thông tin sân vào biến thành viên
                     courtName = c.getName();
                     courtAddress = c.getAddress();
 
@@ -358,7 +357,6 @@ public class ConfirmActivity extends AppCompatActivity {
         int hours = totalMinutes / 60;
         int mins = totalMinutes % 60;
         String timeStr = String.format(Locale.getDefault(), "%dh%02d", hours, mins);
-        // Lưu tổng thời gian chơi để truyền sang QRCodeActivity
         totalTime = timeStr;
         String moneyHtml = "Tổng tiền: <b>" + formatMoney(totalPrice) + "</b>";
         tvTotalPriceLine.setText(Html.fromHtml(moneyHtml));
@@ -377,6 +375,7 @@ public class ConfirmActivity extends AppCompatActivity {
             throw new RuntimeException("Error while generating signature", e);
         }
     }
+
     //=================== PHẦN ĐĂNG KÝ FCM TOKEN VÀ GỬI LÊN SERVER ===================//
     private void registerNotification() {
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
@@ -385,21 +384,16 @@ public class ConfirmActivity extends AppCompatActivity {
                 return;
             }
             String fcmToken = task.getResult();
-            Log.d("FCM_TOKEN", "FCM Token: " + fcmToken); // Thêm dòng này
+            Log.d("FCM_TOKEN", "FCM Token: " + fcmToken);
             sendDeviceTokenToServer(fcmToken);
         });
     }
+
     private void sendDeviceTokenToServer(String fcmToken) {
+        SessionManager sessionManager = new SessionManager(this);
         String key = sessionManager.getUserId();
-
-
-        // Tạo đối tượng NotificationRequest với key và fcmToken
         NotificationRequest request = new NotificationRequest(key, fcmToken);
-
-        // Lấy instance của ApiService
         ApiService apiService = RetrofitClient.getApiService(ConfirmActivity.this);
-
-        // Gọi API đăng ký token với kiểu trả về NotificationRequest
         apiService.registerNotification(request).enqueue(new retrofit2.Callback<Void>() {
             @Override
             public void onResponse(retrofit2.Call<Void> call, retrofit2.Response<Void> response) {

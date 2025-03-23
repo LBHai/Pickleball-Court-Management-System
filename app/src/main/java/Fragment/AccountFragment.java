@@ -212,7 +212,7 @@ public class AccountFragment extends Fragment {
         apiService.getOrders(userId).enqueue(new Callback<List<Orders>>() {
             @Override
             public void onResponse(Call<List<Orders>> call, Response<List<Orders>> response) {
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
                     List<Orders> orders = response.body();
                     if (orders != null) {
                         orderList.clear();

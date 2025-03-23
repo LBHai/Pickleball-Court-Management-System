@@ -65,4 +65,8 @@ public interface ApiService {
     
     @GET("court/public/court_price/getByCourtId/{courtId}")
     Call<CourtPrice> getCourtPriceByCourtId(@Path("courtId") String courtId);
+
+    @GET("identity/public/getOrderById")
+    Call<Orders> getOrderById(@Query("orderId") String orderId);
+
 }

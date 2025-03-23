@@ -2,6 +2,7 @@ package Adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,12 +19,10 @@ import SEP490.G9.R;
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> {
     private List<Orders> orderList;
     private Context context;
-
     public OrderAdapter(List<Orders> orderList, Context context) {
         this.orderList = orderList;
         this.context = context;
     }
-
     @Override
     public OrderAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_order_history, parent, false);
@@ -49,16 +48,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.tvDetail.setText("Chi tiết: Không có");
         }
 
-        // Xử lý click vào item: mở DetailBookingActivity
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, DetailBookingActivity.class);
-            // Truyền dữ liệu cần thiết qua Intent
             intent.putExtra("orderId", order.getId());
-            // Nếu bạn muốn truyền thêm dữ liệu như ngày đặt, tổng tiền, tổng thời gian...
             intent.putExtra("selectedDate", order.getBookingDate());
-            intent.putExtra("totalPrice", String.valueOf(order.getTotalAmount()));
-            // Nếu có trường tổng thời gian, truyền nó. Ví dụ:
-            // intent.putExtra("totalTime", order.getTotalTime());
+            intent.putExtra("totalPrice", order.getTotalAmount());
+            intent.putExtra("totalTime", order.getTotalTime());
             context.startActivity(intent);
         });
     }
