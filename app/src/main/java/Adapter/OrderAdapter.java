@@ -2,7 +2,6 @@ package Adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +9,9 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.List;
+
 import Model.Orders;
 import Model.OrderDetail;
 import SEP490.G9.DetailBookingActivity;
@@ -19,10 +20,12 @@ import SEP490.G9.R;
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> {
     private List<Orders> orderList;
     private Context context;
+
     public OrderAdapter(List<Orders> orderList, Context context) {
         this.orderList = orderList;
         this.context = context;
     }
+
     @Override
     public OrderAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_order_history, parent, false);
@@ -33,11 +36,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull OrderAdapter.ViewHolder holder, int position) {
         Orders order = orderList.get(position);
 
-        // Gán dữ liệu cho các TextView trong item_order.xml
-        holder.tvDonNgay.setText(order.getOrderType());        // Ví dụ: "Đơn ngày"
-        holder.tvStatus.setText(order.getOrderStatus());        // Ví dụ: "Hủy do quá giờ thanh toán"
-        holder.tvTitle.setText(order.getCourtName());           // Tên sân hoặc CLB
-        holder.tvAddress.setText(order.getAddress());           // Địa chỉ
+        holder.tvDonNgay.setText(order.getOrderType());
+        holder.tvStatus.setText(order.getOrderStatus());
+        holder.tvTitle.setText(order.getCourtName());
+        holder.tvAddress.setText(order.getAddress());
 
         if (order.getOrderDetails() != null && !order.getOrderDetails().isEmpty()) {
             String detailText = "Chi tiết: " + order.getOrderDetails().get(0).getCourtSlotName()
@@ -54,10 +56,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             intent.putExtra("selectedDate", order.getBookingDate());
             intent.putExtra("totalPrice", order.getTotalAmount());
             intent.putExtra("totalTime", order.getTotalTime());
+            intent.putExtra("orderStatus", order.getOrderStatus());
+            intent.putExtra("courtId", order.getCourtId()); // Thêm courtId vào Intent
             context.startActivity(intent);
         });
     }
-
 
     @Override
     public int getItemCount() {

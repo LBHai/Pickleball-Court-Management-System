@@ -197,7 +197,6 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-
             <!-- Card 2: Thông tin đặt lịch -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardBookingInfo"
@@ -300,7 +299,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="12dp"
-                app:cardUseCompatPadding="true">
+                app:cardUseCompatPadding="true"
+                android:layout_marginBottom="16dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -319,6 +319,38 @@
                         android:textSize="14sp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+
+            <!-- Container cho 2 nút (chỉ hiển thị ở tab Thông tin Đặt lịch) -->
+            <LinearLayout
+                android:id="@+id/btnContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp"
+                android:gravity="center"
+                android:paddingHorizontal="16dp">
+
+                <Button
+                    android:id="@+id/btnCancelBooking"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:text="Hủy đặt lịch"
+                    android:textAllCaps="false"
+                    android:backgroundTint="#be3725" />
+
+                <Button
+                    android:id="@+id/btnChangeBooking"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:text="Thay đổi lịch đặt"
+                    android:textAllCaps="false"
+                    android:backgroundTint="#e3b02c" />
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 
@@ -349,18 +381,5 @@
                 android:textSize="14sp" />
         </LinearLayout>
     </ScrollView>
-
-    <!-- Nút hủy đặt lịch -->
-    <Button
-        android:id="@+id/btnCancel"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:background="@android:color/transparent"
-        android:text="HỦY ĐẶT LỊCH"
-        android:textColor="#FF0000"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

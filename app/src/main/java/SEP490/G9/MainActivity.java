@@ -54,11 +54,6 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int itemId = item.getItemId();
                 if (itemId == R.id.nav_account) {
-                    if (!isUserLoggedIn()) {
-                        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                        startActivity(intent);
-                        return false;
-                    }
                     loadFragment(accountFragment);
                     return true;
                 } else if (itemId == R.id.nav_map) {

@@ -56,7 +56,6 @@
             android:textColor="@android:color/black"
             android:textColorHint="#888888"
             android:hint="@string/email"
-            android:enabled="false"
             app:layout_constraintTop_toBottomOf="@id/tvEmailLabel"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>

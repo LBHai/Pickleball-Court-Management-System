@@ -169,12 +169,12 @@ public class AccountFragment extends Fragment {
                             userRank = info.getUserRank();
                             gender = info.getGender();
                             dob = info.getDob();
-
                             tvUserName.setText(firstName + " " + lastName);
                             tvPhoneNumber.setText(info.getPhoneNumber());
 
                             // Sau khi lấy xong thông tin, gọi API lấy danh sách đặt
                             getOrderList(id);
+
                         } else {
                             Toast.makeText(getContext(), "Dữ liệu trả về không hợp lệ", Toast.LENGTH_SHORT).show();
                         }

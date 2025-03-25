@@ -3,6 +3,7 @@ package Api;
 import java.util.List;
 
 import Model.CUser;
+import Model.CourtImage;
 import Model.CourtPrice;
 import Model.Courts;
 import Model.CourtSlot;
@@ -56,7 +57,7 @@ public interface ApiService {
     @GET("identity/public/getOrders")
     Call<List<Orders>> getOrders(@Query("value") String UserId);
 
-    @POST("identity/public/notification") // Điều chỉnh endpoint theo API của bạn
+    @POST("identity/public/notification/save-token") // Điều chỉnh endpoint theo API của bạn
     Call<Void> registerNotification(@Body NotificationRequest request);
 
     // GET danh sách thông báo
@@ -68,5 +69,17 @@ public interface ApiService {
 
     @GET("identity/public/getOrderById")
     Call<Orders> getOrderById(@Query("orderId") String orderId);
+
+    @PUT("identity/public/cancelOrder")
+    Call<Orders> cancelOrder(@Query("orderId") String orderId);
+
+    @POST("identity/public/change_order")
+    Call<CreateOrderResponse> changeOrder(@Query("orderId") String orderId, @Body CreateOrderRequest request);
+
+    @GET("court/public/court-images/list")
+    Call<List<CourtImage>> getCourtImages(
+            @Query("courtId") String courtId,
+            @Query("isMap") boolean isMap
+    );
 
 }

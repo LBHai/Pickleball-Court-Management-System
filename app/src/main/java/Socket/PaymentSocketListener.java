@@ -42,22 +42,22 @@ public class PaymentSocketListener extends WebSocketListener {
     public void onOpen(WebSocket webSocket, Response response) {
         connected = true;
         Log.d(TAG, "onOpen => Connected with key: " + key);
-        // Gửi thông điệp test ban đầu
         webSocket.send("{\"action\":\"test\",\"key\":\"" + key + "\"}");
     }
 
     @Override
     public void onMessage(WebSocket webSocket, String text) {
-        Log.d(TAG, "onMessage => Received raw: " + text);
+        Log.d(TAG, "onMessage => Received raw: " + text); // Log toàn bộ JSON gốc
         try {
             JSONObject json = new JSONObject(text);
+            Log.d(TAG, "Full JSON: " + json.toString()); // Log JSON đã parse
             String resCode = json.optString("resCode", "");
             String resDesc = json.optString("resDesc", "");
             Log.d(TAG, "resCode: " + resCode + ", resDesc: " + resDesc);
 
-            // Kiểm tra thành công theo điều kiện: resCode = "200" và resDesc = "Payment successfully"
             if (resCode.equals("200") && resDesc.equals("Payment successfully")) {
                 String orderId = json.optString("orderId", "");
+                Log.d(TAG, "orderId từ socket: " + orderId); // Log orderId cụ thể
                 if (callback != null) {
                     callback.onPaymentSuccess(orderId);
                 }
@@ -98,7 +98,7 @@ public class PaymentSocketListener extends WebSocketListener {
         return connected;
     }
 
-    public void disconnect() { // Đổi tên từ close() sang disconnect()
+    public void disconnect() {
         connected = false;
         if (webSocket != null) {
             webSocket.close(NORMAL_CLOSURE_STATUS, "Activity destroyed");
@@ -107,12 +107,11 @@ public class PaymentSocketListener extends WebSocketListener {
             client.dispatcher().executorService().shutdown();
         }
     }
-    // Callback cơ bản cho thanh toán thành công
+
     public interface PaymentStatusCallback {
         void onPaymentSuccess(String orderId);
     }
 
-    // Callback mở rộng để xử lý lỗi thanh toán
     public interface ExtendedPaymentStatusCallback extends PaymentStatusCallback {
         void onPaymentFailure(String error);
     }

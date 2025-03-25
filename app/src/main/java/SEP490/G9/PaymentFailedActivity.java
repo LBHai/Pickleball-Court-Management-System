@@ -17,7 +17,7 @@ public class PaymentFailedActivity extends AppCompatActivity {
     private TextView tvOrderId;
     private ImageButton btnBack;
     private Button btnHistory,btnReturn;
-    private String orderId, totalTime, selectedDate;
+    private String orderId, totalTime, selectedDate,orderStatus,courtId;
     private int totalPrice;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +31,8 @@ public class PaymentFailedActivity extends AppCompatActivity {
         totalTime = getIntent().getStringExtra("totalTime");
         selectedDate = getIntent().getStringExtra("selectedDate");
         totalPrice = getIntent().getIntExtra("totalPrice", 0);
+        orderStatus = getIntent().getStringExtra("orderStatus");
+        courtId = getIntent().getStringExtra("courtId");
 
         btnBack.setOnClickListener(v -> {
             Intent intent = new Intent(PaymentFailedActivity.this, MainActivity.class);
@@ -46,6 +48,10 @@ public class PaymentFailedActivity extends AppCompatActivity {
             intent.putExtra("totalTime", totalTime);
             intent.putExtra("selectedDate", selectedDate);
             intent.putExtra("totalPrice", totalPrice);
+            intent.putExtra("orderStatus", orderStatus);
+            intent.putExtra("courtId", courtId);
+            Log.d("DetailBookingActivity", "courtId truyen di: " + courtId);
+
             startActivity(intent);
             finish();
         });

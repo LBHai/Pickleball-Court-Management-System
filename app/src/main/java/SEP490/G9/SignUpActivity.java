@@ -20,7 +20,7 @@ import Model.User;
 import retrofit2.Call;
 
 public class SignUpActivity extends AppCompatActivity {
-    private TextInputEditText edtUsername, edtPassword, edtFirstName, edtLastName, edtDOB, edtPhoneNumber, edtEmai;
+    private TextInputEditText edtUsername, edtPassword, edtFirstName, edtLastName, edtDOB, edtPhoneNumber, edtEmail;
     private Button btnSignup;
 
     @Override
@@ -46,7 +46,7 @@ public class SignUpActivity extends AppCompatActivity {
         edtLastName = findViewById(R.id.edtLastName);
         edtDOB = findViewById(R.id.edtDOB);
         edtPhoneNumber = findViewById(R.id.edtPhoneNumber);
-
+        edtEmail = findViewById(R.id.edtEmail);
         btnSignup = findViewById(R.id.btnSignup);
         btnSignup.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,7 +63,7 @@ public class SignUpActivity extends AppCompatActivity {
         String lastName = edtLastName.getText().toString().trim();
         String dob = edtDOB.getText().toString().trim();
         String phoneNumber = edtPhoneNumber.getText().toString().trim();
-        String email = edtEmai.getText().toString().trim();
+        String email = edtEmail.getText().toString().trim();
 
         if (username.isEmpty() || password.isEmpty() || firstName.isEmpty() ||
                 lastName.isEmpty() || dob.isEmpty() || email.isEmpty() || phoneNumber.isEmpty()) {

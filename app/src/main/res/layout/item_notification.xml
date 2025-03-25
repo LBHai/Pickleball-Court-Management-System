@@ -8,12 +8,16 @@
     android:padding="8dp">
 
     <!-- Icon thông báo bên trái -->
-    <ImageView
-    android:id="@+id/imgNotificationIcon"
-    android:layout_width="40dp"
-    android:layout_height="40dp"
-    android:src="@drawable/notification"
-    android:contentDescription="Icon thông báo" />
+    <ImageButton
+        android:id="@+id/btnBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/backicon"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Quay lại"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        />
 
         <!-- Nội dung thông báo (tiêu đề, mô tả, thời gian) -->
     <LinearLayout
@@ -62,5 +66,7 @@
         android:layout_marginStart="8dp"
         android:src="@drawable/close"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Đóng thông báo" />
+        android:contentDescription="Đóng thông báo"
+        android:minWidth="48dp"
+        android:minHeight="48dp"/>
     </LinearLayout>
