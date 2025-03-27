@@ -1,6 +1,7 @@
 package SEP490.G9;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,7 +66,6 @@ public class GalleryFragment extends Fragment {
 
     private void fetchCourtImagesFromApi(Context context) {
         ApiService apiService = RetrofitClient.getApiService(context);
-        // Sử dụng clubId đã nhận được và isMap = false
         Call<List<CourtImage>> call = apiService.getCourtImages(clubId, false);
 
         NetworkUtils.callApi(call, context, new NetworkUtils.ApiCallback<List<CourtImage>>() {
@@ -73,7 +73,7 @@ public class GalleryFragment extends Fragment {
             public void onSuccess(List<CourtImage> data) {
                 if (data != null && !data.isEmpty()) {
                     courtImages = data;
-                    adapter = new GalleryAdapter(courtImages);
+                    adapter = new GalleryAdapter(context, courtImages); // Truyền context
                     recyclerView.setAdapter(adapter);
                 } else {
                     Toast.makeText(context, "Sân chưa có hình ảnh", Toast.LENGTH_SHORT).show();
@@ -89,8 +89,11 @@ public class GalleryFragment extends Fragment {
 
     private static class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHolder> {
         private final List<CourtImage> courtImages;
+        private final Context context;
 
-        GalleryAdapter(List<CourtImage> courtImages) {
+        // Thêm tham số Context vào constructor
+        GalleryAdapter(Context context, List<CourtImage> courtImages) {
+            this.context = context;
             this.courtImages = courtImages;
         }
 
@@ -108,6 +111,13 @@ public class GalleryFragment extends Fragment {
             Glide.with(holder.itemView.getContext())
                     .load(courtImage.getImageUrl())
                     .into(holder.imageView);
+
+            // Thêm sự kiện nhấp chuột
+            holder.imageView.setOnClickListener(v -> {
+                Intent intent = new Intent(context, ImageZoomActivity.class);
+                intent.putExtra("image_url", courtImage.getImageUrl());
+                context.startActivity(intent);
+            });
         }
 
         @Override
@@ -117,6 +127,7 @@ public class GalleryFragment extends Fragment {
 
         static class ViewHolder extends RecyclerView.ViewHolder {
             ImageView imageView;
+
             ViewHolder(View itemView) {
                 super(itemView);
                 imageView = itemView.findViewById(R.id.iv_image);

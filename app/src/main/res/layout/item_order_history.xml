@@ -73,7 +73,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Địa chỉ"
+            android:text="Địa chỉ:"
             android:textColor="@android:color/black"
             android:textSize="14sp" />
 

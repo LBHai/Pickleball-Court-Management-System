@@ -39,6 +39,8 @@ import Model.OrderDetail;
 import Model.Orders;
 import Session.SessionManager;
 import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ConfirmActivity extends AppCompatActivity {
 
@@ -47,13 +49,13 @@ public class ConfirmActivity extends AppCompatActivity {
     private EditText etName, etPhone, etNote;
     private Button btnPayment, btnDeposit;
     private ImageButton btnBack;
-    // Biến thành viên để lưu tổng tiền của các slot
     private int overallTotalPrice = 0;
     private String clubId, selectedDate, confirmOrdersJson, userId = null, orderId;
     private List<ConfirmOrder> confirmOrders;
     private static final String HMAC_SHA256 = "HmacSHA256";
     private static final String SALT = "dHRzX2phdmFfMDFAaHlwZXJsb2d5LmNvbTpIeXBlckAxMjN0dHNfamF2YV8wMUBoeXBlcmxvZ3kuY29t";
 
+    private  SessionManager sessionManager;
     private String courtName;
     private String courtAddress;
     private String totalTime;
@@ -62,6 +64,7 @@ public class ConfirmActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_confirm);
+
         tvHeader = findViewById(R.id.tvHeader);
         tvStadiumName = findViewById(R.id.tvStadiumName);
         tvAddress = findViewById(R.id.tvAddress);
@@ -75,17 +78,20 @@ public class ConfirmActivity extends AppCompatActivity {
         btnPayment = findViewById(R.id.btnPayment);
         btnDeposit = findViewById(R.id.btnDeposit);
         btnBack = findViewById(R.id.btnBack);
+
+        sessionManager = new SessionManager(this);
         clubId = getIntent().getStringExtra("club_id");
         selectedDate = getIntent().getStringExtra("selectedDate");
         confirmOrdersJson = getIntent().getStringExtra("confirmOrdersJson");
         orderId = getIntent().getStringExtra("orderId");
-
+        Log.d("Confirm","orderId: "+ orderId);
         if (selectedDate == null || selectedDate.trim().isEmpty()) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
             selectedDate = sdf.format(new Date());
         }
         tvDate.setText("Thông tin chi tiết:");
-        SessionManager sessionManager = new SessionManager(this);
+
+        // TH1: Nếu có token => người dùng đã login, gọi API getMyInfo để lấy userId
         String token = sessionManager.getToken();
         ApiService apiService = RetrofitClient.getApiService(ConfirmActivity.this);
         if (token != null && !token.isEmpty()) {
@@ -99,6 +105,8 @@ public class ConfirmActivity extends AppCompatActivity {
                         etPhone.setText(r.getResult().getPhoneNumber());
                         userId = r.getResult().getId();
                         sessionManager.saveUserId(userId);
+                        // Với user đã login, key sẽ là userId
+                        registerNotification();
                     } else {
                         Toast.makeText(ConfirmActivity.this, "Lấy thông tin thất bại, vui lòng đăng nhập lại!", Toast.LENGTH_SHORT).show();
                     }
@@ -109,21 +117,95 @@ public class ConfirmActivity extends AppCompatActivity {
                 }
             });
         } else {
+            // TH2: Nếu chưa login (Guest) thì hiện thông báo và chờ số điện thoại được nhập
             Toast.makeText(ConfirmActivity.this, "Bạn đang đặt sân với vai trò là Guest!", Toast.LENGTH_SHORT).show();
         }
+
         confirmOrders = new Gson().fromJson(confirmOrdersJson, new TypeToken<List<ConfirmOrder>>(){}.getType());
         if (clubId != null && !clubId.isEmpty()) {
             fetchCourtDetails(clubId);
         }
         buildConfirmOrdersUI();
 
-        btnPayment.setOnClickListener(v -> processOrder(false));
-        btnDeposit.setOnClickListener(v -> processOrder(true));
+        // Nút đặt sân: đối với Guest, đảm bảo số điện thoại được nhập và lưu, sau đó đăng ký FCM token
+        btnPayment.setOnClickListener(v -> {
+            String phone = etPhone.getText().toString().trim();
+            if (!validateInput(phone)) return;
+
+            if (userId == null || userId.isEmpty()) {
+                // Guest: lưu số điện thoại làm key
+                sessionManager.saveUserId(phone);
+                registerNotification();
+            }
+            processOrder(false);
+        });
+
+        btnDeposit.setOnClickListener(v -> {
+            String phone = etPhone.getText().toString().trim();
+            if (!validateInput(phone)) return;
+
+            if (userId == null || userId.isEmpty()) {
+                sessionManager.saveUserId(phone);
+                registerNotification();
+            }
+            processOrder(true);
+        });
+
         btnBack.setOnClickListener(v -> {
             Intent intent = new Intent(ConfirmActivity.this, BookingTableActivity.class);
             intent.putExtra("club_id", clubId);
             startActivity(intent);
             finish();
+        });
+    }
+
+    private boolean validateInput(String phone) {
+        if (phone.isEmpty() || !phone.matches("0\\d{9}")) {
+            Toast.makeText(ConfirmActivity.this, "Vui lòng nhập số điện thoại hợp lệ", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Hàm đăng ký FCM token: nếu user đã login thì dùng userId, nếu Guest thì dùng số điện thoại lưu trong session.
+     */
+    private void registerNotification() {
+        // Lấy key từ session (đã lưu số điện thoại hoặc userId)
+        String key = sessionManager.getUserId();
+        if (key == null || key.isEmpty()) {
+            Log.e("FCM", "Không có key để đăng ký FCM token (userId hoặc phone)");
+            return;
+        }
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.e("FCM", "Fetching FCM token failed", task.getException());
+                return;
+            }
+            String fcmToken = task.getResult();
+            Log.d("FCM_KEY", "Key dùng để đăng ký FCM token: " + key);
+            sendDeviceTokenToServer(key, fcmToken);
+            Log.d("FCM_DEBUG", "FCM Token được gửi: " + fcmToken);
+        });
+    }
+
+    private void sendDeviceTokenToServer(String key, String fcmToken) {
+        NotificationRequest request = new NotificationRequest(key, fcmToken);
+        ApiService apiService = RetrofitClient.getApiService(ConfirmActivity.this);
+        apiService.registerNotification(request).enqueue(new retrofit2.Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, retrofit2.Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Log.d("Notify", "Đăng ký FCM token thành công với key: " + key);
+                } else {
+                    Log.e("Notify", "Đăng ký token thất bại: " + response.code() + " - " +
+                            (response.errorBody() != null ? response.errorBody().toString() : "No error body"));
+                }
+            }
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e("Notify", "Lỗi khi đăng ký FCM token", t);
+            }
         });
     }
 
@@ -144,10 +226,17 @@ public class ConfirmActivity extends AppCompatActivity {
             Toast.makeText(this, "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0", Toast.LENGTH_SHORT).show();
             return;
         }
+        SessionManager sessionManager = new SessionManager(this);
+
+        // Nếu là Guest (không có user ID), lưu số điện thoại vào Session
+        if (userId == null || userId.isEmpty()) {
+            sessionManager.saveUserId(phone); // Lưu số điện thoại làm key
+        }
+
+
         btnPayment.setEnabled(false);
         btnDeposit.setEnabled(false);
 
-        // Tính tổng tiền của các slot
         overallTotalPrice = 0;
         for (ConfirmOrder o : confirmOrders) {
             overallTotalPrice += o.getDailyPrice();
@@ -156,19 +245,17 @@ public class ConfirmActivity extends AppCompatActivity {
         int totalAmount = overallTotalPrice;
         int depositAmount = 0;
 
-        // Tính depositAmount theo yêu cầu
         if (n == 1) {
-            depositAmount = totalAmount; // 1 slot thì deposit bằng total
+            depositAmount = totalAmount;
         } else {
             int pricePerSlot = overallTotalPrice / n;
-            int depositSlots = (int) Math.ceil(n / 3.0); // Làm tròn lên số slot cần cọc
+            int depositSlots = (int) Math.ceil(n / 3.0);
             depositAmount = pricePerSlot * depositSlots;
         }
 
         final int finalTotalAmount = totalAmount;
         final int finalDepositAmount = depositAmount;
 
-        // Tạo request đặt đơn hàng
         CreateOrderRequest req = new CreateOrderRequest();
         req.setCourtId(clubId);
         req.setCourtName(courtName);
@@ -189,7 +276,7 @@ public class ConfirmActivity extends AppCompatActivity {
             d.setCourtSlotName(o.getCourtSlotName());
             d.setStartTime(o.getStartTime());
             d.setEndTime(o.getEndTime());
-            d.setPrice((int)o.getDailyPrice());
+            d.setPrice((int) o.getDailyPrice());
             orderDetails.add(d);
         }
         req.setOrderDetails(orderDetails);
@@ -197,7 +284,6 @@ public class ConfirmActivity extends AppCompatActivity {
         ApiService api = RetrofitClient.getApiService(this);
 
         if (orderId != null && !orderId.isEmpty()) {
-            // Thay đổi lịch
             Call<Orders> orderCall = api.getOrderById(orderId);
             NetworkUtils.callApi(orderCall, this, new NetworkUtils.ApiCallback<Orders>() {
                 @Override
@@ -209,7 +295,7 @@ public class ConfirmActivity extends AppCompatActivity {
                     if (isDeposit) {
                         paymentAmount = finalDepositAmount - amountPaid;
                         if (n == 1) {
-                            paymentStatus = "Đã thanh toán"; // 1 slot ấn Đặt cọc thì ép về Đã thanh toán
+                            paymentStatus = "Đã thanh toán";
                         } else if (paymentAmount > 0) {
                             paymentStatus = "Chưa đặt cọc";
                         } else {
@@ -217,11 +303,7 @@ public class ConfirmActivity extends AppCompatActivity {
                         }
                     } else {
                         paymentAmount = finalTotalAmount - amountPaid;
-                        if (paymentAmount > 0) {
-                            paymentStatus = "Chưa thanh toán";
-                        } else {
-                            paymentStatus = "Đã thanh toán";
-                        }
+                        paymentStatus = (paymentAmount > 0) ? "Chưa thanh toán" : "Đã thanh toán";
                     }
 
                     req.setPaymentAmount(paymentAmount);
@@ -240,7 +322,6 @@ public class ConfirmActivity extends AppCompatActivity {
                             if (r != null) {
                                 Intent i;
                                 if (paymentAmount > 0 && r.getQrcode() != null && !r.getQrcode().isEmpty()) {
-                                    // Trường hợp cần thanh toán thêm
                                     i = new Intent(ConfirmActivity.this, QRCodeActivity.class);
                                     i.putExtra("qrCodeData", r.getQrcode());
                                     i.putExtra("paymentTimeout", r.getPaymentTimeout());
@@ -249,7 +330,6 @@ public class ConfirmActivity extends AppCompatActivity {
                                     i.putExtra("isDeposit", isDeposit);
                                     i.putExtra("courtId", clubId);
                                 } else {
-                                    // Trường hợp không cần thanh toán thêm hoặc hoàn tiền
                                     i = new Intent(ConfirmActivity.this, PaymentSuccessActivity.class);
                                 }
                                 i.putExtra("orderId", r.getId());
@@ -283,7 +363,6 @@ public class ConfirmActivity extends AppCompatActivity {
                 }
             });
         } else {
-            // Tạo đơn mới
             int paymentAmount;
             String paymentStatus;
             if (isDeposit) {
@@ -432,39 +511,5 @@ public class ConfirmActivity extends AppCompatActivity {
         } catch (Exception e) {
             throw new RuntimeException("Error while generating signature", e);
         }
-    }
-
-    private void registerNotification() {
-        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
-            if (!task.isSuccessful()) {
-                Log.e("FCM", "Fetching FCM token failed", task.getException());
-                return;
-            }
-            String fcmToken = task.getResult();
-            Log.d("FCM_TOKEN", "FCM Token: " + fcmToken);
-            sendDeviceTokenToServer(fcmToken);
-        });
-    }
-
-    private void sendDeviceTokenToServer(String fcmToken) {
-        SessionManager sessionManager = new SessionManager(this);
-        String key = sessionManager.getUserId();
-        NotificationRequest request = new NotificationRequest(key, fcmToken);
-        ApiService apiService = RetrofitClient.getApiService(ConfirmActivity.this);
-        apiService.registerNotification(request).enqueue(new retrofit2.Callback<Void>() {
-            @Override
-            public void onResponse(retrofit2.Call<Void> call, retrofit2.Response<Void> response) {
-                if (response.isSuccessful()) {
-                    Log.d("Notify", "Đăng ký FCM token thành công");
-                } else {
-                    Log.e("Notify", "Đăng ký token thất bại: " + response.code() + " - " + (response.errorBody() != null ? response.errorBody().toString() : "No error body"));
-                }
-            }
-
-            @Override
-            public void onFailure(retrofit2.Call<Void> call, Throwable t) {
-                Log.e("Notify", "Lỗi khi đăng ký FCM token", t);
-            }
-        });
     }
 }

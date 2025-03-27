@@ -3,11 +3,10 @@ package Model;
 import com.google.gson.annotations.SerializedName;
 
 public class NotificationRequest {
-    @SerializedName("key")
     private String key; // userId hoặc phoneNumber
 
-    @SerializedName("token")
     private String token; // fcm-token từ Firebase
+
 
     public NotificationRequest(String key, String token) {
         this.key = key;
@@ -18,7 +17,15 @@ public class NotificationRequest {
         return key;
     }
 
+    public void setKey(String key) {
+        this.key = key;
+    }
+
     public String getToken() {
         return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

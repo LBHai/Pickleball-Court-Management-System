@@ -75,6 +75,7 @@ public class QRCodeActivity extends AppCompatActivity {
         String qrCodeData = getIntent().getStringExtra("qrCodeData");
         String paymentTimeoutStr = getIntent().getStringExtra("paymentTimeout");
         orderId = getIntent().getStringExtra("orderId");
+        Log.d("QRCode","orderId: "+ orderId);
         totalTime = getIntent().getStringExtra("totalTime");
         selectedDate = getIntent().getStringExtra("selectedDate");
         totalPrice = getIntent().getIntExtra("totalPrice", 0);

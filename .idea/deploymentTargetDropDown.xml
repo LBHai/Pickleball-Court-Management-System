@@ -9,8 +9,8 @@
               <type value="RUNNING_DEVICE_TARGET" />
               <deviceKey>
                 <Key>
-                  <type value="VIRTUAL_DEVICE_PATH" />
-                  <value value="C:\Users\hayha\.android\avd\Pixel_7_Pro_API_27.avd" />
+                  <type value="SERIAL_NUMBER" />
+                  <value value="R5CW91WK0HL" />
                 </Key>
               </deviceKey>
             </Target>
@@ -22,15 +22,6 @@
                 <Key>
                   <type value="VIRTUAL_DEVICE_PATH" />
                   <value value="C:\Users\hayha\.android\avd\Pixel_7_Pro_API_27.avd" />
-                </Key>
-              </deviceKey>
-            </Target>
-            <Target>
-              <type value="QUICK_BOOT_TARGET" />
-              <deviceKey>
-                <Key>
-                  <type value="VIRTUAL_DEVICE_PATH" />
-                  <value value="C:\Users\hayha\.android\avd\Pixel_7_API_27.avd" />
                 </Key>
               </deviceKey>
             </Target>

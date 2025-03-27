@@ -41,4 +41,6 @@ public class SessionManager {
     public String getUserId() {
         return prefs.getString(KEY_USER_ID, "");
     }
-}
+
+
+    }
