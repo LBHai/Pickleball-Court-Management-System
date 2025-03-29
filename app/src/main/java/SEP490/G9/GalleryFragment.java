@@ -28,10 +28,11 @@ import retrofit2.Call;
 
 public class GalleryFragment extends Fragment {
 
-    private TextView tvTitle;
-    private RecyclerView recyclerView;
-    private GalleryAdapter adapter;
-    private List<CourtImage> courtImages = new ArrayList<>();
+    private TextView tvCourtLayoutTitle, tvTitle;
+    private RecyclerView rvCourtLayout, rvGallery; // Thêm RecyclerView cho sơ đồ sân
+    private GalleryAdapter layoutAdapter, galleryAdapter; // Hai adapter cho hai RecyclerView
+    private List<CourtImage> courtLayouts = new ArrayList<>(); // Danh sách sơ đồ sân
+    private List<CourtImage> courtImages = new ArrayList<>(); // Danh sách hình ảnh
 
     // ID sân được truyền qua Bundle (sử dụng key "club_id")
     private String clubId;
@@ -52,37 +53,75 @@ public class GalleryFragment extends Fragment {
         }
 
         // Tham chiếu các View
+        tvCourtLayoutTitle = view.findViewById(R.id.tv_court_layout_title);
+        rvCourtLayout = view.findViewById(R.id.rv_court_layout); // Ánh xạ RecyclerView sơ đồ sân
         tvTitle = view.findViewById(R.id.tv_title);
-        recyclerView = view.findViewById(R.id.rv_gallery);
+        rvGallery = view.findViewById(R.id.rv_gallery);
 
+        tvCourtLayoutTitle.setText("Sơ đồ sân");
         tvTitle.setText("Hình ảnh");
 
-        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        // Thiết lập GridLayoutManager cho cả hai RecyclerView
+        rvCourtLayout.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        rvGallery.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
-        fetchCourtImagesFromApi(getContext());
+        // Lấy dữ liệu từ API
+        fetchCourtLayoutsFromApi(getContext()); // Lấy sơ đồ sân
+        fetchCourtImagesFromApi(getContext()); // Lấy hình ảnh
 
         return view;
     }
 
-    private void fetchCourtImagesFromApi(Context context) {
+    private void fetchCourtLayoutsFromApi(Context context) {
         ApiService apiService = RetrofitClient.getApiService(context);
-        Call<List<CourtImage>> call = apiService.getCourtImages(clubId, false);
+        Call<List<CourtImage>> call = apiService.getCourtImages(clubId, true); // isLayout = true để lấy sơ đồ sân
 
         NetworkUtils.callApi(call, context, new NetworkUtils.ApiCallback<List<CourtImage>>() {
             @Override
             public void onSuccess(List<CourtImage> data) {
                 if (data != null && !data.isEmpty()) {
-                    courtImages = data;
-                    adapter = new GalleryAdapter(context, courtImages); // Truyền context
-                    recyclerView.setAdapter(adapter);
+                    courtLayouts = data;
+                    layoutAdapter = new GalleryAdapter(context, courtLayouts);
+                    rvCourtLayout.setAdapter(layoutAdapter);
                 } else {
-                    Toast.makeText(context, "Sân chưa có hình ảnh", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Sân chưa có sơ đồ", Toast.LENGTH_SHORT).show();
+                    tvCourtLayoutTitle.setVisibility(View.GONE);
+                    rvCourtLayout.setVisibility(View.GONE);
                 }
             }
 
             @Override
             public void onError(String errorMessage) {
                 Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show();
+                tvCourtLayoutTitle.setVisibility(View.GONE);
+                rvCourtLayout.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private void fetchCourtImagesFromApi(Context context) {
+        ApiService apiService = RetrofitClient.getApiService(context);
+        Call<List<CourtImage>> call = apiService.getCourtImages(clubId, false); // isLayout = false để lấy hình ảnh
+
+        NetworkUtils.callApi(call, context, new NetworkUtils.ApiCallback<List<CourtImage>>() {
+            @Override
+            public void onSuccess(List<CourtImage> data) {
+                if (data != null && !data.isEmpty()) {
+                    courtImages = data;
+                    galleryAdapter = new GalleryAdapter(context, courtImages);
+                    rvGallery.setAdapter(galleryAdapter);
+                } else {
+                    Toast.makeText(context, "Sân chưa có hình ảnh", Toast.LENGTH_SHORT).show();
+                    tvTitle.setVisibility(View.GONE);
+                    rvGallery.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show();
+                tvTitle.setVisibility(View.GONE);
+                rvGallery.setVisibility(View.GONE);
             }
         });
     }
@@ -91,7 +130,6 @@ public class GalleryFragment extends Fragment {
         private final List<CourtImage> courtImages;
         private final Context context;
 
-        // Thêm tham số Context vào constructor
         GalleryAdapter(Context context, List<CourtImage> courtImages) {
             this.context = context;
             this.courtImages = courtImages;

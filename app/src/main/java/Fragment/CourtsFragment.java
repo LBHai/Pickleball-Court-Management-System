@@ -48,7 +48,7 @@ public class CourtsFragment extends Fragment {
         rcvClubs.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // Gọi API lấy danh sách CLB
-        callApiGetClubs();
+        callApiGetCourts();
 
         // Lắng nghe sự kiện nhập vào ô tìm kiếm
         edtSearch.addTextChangedListener(new TextWatcher() {
@@ -67,7 +67,7 @@ public class CourtsFragment extends Fragment {
         return view;
     }
 
-    private void callApiGetClubs() {
+    private void callApiGetCourts() {
         ApiService apiService = RetrofitClient.getApiService(getContext());
         apiService.getCourts().enqueue(new Callback<List<Courts>>() {
             @Override

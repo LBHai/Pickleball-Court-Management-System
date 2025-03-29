@@ -1,53 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
+    android:fillViewport="true"
     tools:context=".GalleryFragment">
 
-    <!-- Tiêu đề Sơ đồ sân -->
-    <TextView
-        android:id="@+id/tv_court_layout_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Sơ đồ sân"
-        android:textStyle="bold"
-        android:textSize="18sp"
-        android:textColor="@android:color/black"
-        android:layout_marginBottom="8dp"/>
-
-    <!-- ImageView hiển thị sơ đồ sân -->
-    <ImageView
-        android:id="@+id/iv_court_layout"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/facebook_icon_2013"
-        android:contentDescription="Sơ đồ sân quần vợt"
-        android:layout_marginBottom="16dp"/>
-
-    <!-- Tiêu đề Hình ảnh -->
-    <TextView
-        android:id="@+id/tv_title"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hình ảnh"
-        android:textStyle="bold"
-        android:textSize="18sp"
-        android:textColor="@android:color/black"
-        android:layout_marginBottom="8dp"/>
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <!-- RecyclerView hiển thị danh sách ảnh -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_gallery"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:padding="4dp"
-        android:contentDescription="Danh sách hình ảnh"
-        tools:listitem="@layout/item_image"/>
+        <!-- Tiêu đề Sơ đồ sân -->
+        <TextView
+            android:id="@+id/tv_court_layout_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sơ đồ sân"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp"/>
 
-</LinearLayout>
+        <!-- RecyclerView hiển thị danh sách sơ đồ sân -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_court_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="4dp"
+            android:contentDescription="Danh sách sơ đồ sân"
+            android:nestedScrollingEnabled="false"
+            tools:listitem="@layout/item_image"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Tiêu đề Hình ảnh -->
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hình ảnh"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- RecyclerView hiển thị danh sách ảnh -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_gallery"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="4dp"
+            android:contentDescription="Danh sách hình ảnh"
+            android:nestedScrollingEnabled="false"
+            tools:listitem="@layout/item_image"/>
+
+    </LinearLayout>
+</ScrollView>

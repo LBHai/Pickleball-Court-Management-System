@@ -55,7 +55,7 @@ public interface ApiService {
     Call<UpdateMyInfor> updateMyInfo(@Header("Authorization") String authHeader, @Body UpdateMyInfor updateUser);
 
     @GET("identity/public/getOrders")
-    Call<List<Orders>> getOrders(@Query("value") String UserId);
+    Call<List<Orders>> getOrders(@Query("value") String value);
 
     @POST("identity/public/notification/save-token") // Điều chỉnh endpoint theo API của bạn
     Call<Void> registerNotification(@Body NotificationRequest request);

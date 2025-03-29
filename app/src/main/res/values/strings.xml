@@ -58,7 +58,7 @@
     </string-array>
 
     <string name="avatar">Ảnh đại diện</string>
-    <string name="enter_full_name" translatable="false">Enter First Name</string>
+    <string name="enter_first_name" translatable="false">Enter First Name</string>
     <string name="enter_last_name" translatable="false">Enter Last Name</string>
     <string name="enter_phone_number" translatable="false">Enter Phone Number</string>
     <string name="user_rank" translatable="false">User Rank</string>

@@ -8,12 +8,15 @@ public class Courts {
     private String openTime;
     private String email;
     private String link;
+    private String logoUrl;
+    private String backgroundUrl;
     private boolean active;
 
     public Courts() {
+
     }
 
-    public Courts(String id, String name, String address, String phone, String openTime, String email, String link, boolean active) {
+    public Courts(String id, String name, String address, String phone, String openTime, String email, String link, String logoUrl, String backgroundUrl, boolean active) {
         this.id = id;
         this.name = name;
         this.address = address;
@@ -21,6 +24,8 @@ public class Courts {
         this.openTime = openTime;
         this.email = email;
         this.link = link;
+        this.logoUrl = logoUrl;
+        this.backgroundUrl = backgroundUrl;
         this.active = active;
     }
 
@@ -78,6 +83,22 @@ public class Courts {
 
     public void setLink(String link) {
         this.link = link;
+    }
+
+    public String getLogoUrl() {
+        return logoUrl;
+    }
+
+    public void setLogoUrl(String logoUrl) {
+        this.logoUrl = logoUrl;
+    }
+
+    public String getBackgroundUrl() {
+        return backgroundUrl;
+    }
+
+    public void setBackgroundUrl(String backgroundUrl) {
+        this.backgroundUrl = backgroundUrl;
     }
 
     public boolean isActive() {

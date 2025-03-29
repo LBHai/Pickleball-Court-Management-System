@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@color/greenBackground"
+    android:background="#1A3C34"
     tools:context=".EditInformationActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -15,6 +15,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp">
+
+        <!-- Nút quay lại -->
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/backicon"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Avatar -->
         <com.google.android.material.imageview.ShapeableImageView
@@ -25,24 +37,23 @@
             android:scaleType="centerCrop"
             android:layout_marginTop="16dp"
             app:shapeAppearanceOverlay="@style/CircleImageView"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnBack"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
+
+        <!-- (Nếu cần, bạn có thể thêm nút camera trên avatar tại đây) -->
 
         <!-- Label: Email -->
         <TextView
             android:id="@+id/tvEmailLabel"
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:layout_marginTop="8dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:text="@string/email"
             android:textColor="@android:color/white"
-            android:textSize="20sp"
-
+            android:textSize="16sp"
             app:layout_constraintTop_toBottomOf="@id/imgAvatar"
             app:layout_constraintStart_toStartOf="parent"/>
-
-
 
         <!-- EditText: Email -->
         <EditText
@@ -51,54 +62,62 @@
             android:layout_height="50dp"
             android:layout_marginTop="4dp"
             android:inputType="textEmailAddress"
-            android:background="@drawable/bg_edittext"
-            android:padding="8dp"
+            android:background="@drawable/bg_edittext_rounded"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
             android:textColor="@android:color/black"
             android:textColorHint="#888888"
             android:hint="@string/email"
+            android:textSize="16sp"
             app:layout_constraintTop_toBottomOf="@id/tvEmailLabel"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
-        <TextView
-            android:id="@+id/tvPassword"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:layout_marginTop="8dp"
-            android:text="@string/password"
-            android:textColor="@android:color/white"
-            android:textSize="20sp"
 
+        <!-- Label: Phone Number -->
+        <TextView
+            android:id="@+id/tvPhoneNumberLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/phone_number"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:layout_marginTop="16dp"
             app:layout_constraintTop_toBottomOf="@id/etEmail"
             app:layout_constraintStart_toStartOf="parent"/>
 
-        <!-- EditText: Password -->
+        <!-- EditText: Phone Number (Disabled) -->
         <EditText
-            android:id="@+id/etPassword"
+            android:id="@+id/etPhoneNumber"
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:layout_marginTop="4dp"
-            android:inputType="textEmailAddress"
-            android:background="@drawable/bg_edittext"
-            android:padding="8dp"
+            android:background="@drawable/bg_edittext_disabled"
+            android:enabled="false"
+            android:hint="@string/phone_number"
+            android:inputType="phone"
+            android:paddingStart="40dp"
+            android:paddingEnd="16dp"
             android:textColor="@android:color/black"
             android:textColorHint="#888888"
-            android:hint="@string/password"
-            app:layout_constraintTop_toBottomOf="@id/tvPassword"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/tvPhoneNumberLabel"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
+        <!-- (Nếu cần, bạn có thể thêm LinearLayout chứa cờ và mã vùng tại đây) -->
 
         <!-- Label: First Name -->
         <TextView
             android:id="@+id/tvFirstNameLabel"
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="wrap_content"
             android:text="@string/first_name"
             android:textColor="@android:color/white"
-            android:textSize="20sp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@id/etPassword"
+            android:textSize="16sp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/etPhoneNumber"
             app:layout_constraintStart_toStartOf="parent"/>
+
         <!-- EditText: First Name -->
         <EditText
             android:id="@+id/etFirstName"
@@ -106,11 +125,13 @@
             android:layout_height="50dp"
             android:layout_marginTop="4dp"
             android:inputType="textPersonName"
-            android:background="@drawable/bg_edittext"
-            android:padding="8dp"
+            android:background="@drawable/bg_edittext_rounded"
+            android:paddingStart="16dp"
+            android:paddingEnd="40dp"
             android:textColor="@android:color/black"
             android:textColorHint="#888888"
-            android:hint="@string/first_name"
+            android:hint="@string/enter_first_name"
+            android:textSize="16sp"
             app:layout_constraintTop_toBottomOf="@id/tvFirstNameLabel"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
@@ -119,11 +140,11 @@
         <TextView
             android:id="@+id/tvLastNameLabel"
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="wrap_content"
             android:text="@string/last_name"
             android:textColor="@android:color/white"
-            android:textSize="20sp"
-            android:layout_marginTop="8dp"
+            android:textSize="16sp"
+            android:layout_marginTop="16dp"
             app:layout_constraintTop_toBottomOf="@id/etFirstName"
             app:layout_constraintStart_toStartOf="parent"/>
 
@@ -134,41 +155,14 @@
             android:layout_height="50dp"
             android:layout_marginTop="4dp"
             android:inputType="textPersonName"
-            android:background="@drawable/bg_edittext"
-            android:padding="8dp"
+            android:background="@drawable/bg_edittext_rounded"
+            android:paddingStart="16dp"
+            android:paddingEnd="40dp"
             android:textColor="@android:color/black"
             android:textColorHint="#888888"
-            android:hint="@string/last_name"
+            android:hint="@string/enter_last_name"
+            android:textSize="16sp"
             app:layout_constraintTop_toBottomOf="@id/tvLastNameLabel"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
-
-        <!-- Label: Phone Number -->
-        <TextView
-            android:id="@+id/tvPhoneNumberLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:text="@string/phone_number"
-            android:textColor="@android:color/white"
-            android:textSize="20sp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@id/etLastName"
-            app:layout_constraintStart_toStartOf="parent"/>
-
-        <!-- EditText: Phone Number -->
-        <EditText
-            android:id="@+id/etPhoneNumber"
-            android:layout_width="0dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="4dp"
-            android:inputType="phone"
-            android:background="@drawable/bg_edittext"
-            android:padding="8dp"
-            android:textColor="@android:color/black"
-            android:textColorHint="#888888"
-            android:enabled="false"
-            android:hint="@string/phone_number"
-            app:layout_constraintTop_toBottomOf="@id/tvPhoneNumberLabel"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -176,12 +170,12 @@
         <TextView
             android:id="@+id/tvUserRankLabel"
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="wrap_content"
             android:text="@string/user_rank"
             android:textColor="@android:color/white"
-            android:textSize="20sp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@id/etPhoneNumber"
+            android:textSize="16sp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/etLastName"
             app:layout_constraintStart_toStartOf="parent"/>
 
         <!-- EditText: User Rank -->
@@ -190,26 +184,39 @@
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:layout_marginTop="4dp"
-            android:inputType="text"
-            android:background="@drawable/bg_edittext"
-            android:padding="8dp"
+            android:inputType="textPersonName"
+            android:background="@drawable/bg_edittext_rounded"
+            android:paddingStart="16dp"
+            android:paddingEnd="40dp"
             android:textColor="@android:color/black"
             android:textColorHint="#888888"
-            android:hint="@string/user_rank"
-            android:enabled="false"
+            android:hint="@string/enter_user_rank"
+            android:textSize="16sp"
             app:layout_constraintTop_toBottomOf="@id/tvUserRankLabel"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
+
+        <!-- Nút xóa (clear) cho User Rank -->
+        <ImageView
+            android:id="@+id/ivClearFullName"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/bin"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@id/etUserRank"
+            app:layout_constraintTop_toTopOf="@id/etUserRank"
+            app:layout_constraintBottom_toBottomOf="@id/etUserRank" />
 
         <!-- Label: Gender -->
         <TextView
             android:id="@+id/tvGenderLabel"
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="wrap_content"
             android:text="@string/gender"
             android:textColor="@android:color/white"
-            android:textSize="20sp"
-            android:layout_marginTop="8dp"
+            android:textSize="16sp"
+            android:layout_marginTop="16dp"
             app:layout_constraintTop_toBottomOf="@id/etUserRank"
             app:layout_constraintStart_toStartOf="parent"/>
 
@@ -222,12 +229,36 @@
             android:spinnerMode="dropdown"
             android:entries="@array/gender_array"
             android:popupBackground="@android:color/white"
-            android:background="@drawable/bg_edittext"
-            android:padding="8dp"
+            android:background="@drawable/bg_edittext_rounded"
+            android:paddingStart="16dp"
+            android:paddingEnd="40dp"
             android:gravity="center_vertical|start"
+            android:textSize="16sp"
             app:layout_constraintTop_toBottomOf="@id/tvGenderLabel"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
+
+        <!-- Mũi tên dropdown cho Spinner -->
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="16dp"
+            android:src="@android:drawable/arrow_down_float"
+            app:layout_constraintEnd_toEndOf="@id/spGender"
+            app:layout_constraintTop_toTopOf="@id/spGender"
+            app:layout_constraintBottom_toBottomOf="@id/spGender" />
+
+        <!-- Label: Date of Birth -->
+        <TextView
+            android:id="@+id/tvDobLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ngày sinh"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/spGender"
+            app:layout_constraintStart_toStartOf="parent"/>
 
         <!-- Date of Birth Container (3 columns) -->
         <LinearLayout
@@ -235,94 +266,54 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="12dp"
-            app:layout_constraintTop_toBottomOf="@id/spGender"
+            android:layout_marginTop="4dp"
+            app:layout_constraintTop_toBottomOf="@id/tvDobLabel"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <!-- Column 1: Day of Birth -->
-            <LinearLayout
+            <!-- Spinner: Day -->
+            <Spinner
+                android:id="@+id/spDay"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginRight="4dp">
+                android:layout_marginEnd="8dp"
+                android:spinnerMode="dropdown"
+                android:popupBackground="@android:color/white"
+                android:background="@drawable/bg_edittext_rounded"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:gravity="center_vertical|start"
+                android:textSize="16sp" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:text="Day of Birth"
-                    android:gravity="center"
-                    android:textColor="@android:color/white"
-                    android:textSize="18sp"/>
-
-                <Spinner
-                    android:id="@+id/spDay"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="4dp"
-                    android:layout_gravity="center"
-                    android:spinnerMode="dropdown"
-                    android:popupBackground="@android:color/white"
-                    android:background="@drawable/bg_edittext"
-                    android:padding="8dp"
-                    />
-            </LinearLayout>
-
-            <!-- Column 2: Month of Birth -->
-            <LinearLayout
+            <!-- Spinner: Month -->
+            <Spinner
+                android:id="@+id/spMonth"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginRight="4dp">
+                android:layout_marginEnd="8dp"
+                android:spinnerMode="dropdown"
+                android:popupBackground="@android:color/white"
+                android:background="@drawable/bg_edittext_rounded"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:gravity="center_vertical|start"
+                android:textSize="16sp" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:text="Month of Birth"
-                    android:gravity="center"
-                    android:textColor="@android:color/white"
-                    android:textSize="18sp"/>
-
-                <Spinner
-                    android:id="@+id/spMonth"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="4dp"
-                    android:spinnerMode="dropdown"
-                    android:popupBackground="@android:color/white"
-                    android:background="@drawable/bg_edittext"
-                    android:padding="8dp"
-                    android:gravity="center_vertical|start"/>
-            </LinearLayout>
-
-            <!-- Column 3: Year of Birth -->
-            <LinearLayout
+            <!-- Spinner: Year -->
+            <Spinner
+                android:id="@+id/spYear"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:text="Year of Birth"
-                    android:gravity="center"
-                    android:textColor="@android:color/white"
-                    android:textSize="18sp"/>
-
-                <Spinner
-                    android:id="@+id/spYear"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="4dp"
-                    android:spinnerMode="dropdown"
-                    android:popupBackground="@android:color/white"
-                    android:background="@drawable/bg_edittext"
-                    android:padding="8dp"
-                    android:gravity="center_vertical|start"/>
-            </LinearLayout>
+                android:spinnerMode="dropdown"
+                android:popupBackground="@android:color/white"
+                android:background="@drawable/bg_edittext_rounded"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:gravity="center_vertical|start"
+                android:textSize="16sp" />
         </LinearLayout>
 
         <!-- CheckBox: Student -->
@@ -330,25 +321,25 @@
             android:id="@+id/cbStudent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:text="Student"
-            android:textSize="20sp"
             android:textColor="@android:color/white"
-            android:layout_marginTop="12dp"
+            android:textSize="16sp"
             app:layout_constraintTop_toBottomOf="@id/llDobContainer"
-            app:layout_constraintStart_toStartOf="parent"
-            android:enabled="false"/>
+            app:layout_constraintStart_toStartOf="parent" />
 
         <!-- Button: Save -->
         <Button
             android:id="@+id/btnSave"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_button_yellow"
             android:text="@string/save"
             android:textAllCaps="false"
             android:textColor="@android:color/black"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/bg_button"
+            android:textSize="16sp"
             app:layout_constraintTop_toBottomOf="@id/cbStudent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>

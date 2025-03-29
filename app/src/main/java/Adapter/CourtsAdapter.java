@@ -1,8 +1,6 @@
 package Adapter;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,71 +11,70 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import Model.Courts;
-import SEP490.G9.BookingTableActivity;
 import SEP490.G9.R;
 
-public class CourtsAdapter extends RecyclerView.Adapter<CourtsAdapter.ClubsViewHolder> {
+public class CourtsAdapter extends RecyclerView.Adapter<CourtsAdapter.CourtViewHolder> {
 
     private Context context;
     private List<Courts> courtsList;
-    private OnItemClickListener listener;
+    private OnCourtClickListener listener;
 
-    public interface OnItemClickListener {
-        void onItemClick(Courts club);
+    public interface OnCourtClickListener {
+        void onCourtClick(Courts court);
     }
 
-    public CourtsAdapter(Context context, List<Courts> courtsList, OnItemClickListener listener) {
+    public CourtsAdapter(Context context, List<Courts> courtsList, OnCourtClickListener listener) {
         this.context = context;
-        this.courtsList = courtsList;
+        this.courtsList = courtsList != null ? courtsList : new ArrayList<>();
         this.listener = listener;
-    }
-
-    public void updateList(List<Courts> newList) {
-        courtsList = newList;
-        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
-    public ClubsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_court, parent, false);
-        return new ClubsViewHolder(view);
+    public CourtViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context).inflate(R.layout.item_court, parent, false);
+        return new CourtViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ClubsViewHolder holder, int position) {
-        Courts club = courtsList.get(position);
+    public void onBindViewHolder(@NonNull CourtViewHolder holder, int position) {
+        Courts court = courtsList.get(position);
 
-        // Binding dữ liệu
-        holder.tvClubName.setText(club.getName());
-        holder.tvAddress.setText("Địa chỉ: " + club.getAddress());
-        holder.tvOpenTime.setText("Giờ mở cửa: " + club.getOpenTime());
-        holder.tvPhone.setText("Liên hệ: " + club.getPhone());
+        // Hiển thị thông tin CLB
+        holder.tvClubName.setText(court.getName());
+        holder.tvAddress.setText(court.getAddress());
+        holder.tvOpenTime.setText(court.getOpenTime());
+        holder.tvPhone.setText(court.getPhone());
 
-        // Xử lý khi bấm vào item → mở màn hình chi tiết CLB
+        // Tải ảnh logo từ URL bằng Glide
+        String logoUrl = court.getLogoUrl(); // Giả định Courts có thuộc tính logoUrl
+        if (logoUrl != null && !logoUrl.isEmpty()) {
+            Glide.with(context)
+                    .load(logoUrl)
+                    .placeholder(R.drawable.logo) // Ảnh placeholder khi đang tải
+                    .error(R.drawable.logo) // Ảnh hiển thị nếu lỗi
+                    .into(holder.imgClubLogo);
+        } else {
+            holder.imgClubLogo.setImageResource(R.drawable.logo); // Ảnh mặc định nếu không có URL
+        }
+
+        // Xử lý sự kiện nhấn vào item
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
-                listener.onItemClick(club);
+                listener.onCourtClick(court);
             }
         });
 
-        // Xử lý nút "Đặt Sân"
+        // Xử lý nút Book
         holder.btnBook.setOnClickListener(v -> {
-            Intent intent = new Intent(context, BookingTableActivity.class);
-            intent.putExtra("club_id", club.getId());
-            context.startActivity(intent);
-        });
-
-        // Xử lý nút "Xem Bản Đồ"
-        holder.btnMap.setOnClickListener(v -> {
-            Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + Uri.encode(club.getAddress()));
-            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-            mapIntent.setPackage("com.google.android.apps.maps");
-            if (mapIntent.resolveActivity(context.getPackageManager()) != null) {
-                context.startActivity(mapIntent);
+            if (listener != null) {
+                listener.onCourtClick(court);
             }
         });
     }
@@ -87,19 +84,28 @@ public class CourtsAdapter extends RecyclerView.Adapter<CourtsAdapter.ClubsViewH
         return courtsList.size();
     }
 
-    public static class ClubsViewHolder extends RecyclerView.ViewHolder {
+    public void updateList(List<Courts> newList) {
+        this.courtsList = newList != null ? newList : new ArrayList<>();
+        notifyDataSetChanged();
+    }
+
+    static class CourtViewHolder extends RecyclerView.ViewHolder {
+        ImageView imgClubLogo, imgHeart, btnMap, imgDongho, imgPhone;
         TextView tvClubName, tvAddress, tvOpenTime, tvPhone;
         Button btnBook;
-        ImageView btnMap;
 
-        public ClubsViewHolder(@NonNull View itemView) {
+        CourtViewHolder(@NonNull View itemView) {
             super(itemView);
+            imgClubLogo = itemView.findViewById(R.id.imgClubLogo);
+            imgHeart = itemView.findViewById(R.id.imgHeart);
+            btnMap = itemView.findViewById(R.id.btnMap);
+            imgDongho = itemView.findViewById(R.id.imgDongho);
+            imgPhone = itemView.findViewById(R.id.imgPhone);
             tvClubName = itemView.findViewById(R.id.tvClubName);
             tvAddress = itemView.findViewById(R.id.tvAddress);
             tvOpenTime = itemView.findViewById(R.id.tvOpenTime);
             tvPhone = itemView.findViewById(R.id.tvPhone);
             btnBook = itemView.findViewById(R.id.btnBook);
-            btnMap = itemView.findViewById(R.id.btnMap);
         }
     }
 }

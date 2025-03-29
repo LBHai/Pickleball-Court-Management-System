@@ -21,7 +21,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -38,6 +37,7 @@ import SEP490.G9.EditInformationActivity;
 import SEP490.G9.LoginActivity;
 import SEP490.G9.NotificationActivity;
 import SEP490.G9.R;
+import SEP490.G9.SignUpActivity;
 import Session.SessionManager;
 import Adapter.OrderAdapter;
 import retrofit2.Call;
@@ -46,107 +46,150 @@ import retrofit2.Response;
 
 public class AccountFragment extends Fragment {
 
-    // Các view hiển thị trên AccountFragment
     private TextView tvUserName, tvPhoneNumber;
-    private TextView tvTabBooked, tvTabInfoMember, tvMemberInfo; // Thêm cho phần tab
-    private ImageButton btnNoti;
+    private TextView tvTabBooked, tvTabInfoMember, tvMemberInfo;
+    private ImageButton btnNoti, btnOptions; // Thêm biến cho nút options
 
-    // Các biến lưu trữ dữ liệu người dùng lấy từ API
     private String id, username, email, firstName, lastName, userRank, gender, dob;
     private SessionManager sessionManager;
 
-    // Khai báo RecyclerView và adapter cho danh sách đơn đặt (orders)
     private RecyclerView recyclerOrder;
     private OrderAdapter orderAdapter;
-    private List<Orders> orderList; // Lưu danh sách đơn đặt
+    private List<Orders> orderList;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Kiểm tra trạng thái đăng nhập
         sessionManager = new SessionManager(getContext());
-        if (sessionManager.getToken() == null || sessionManager.getToken().isEmpty()) {
-            Intent intent = new Intent(getActivity(), LoginActivity.class);
-            startActivity(intent);
-            getActivity().finish();
-            return null;
-        }
-
-        // Inflate layout cho Fragment
         View view = inflater.inflate(R.layout.fragment_account, container, false);
         setHasOptionsMenu(true);
 
-        // Ánh xạ các view từ XML
         tvUserName = view.findViewById(R.id.userName);
         tvPhoneNumber = view.findViewById(R.id.phoneNumber);
         btnNoti = view.findViewById(R.id.notification);
+        btnOptions = view.findViewById(R.id.options); // Ánh xạ nút options
 
-        // Ánh xạ các tab
         tvTabBooked = view.findViewById(R.id.tvTabBooked);
         tvTabInfoMember = view.findViewById(R.id.tvTabInfoMember);
         tvMemberInfo = view.findViewById(R.id.tvMemberInfo);
 
-        // Xử lý click vào nút thông báo (nếu có)
-        btnNoti.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), NotificationActivity.class);
-            startActivity(intent);
-        });
-
-        // Khởi tạo RecyclerView và adapter cho danh sách đơn đặt
         recyclerOrder = view.findViewById(R.id.listOrderHistory);
         recyclerOrder.setLayoutManager(new LinearLayoutManager(getContext()));
         orderList = new ArrayList<>();
         orderAdapter = new OrderAdapter(orderList, getContext());
         recyclerOrder.setAdapter(orderAdapter);
 
-        // Gọi API lấy thông tin người dùng
-        getMyInfo();
+        // Ẩn nút options nếu người dùng chưa đăng nhập
+        if (sessionManager.getToken() == null || sessionManager.getToken().isEmpty()) {
+            btnOptions.setVisibility(View.GONE);
+        } else {
+            btnOptions.setVisibility(View.VISIBLE);
+        }
 
-        // Xử lý nút Options (PopupMenu)
-        ImageButton optionsButton = view.findViewById(R.id.options);
-        optionsButton.setOnClickListener(this::showPopupMenu);
+        btnNoti.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), NotificationActivity.class);
+            startActivity(intent);
+        });
 
-        // Đặt mặc định hiển thị tab "Lịch đã đặt"
+        btnOptions.setOnClickListener(this::showPopupMenu);
+
         showBookedTab();
-
-        // Bắt sự kiện click cho 2 "tab"
         tvTabBooked.setOnClickListener(v -> showBookedTab());
         tvTabInfoMember.setOnClickListener(v -> showMemberInfoTab());
 
+        // Kiểm tra trạng thái đăng nhập
+        if (sessionManager.getToken() != null && !sessionManager.getToken().isEmpty()) {
+            // Người dùng đã đăng nhập: load thông tin user và đơn đặt của user
+            getMyInfo();
+        } else {
+            // Guest: hiển thị dialog khuyến khích tạo tài khoản (chỉ hiển thị một lần)
+            if (!sessionManager.hasShownGuestDialog()) {
+                showGuestDialog();
+                sessionManager.setHasShownGuestDialog(true);
+            }
+            // Load danh sách đơn đặt của guest
+            getAllOrderListForGuest();
+        }
         return view;
     }
 
-    /**
-     * Hiển thị tab "Lịch đã đặt"
-     */
+    private void getAllOrderListForGuest() {
+        List<String> guestPhones = sessionManager.getGuestPhones();
+        if (guestPhones == null || guestPhones.isEmpty()) {
+            Toast.makeText(getContext(), "Chưa có số điện thoại được sử dụng để đặt lịch.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        orderList.clear();
+        final int[] callsRemaining = {guestPhones.size()};
+        for (String phone : guestPhones) {
+            ApiService apiService = RetrofitClient.getApiService(getContext());
+            apiService.getOrders(phone).enqueue(new Callback<List<Orders>>() {
+                @Override
+                public void onResponse(Call<List<Orders>> call, Response<List<Orders>> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        orderList.addAll(response.body());
+                    }
+                    callsRemaining[0]--;
+                    if (callsRemaining[0] == 0) {
+                        orderAdapter.notifyDataSetChanged();
+                        recyclerOrder.setVisibility(View.VISIBLE);
+                    }
+                }
+                @Override
+                public void onFailure(Call<List<Orders>> call, Throwable t) {
+                    callsRemaining[0]--;
+                    if (callsRemaining[0] == 0) {
+                        orderAdapter.notifyDataSetChanged();
+                        recyclerOrder.setVisibility(View.VISIBLE);
+                    }
+                }
+            });
+        }
+    }
+
+    private void showGuestDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setMessage("Tạo tài khoản để dễ dàng quản lý và lưu trữ lịch đặt của bạn.");
+
+        builder.setPositiveButton("Đăng nhập", (dialog, which) -> {
+            Intent intent = new Intent(getActivity(), LoginActivity.class);
+            startActivity(intent);
+            getActivity().finish();
+        });
+
+        builder.setNegativeButton("Đăng ký", (dialog, which) -> {
+            Intent intent = new Intent(getActivity(), SignUpActivity.class);
+            startActivity(intent);
+            getActivity().finish();
+        });
+
+        builder.setNeutralButton("OK", (dialog, which) -> dialog.dismiss());
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setTextColor(ContextCompat.getColor(getContext(), android.R.color.black));
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                .setTextColor(ContextCompat.getColor(getContext(), android.R.color.black));
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL)
+                .setTextColor(ContextCompat.getColor(getContext(), android.R.color.white));
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL)
+                .setBackgroundColor(ContextCompat.getColor(getContext(), R.color.green));
+    }
+
     private void showBookedTab() {
-        // Đổi màu text cho biết tab nào đang được chọn
         tvTabBooked.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
         tvTabInfoMember.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.darker_gray));
-
-        // Hiển thị danh sách đặt
         recyclerOrder.setVisibility(View.VISIBLE);
-        // Ẩn nội dung thông tin thành viên
         tvMemberInfo.setVisibility(View.GONE);
     }
 
-    /**
-     * Hiển thị tab "Thông tin thành viên"
-     */
     private void showMemberInfoTab() {
-        // Đổi màu text cho biết tab nào đang được chọn
         tvTabBooked.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.darker_gray));
         tvTabInfoMember.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
-
-        // Ẩn danh sách đặt
         recyclerOrder.setVisibility(View.GONE);
-        // Hiển thị nội dung thành viên
         tvMemberInfo.setVisibility(View.VISIBLE);
     }
 
-    /**
-     * Gọi API lấy thông tin người dùng và cập nhật giao diện.
-     * Sau khi lấy thông tin thành công, gọi tiếp API lấy danh sách đơn đặt.
-     */
     private void getMyInfo() {
         String token = sessionManager.getToken();
         if (token != null && !token.isEmpty()) {
@@ -172,25 +215,12 @@ public class AccountFragment extends Fragment {
                             tvUserName.setText(firstName + " " + lastName);
                             tvPhoneNumber.setText(info.getPhoneNumber());
 
-                            // Sau khi lấy xong thông tin, gọi API lấy danh sách đặt
                             getOrderList(id);
-
                         } else {
                             Toast.makeText(getContext(), "Dữ liệu trả về không hợp lệ", Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        if (response.code() == 401 || response.code() == 403) {
-                            try {
-                                String errorMessage = response.errorBody().string();
-                                if (errorMessage.contains("expired") || errorMessage.contains("hết hạn")) {
-                                    Toast.makeText(getContext(), "Lấy thông tin thất bại, vui lòng đăng nhập lại!", Toast.LENGTH_SHORT).show();
-                                }
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        } else {
-                            Toast.makeText(getContext(), "Lấy thông tin thất bại, vui lòng đăng nhập lại!", Toast.LENGTH_SHORT).show();
-                        }
+                        Toast.makeText(getContext(), "Lấy thông tin thất bại, vui lòng đăng nhập lại!", Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -204,9 +234,6 @@ public class AccountFragment extends Fragment {
         }
     }
 
-    /**
-     * Gọi API để lấy danh sách đơn đặt dựa theo userId.
-     */
     private void getOrderList(String userId) {
         ApiService apiService = RetrofitClient.getApiService(getContext());
         apiService.getOrders(userId).enqueue(new Callback<List<Orders>>() {
@@ -214,15 +241,11 @@ public class AccountFragment extends Fragment {
             public void onResponse(Call<List<Orders>> call, Response<List<Orders>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Orders> orders = response.body();
-                    if (orders != null) {
-                        orderList.clear();
-                        orderList.addAll(orders);
-                        orderAdapter.notifyDataSetChanged();
-                    } else {
-                        Toast.makeText(getContext(), "Không có đơn đặt sân nào", Toast.LENGTH_SHORT).show();
-                    }
+                    orderList.clear();
+                    orderList.addAll(orders);
+                    orderAdapter.notifyDataSetChanged();
                 } else {
-                    Toast.makeText(getContext(), "Lấy danh sách đơn đặt thất bại", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Không có đơn đặt sân nào", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -233,9 +256,6 @@ public class AccountFragment extends Fragment {
         });
     }
 
-    /**
-     * Hiển thị PopupMenu và xử lý sự kiện khi chọn từng mục.
-     */
     private void showPopupMenu(View anchorView) {
         PopupMenu popupMenu = new PopupMenu(getContext(), anchorView);
         popupMenu.getMenuInflater().inflate(R.menu.popup_menu_in_option, popupMenu.getMenu());
@@ -256,7 +276,6 @@ public class AccountFragment extends Fragment {
                 startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_changepassword) {
-                // Xử lý thay đổi mật khẩu
                 return true;
             } else if (itemId == R.id.menu_transalate) {
                 showLanguageDialog();
@@ -265,10 +284,8 @@ public class AccountFragment extends Fragment {
                 logoutUser();
                 return true;
             } else if (itemId == R.id.menu_version) {
-                // Xử lý version
                 return true;
             } else if (itemId == R.id.menu_deleteaccount) {
-                // Xử lý xóa tài khoản
                 return true;
             }
             return false;
@@ -276,9 +293,6 @@ public class AccountFragment extends Fragment {
         popupMenu.show();
     }
 
-    /**
-     * Bắt buộc hiển thị icon trong PopupMenu.
-     */
     private void forceShowPopupMenuIcons(PopupMenu popupMenu) {
         try {
             Field[] fields = popupMenu.getClass().getDeclaredFields();
@@ -297,24 +311,17 @@ public class AccountFragment extends Fragment {
         }
     }
 
-    /**
-     * Xử lý đăng xuất người dùng.
-     */
     private void logoutUser() {
         String userId = sessionManager.getUserId();
-
         Log.d("AccountFragment", "User logged out with ID: " + userId);
-
         sessionManager.clearSession();
+
         Intent intent = new Intent(getActivity(), LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         getActivity().finish();
     }
 
-    /**
-     * Hiển thị dialog chọn ngôn ngữ.
-     */
     private void showLanguageDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle(getString(R.string.choose_language));
@@ -347,9 +354,6 @@ public class AccountFragment extends Fragment {
         builder.show();
     }
 
-    /**
-     * Đổi ngôn ngữ và khởi động lại Activity.
-     */
     private void changeLanguage(String languageCode) {
         Locale locale = new Locale(languageCode);
         Locale.setDefault(locale);
@@ -358,7 +362,6 @@ public class AccountFragment extends Fragment {
         config.setLocale(locale);
         resources.updateConfiguration(config, resources.getDisplayMetrics());
 
-        // Khởi động lại Activity hiện tại
         Intent refresh = getActivity().getIntent();
         getActivity().finish();
         startActivity(refresh);

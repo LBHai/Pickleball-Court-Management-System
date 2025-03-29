@@ -36,7 +36,7 @@ public class QRCodeActivity extends AppCompatActivity {
     private long timeoutTimeMillis;
     private String orderId; // orderId từ Intent
     private boolean hasRedirected = false;
-    private int overallTotalPrice, totalPrice, depositAmount;
+    private int overallTotalPrice, totalPrice, depositAmount,paymentAmount;
     private boolean isDeposit;
     private String orderStatus, totalTime, selectedDate, source, courtId;
 
@@ -85,6 +85,7 @@ public class QRCodeActivity extends AppCompatActivity {
         isDeposit = getIntent().getBooleanExtra("isDeposit", false);
         orderStatus = getIntent().getStringExtra("orderStatus");
         courtId = getIntent().getStringExtra("courtId");
+        paymentAmount = getIntent().getIntExtra("paymentAmount", 0);
 
         if (paymentTimeoutStr != null && !paymentTimeoutStr.isEmpty()) {
             try {
@@ -118,8 +119,8 @@ public class QRCodeActivity extends AppCompatActivity {
             String formattedDeposit = decimalFormat.format(depositAmount);
             tvWarning.setText("Vui lòng chuyển khoản " + formattedDeposit + "₫ để hoàn tất đặt cọc!");
         } else {
-            String formattedPrice = decimalFormat.format(overallTotalPrice);
-            tvWarning.setText("Vui lòng chuyển khoản " + formattedPrice + "₫ để hoàn tất đặt lịch!");
+            String formattedPaymentAmount = decimalFormat.format(paymentAmount);
+            tvWarning.setText("Vui lòng chuyển khoản " + formattedPaymentAmount + "₫ để hoàn tất đặt lịch!");
         }
 
         btnBack.setOnClickListener(v -> {

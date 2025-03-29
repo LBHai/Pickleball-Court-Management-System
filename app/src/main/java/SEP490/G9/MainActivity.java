@@ -7,27 +7,18 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.app.AlertDialog;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.firebase.Firebase;
-import com.google.firebase.messaging.FirebaseMessaging;
 
-import Api.ApiService;
-import Api.RetrofitClient;
 import Fragment.AccountFragment;
 import Fragment.CourtsFragment;
 import Fragment.MapFragment;
 import Fragment.ProminentFragment;
-import Model.NotificationRequest;
 import Session.SessionManager;
-import retrofit2.Call;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,11 +26,20 @@ public class MainActivity extends AppCompatActivity {
     CourtsFragment courtsFragment;
     MapFragment mapFragment;
     ProminentFragment prominentFragment;
+    private SessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ((AppCompatActivity) this).setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main);
+
+        // Khởi tạo SessionManager
+        sessionManager = new SessionManager(this);
+
+        // Reset cờ hasShownGuestDialog khi ứng dụng khởi động (tùy chọn)
+        // Nếu bạn muốn dialog hiển thị lại mỗi khi ứng dụng khởi động lại, để dòng này
+        // Nếu không, hãy xóa dòng dưới đây để dialog chỉ hiển thị một lần duy nhất cho đến khi ứng dụng bị gỡ cài đặt
+        sessionManager.setHasShownGuestDialog(false);
 
         accountFragment = new AccountFragment();
         courtsFragment = new CourtsFragment();
@@ -70,6 +70,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Kiểm tra trạng thái đăng nhập và hiển thị dialog cho guest
+        if (!isUserLoggedIn()) {
+            if (!sessionManager.hasShownGuestDialog()) {
+                showGuestDialog();
+                sessionManager.setHasShownGuestDialog(true);
+            }
+        }
 
         String showFragment = getIntent().getStringExtra("showFragment");
         if (showFragment != null) {
@@ -105,7 +112,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean isUserLoggedIn() {
-        SessionManager sessionManager = new SessionManager(this);
         String token = sessionManager.getToken();
         return token != null && !token.isEmpty();
     }
@@ -117,6 +123,33 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
+    private void showGuestDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Tạo tài khoản để dễ dàng quản lý và lưu trữ lịch đặt của bạn.");
 
+        builder.setPositiveButton("Đăng nhập", (dialog, which) -> {
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        });
 
+        builder.setNegativeButton("Đăng ký", (dialog, which) -> {
+            Intent intent = new Intent(MainActivity.this, SignUpActivity.class);
+            startActivity(intent);
+            finish();
+        });
+
+        builder.setNeutralButton("OK", (dialog, which) -> dialog.dismiss());
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setTextColor(ContextCompat.getColor(this, android.R.color.black));
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                .setTextColor(ContextCompat.getColor(this, android.R.color.black));
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL)
+                .setTextColor(ContextCompat.getColor(this, android.R.color.white));
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL)
+                .setBackgroundColor(ContextCompat.getColor(this, R.color.green));
+    }
 }

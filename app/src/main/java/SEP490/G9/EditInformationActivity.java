@@ -42,7 +42,6 @@ public class EditInformationActivity extends AppCompatActivity {
 
         // Ánh xạ view từ XML
         etEmail       = findViewById(R.id.etEmail);
-        etPassword    = findViewById(R.id.etPassword);
         etFirstName   = findViewById(R.id.etFirstName);
         etLastName    = findViewById(R.id.etLastName);
         etPhoneNumber = findViewById(R.id.etPhoneNumber);
@@ -112,7 +111,7 @@ public class EditInformationActivity extends AppCompatActivity {
             etLastName.setText(intent.getStringExtra("lastName"));
             etPhoneNumber.setText(intent.getStringExtra("phoneNumber"));
             etUserRank.setText(intent.getStringExtra("userRank"));
-            etPassword.setText(intent.getStringExtra("password"));
+            //etPassword.setText(intent.getStringExtra("password"));
 
             // Thiết lập giới tính: nếu gender null, hiển thị "Select gender"
             String genderFromIntent = intent.getStringExtra("gender"); // expected "MALE"/"FEMALE" hoặc null
@@ -157,12 +156,15 @@ public class EditInformationActivity extends AppCompatActivity {
                     int dayPos = dayAdapter.getPosition(dayStr);
                     if (dayPos >= 0) spDay.setSelection(dayPos);
                 }
+
             }
 
-            // Checkbox Student
+
             String studentStr = intent.getStringExtra("student");
             if (studentStr != null) {
                 cbStudent.setChecked(Boolean.parseBoolean(studentStr));
+            } else {
+                cbStudent.setChecked(false);
             }
         }
     }
@@ -172,7 +174,7 @@ public class EditInformationActivity extends AppCompatActivity {
         // Lấy dữ liệu từ giao diện
         String email       = etEmail.getText().toString().trim();
         String firstName   = etFirstName.getText().toString().trim();
-        String password    = etPassword.getText().toString().trim();
+        //String password    = etPassword.getText().toString().trim();
         String lastName    = etLastName.getText().toString().trim();
         String phoneNumber = etPhoneNumber.getText().toString().trim();
         String userRank    = etUserRank.getText().toString().trim();
@@ -203,7 +205,7 @@ public class EditInformationActivity extends AppCompatActivity {
         UpdateMyInfor updateUser = new UpdateMyInfor();
         updateUser.setId(id);
         updateUser.setUsername(username);
-        updateUser.setPassword(password);
+        //updateUser.setPassword(password);
         updateUser.setEmail(email);
         updateUser.setFirstName(firstName);
         updateUser.setLastName(lastName);
@@ -256,4 +258,5 @@ public class EditInformationActivity extends AppCompatActivity {
             }
         });
     }
+
 }
