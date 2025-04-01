@@ -34,9 +34,9 @@ public class QRCodeActivity extends AppCompatActivity {
     private Handler handler = new Handler();
 
     private long timeoutTimeMillis;
-    private String orderId; // orderId từ Intent
+    private String orderId;
     private boolean hasRedirected = false;
-    private int overallTotalPrice, totalPrice, depositAmount,paymentAmount;
+    private int overallTotalPrice, totalPrice, depositAmount, paymentAmount;
     private boolean isDeposit;
     private String orderStatus, totalTime, selectedDate, source, courtId;
 
@@ -75,10 +75,10 @@ public class QRCodeActivity extends AppCompatActivity {
         String qrCodeData = getIntent().getStringExtra("qrCodeData");
         String paymentTimeoutStr = getIntent().getStringExtra("paymentTimeout");
         orderId = getIntent().getStringExtra("orderId");
-        Log.d("QRCode","orderId: "+ orderId);
+        Log.d("QRCode", "orderId: " + orderId);
         totalTime = getIntent().getStringExtra("totalTime");
         selectedDate = getIntent().getStringExtra("selectedDate");
-        totalPrice = getIntent().getIntExtra("totalPrice", 0);
+        totalPrice = getIntent().getIntExtra("totalPrice", 0); // Nhận totalPrice
         source = getIntent().getStringExtra("source");
         depositAmount = getIntent().getIntExtra("depositAmount", 0);
         overallTotalPrice = getIntent().getIntExtra("overallTotalPrice", 0);
@@ -87,25 +87,68 @@ public class QRCodeActivity extends AppCompatActivity {
         courtId = getIntent().getStringExtra("courtId");
         paymentAmount = getIntent().getIntExtra("paymentAmount", 0);
 
-        if (paymentTimeoutStr != null && !paymentTimeoutStr.isEmpty()) {
-            try {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS", Locale.getDefault());
-                sdf.setTimeZone(TimeZone.getTimeZone("GMT+7"));
-                Date timeoutDate = sdf.parse(paymentTimeoutStr);
-                timeoutTimeMillis = timeoutDate.getTime();
-            } catch (Exception e) {
-                Log.e("QRCodeActivity", "Lỗi parse paymentTimeout: " + e.getMessage());
-                timeoutTimeMillis = System.currentTimeMillis() + 15 * 60 * 1000; // Mặc định 15 phút
+        // Nếu không có qrCodeData, gọi API để lấy
+        if (qrCodeData == null || qrCodeData.isEmpty()) {
+            if (orderId != null && !orderId.isEmpty()) {
+                fetchOrderDetails(orderId);
+            } else {
+                Toast.makeText(this, "Không có orderId để lấy dữ liệu QR Code", Toast.LENGTH_SHORT).show();
+                return;
             }
         } else {
-            timeoutTimeMillis = System.currentTimeMillis() + 15 * 60 * 1000; // Mặc định 15 phút nếu không có paymentTimeout
+            processQRCodeData(qrCodeData, paymentTimeoutStr);
         }
 
-        if (qrCodeData == null || qrCodeData.isEmpty()) {
-            Toast.makeText(this, "Không có dữ liệu QR Code", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        btnBack.setOnClickListener(v -> {
+            Intent intent = new Intent(QRCodeActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        });
 
+        timeoutHandler.post(updateTimeoutRunnable);
+
+        if (orderId != null && !orderId.isEmpty()) {
+            socketListener = new PaymentSocketListener(orderId, new ExtendedPaymentStatusCallback() {
+                @Override
+                public void onPaymentSuccess(String orderIdFromSocket) {
+                    runOnUiThread(() -> handlePaymentSuccess(orderIdFromSocket));
+                }
+                @Override
+                public void onPaymentFailure(String error) {
+                    runOnUiThread(() -> navigateToPaymentFailed());
+                }
+            });
+            socketListener.connect();
+        }
+    }
+
+    private void fetchOrderDetails(String orderId) {
+        Call<Orders> call = RetrofitClient.getApiService(this).getOrderById(orderId);
+        NetworkUtils.callApi(call, this, new NetworkUtils.ApiCallback<Orders>() {
+            @Override
+            public void onSuccess(Orders order) {
+                if (order != null) {
+                    String qrCodeData = order.getQrcode();
+                    String paymentTimeoutStr = order.getPaymentTimeout();
+                    if (qrCodeData != null && !qrCodeData.isEmpty()) {
+                        processQRCodeData(qrCodeData, paymentTimeoutStr);
+                    } else {
+                        Toast.makeText(QRCodeActivity.this, "Không có dữ liệu QR Code từ API", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(QRCodeActivity.this, "Không thể lấy thông tin đơn hàng", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                Log.e("QRCodeActivity", "Lỗi khi lấy dữ liệu: " + errorMessage);
+                Toast.makeText(QRCodeActivity.this, "Lỗi khi lấy dữ liệu", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void processQRCodeData(String qrCodeData, String paymentTimeoutStr) {
         try {
             BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
             Bitmap bitmap = barcodeEncoder.encodeBitmap(qrCodeData, BarcodeFormat.QR_CODE, 320, 320);
@@ -119,36 +162,25 @@ public class QRCodeActivity extends AppCompatActivity {
             String formattedDeposit = decimalFormat.format(depositAmount);
             tvWarning.setText("Vui lòng chuyển khoản " + formattedDeposit + "₫ để hoàn tất đặt cọc!");
         } else {
-            String formattedPaymentAmount = decimalFormat.format(paymentAmount);
-            tvWarning.setText("Vui lòng chuyển khoản " + formattedPaymentAmount + "₫ để hoàn tất đặt lịch!");
+            String formattedPaymentAmount = decimalFormat.format(paymentAmount > 0 ? paymentAmount : totalPrice);
+            tvWarning.setText("Vui lòng chuyển khoản " + formattedPaymentAmount + "₫ để hoàn tất thanh toán!");
         }
 
-        btnBack.setOnClickListener(v -> {
-            Intent intent = new Intent(QRCodeActivity.this, MainActivity.class);
-            startActivity(intent);
-            finish();
-        });
+        if (paymentTimeoutStr != null && !paymentTimeoutStr.isEmpty()) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS", Locale.getDefault());
+                sdf.setTimeZone(TimeZone.getTimeZone("GMT+7"));
+                Date timeoutDate = sdf.parse(paymentTimeoutStr);
+                timeoutTimeMillis = timeoutDate.getTime();
+            } catch (Exception e) {
+                Log.e("QRCodeActivity", "Lỗi parse paymentTimeout: " + e.getMessage());
+                timeoutTimeMillis = System.currentTimeMillis() + 15 * 60 * 1000; // Mặc định 15 phút
+            }
+        } else {
+            timeoutTimeMillis = System.currentTimeMillis() + 15 * 60 * 1000; // Mặc định 15 phút
+        }
 
         startCountdown();
-
-        timeoutHandler.post(updateTimeoutRunnable);
-
-        if (orderId != null && !orderId.isEmpty()) {
-            socketListener = new PaymentSocketListener(orderId, new ExtendedPaymentStatusCallback() {
-                @Override
-                public void onPaymentSuccess(String orderIdFromSocket) {
-                    runOnUiThread(() -> handlePaymentSuccess(orderIdFromSocket));
-                }
-                @Override
-                public void onPaymentFailure(String error) {
-                    runOnUiThread(() -> {
-                        //Toast.makeText(QRCodeActivity.this, "Thanh toán thất bại: " + error, Toast.LENGTH_SHORT).show();
-                        navigateToPaymentFailed();
-                    });
-                }
-            });
-            socketListener.connect();
-        }
     }
 
     private void startCountdown() {

@@ -14,6 +14,7 @@ import java.util.List;
 
 import Model.Orders;
 import Model.OrderDetail;
+import Model.OrderDetailGroup; // Đảm bảo import lớp OrderDetailGroup
 import SEP490.G9.DetailBookingActivity;
 import SEP490.G9.R;
 
@@ -41,11 +42,18 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.tvTitle.setText(order.getCourtName());
         holder.tvAddress.setText(order.getAddress());
 
+        // Kiểm tra và hiển thị thông tin chi tiết
         if (order.getOrderDetails() != null && !order.getOrderDetails().isEmpty()) {
-            String detailText = "Chi tiết: " + order.getOrderDetails().get(0).getCourtSlotName()
-                    + " " + order.getOrderDetails().get(0).getStartTime()
-                    + " - " + order.getOrderDetails().get(0).getEndTime();
-            holder.tvDetail.setText(detailText);
+            OrderDetailGroup firstGroup = order.getOrderDetails().get(0); // Lấy nhóm đầu tiên
+            if (firstGroup.getBookingSlots() != null && !firstGroup.getBookingSlots().isEmpty()) {
+                OrderDetail firstDetail = firstGroup.getBookingSlots().get(0); // Lấy slot đầu tiên trong nhóm
+                String detailText = "Chi tiết: " + firstDetail.getCourtSlotName()
+                        + " " + firstDetail.getStartTime()
+                        + " - " + firstDetail.getEndTime();
+                holder.tvDetail.setText(detailText);
+            } else {
+                holder.tvDetail.setText("Chi tiết: Không có");
+            }
         } else {
             holder.tvDetail.setText("Chi tiết: Không có");
         }
@@ -57,7 +65,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             intent.putExtra("totalPrice", order.getTotalAmount());
             intent.putExtra("totalTime", order.getTotalTime());
             intent.putExtra("orderStatus", order.getOrderStatus());
-            intent.putExtra("courtId", order.getCourtId()); // Thêm courtId vào Intent
+            intent.putExtra("courtId", order.getCourtId());
             context.startActivity(intent);
         });
     }

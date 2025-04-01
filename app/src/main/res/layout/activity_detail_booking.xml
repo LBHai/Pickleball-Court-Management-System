@@ -133,7 +133,6 @@
                     android:orientation="horizontal"
                     android:padding="15dp">
 
-                    <!-- Ảnh đại diện (Avatar) -->
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/imgAvatar"
                         android:layout_width="80dp"
@@ -144,7 +143,6 @@
                         android:src="@drawable/avatar"
                         app:shapeAppearanceOverlay="@style/CircleImageView" />
 
-                    <!-- Thông tin cột bên phải (được căn giữa) -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -162,7 +160,6 @@
                             android:textColor="#FFFFFF"
                             android:textSize="14sp" />
 
-                        <!-- Icon + text môn thể thao -->
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -291,6 +288,34 @@
                         android:text="Trạng thái thanh toán: Đã thanh toán"
                         android:textColor="#FFFFFF"
                         android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tvAmountPaid"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Số tiền đã trả: 0 đ"
+                        android:textColor="#ddfa88"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tvPaymentAmount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Số tiền cần thanh toán: 0 đ"
+                        android:textColor="#E44D39"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tvRefundAmount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Số tiền đã hoàn lại: 0 đ"
+                        android:textColor="#00FF00"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -320,7 +345,7 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Container cho 2 nút (chỉ hiển thị ở tab Thông tin Đặt lịch) -->
+            <!-- Container cho 2 nút -->
             <LinearLayout
                 android:id="@+id/btnContainer"
                 android:layout_width="match_parent"
@@ -350,11 +375,10 @@
                     android:textAllCaps="false"
                     android:backgroundTint="#e3b02c" />
             </LinearLayout>
-
         </LinearLayout>
     </ScrollView>
 
-    <!-- Nội dung tab Dịch vụ (mặc định ẩn) -->
+    <!-- Nội dung tab Dịch vụ -->
     <ScrollView
         android:id="@+id/layoutServiceDetail"
         android:layout_width="0dp"
@@ -381,5 +405,4 @@
                 android:textSize="14sp" />
         </LinearLayout>
     </ScrollView>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

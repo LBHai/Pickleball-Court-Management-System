@@ -96,7 +96,7 @@ public class BookingTableActivity extends AppCompatActivity {
         selectedDate = sdf.format(c.getTime());
         btnSelectDate.setText("Ngày: " + selectedDate);
 
-        selectedOrdersByDate.clear();
+        // Khởi tạo selectedOrdersByDate cho ngày mặc định
         selectedOrdersByDate.put(selectedDate, new HashMap<>());
 
         // Lấy thông tin người dùng trước khi tải slot
@@ -141,7 +141,6 @@ public class BookingTableActivity extends AppCompatActivity {
         SessionManager sessionManager = new SessionManager(this);
         String token = sessionManager.getToken();
         if (token == null) {
-            //makeText(this, "Chưa đăng nhập", Toast.LENGTH_SHORT).show();
             isStudent = false;
             fetchBookingSlots(courtId, selectedDate);
             return;
@@ -194,14 +193,12 @@ public class BookingTableActivity extends AppCompatActivity {
                     Calendar tmp = Calendar.getInstance();
                     tmp.set(y, m, d);
                     String newSelectedDate = sdf.format(tmp.getTime());
-                    if (!newSelectedDate.equals(selectedDate)) {
-                        selectedDate = newSelectedDate;
-                        btnSelectDate.setText("Ngày: " + selectedDate);
-                        selectedOrdersByDate.clear();
-                        selectedBookingsList.clear();
-                        selectedOrdersByDate.put(selectedDate, new HashMap<>());
-                        fetchBookingSlots(courtId, selectedDate);
+                    if (!selectedOrdersByDate.containsKey(newSelectedDate)) {
+                        selectedOrdersByDate.put(newSelectedDate, new HashMap<>());
                     }
+                    selectedDate = newSelectedDate;
+                    btnSelectDate.setText("Ngày: " + selectedDate);
+                    fetchBookingSlots(courtId, selectedDate);
                 },
                 year, month, day
         );
@@ -352,7 +349,6 @@ public class BookingTableActivity extends AppCompatActivity {
                                         order.setCourtSlotName(finalCourt.getCourtSlotName());
                                         order.setStartTime(finalSlot.getStartTime());
                                         order.setEndTime(finalSlot.getEndTime());
-                                        // Áp dụng giá dựa trên isStudent
                                         double price = isStudent ? finalSlot.getStudentPrice() : finalSlot.getDailyPrice();
                                         order.setDailyPrice(price);
                                         order.setDayBooking(finalDate);

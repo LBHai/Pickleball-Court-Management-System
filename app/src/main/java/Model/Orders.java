@@ -5,7 +5,7 @@ import java.util.Locale;
 
 public class Orders {
     private String id;
-    private String courtId; // Thêm trường courtId
+    private String courtId;
     private String courtName;
     private String address;
     private String bookingDate;
@@ -23,53 +23,16 @@ public class Orders {
     private int amountPaid;
     private int amountRefund;
     private String paymentTimeout;
-    private List<OrderDetail> orderDetails;
+    private List<OrderDetailGroup> orderDetails; // Đổi sang List<OrderDetailGroup>
     private String qrcode;
     private String createdAt;
+    private int depositAmount; // Đổi sang int
 
-    public Orders() {
-    }
-
-    public Orders(String totalTime, String id, String courtId, String courtName, String address, String bookingDate, String userId,
-                  String customerName, String phoneNumber, String note, String orderType, String orderStatus, String paymentStatus,
-                  String discountCode, int totalAmount, int discountAmount, int paymentAmount, int amountPaid, int amountRefund,
-                  String paymentTimeout, List<OrderDetail> orderDetails, String qrcode, String createdAt) {
-        this.id = id;
-        this.courtId = courtId; // Thêm vào constructor
-        this.courtName = courtName;
-        this.address = address;
-        this.bookingDate = bookingDate;
-        this.userId = userId;
-        this.customerName = customerName;
-        this.phoneNumber = phoneNumber;
-        this.note = note;
-        this.orderType = orderType;
-        this.orderStatus = orderStatus;
-        this.paymentStatus = paymentStatus;
-        this.discountCode = discountCode;
-        this.totalAmount = totalAmount;
-        this.discountAmount = discountAmount;
-        this.paymentAmount = paymentAmount;
-        this.amountPaid = amountPaid;
-        this.amountRefund = amountRefund;
-        this.paymentTimeout = paymentTimeout;
-        this.orderDetails = orderDetails;
-        this.qrcode = qrcode;
-        this.createdAt = createdAt;
-    }
-
-    // Getter và Setter cho courtId
-    public String getCourtId() {
-        return courtId;
-    }
-
-    public void setCourtId(String courtId) {
-        this.courtId = courtId;
-    }
-
-    // Các getter/setter khác giữ nguyên
+    // Constructors, Getters & Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
+    public String getCourtId() { return courtId; }
+    public void setCourtId(String courtId) { this.courtId = courtId; }
     public String getCourtName() { return courtName; }
     public void setCourtName(String courtName) { this.courtName = courtName; }
     public String getAddress() { return address; }
@@ -104,20 +67,24 @@ public class Orders {
     public void setAmountRefund(int amountRefund) { this.amountRefund = amountRefund; }
     public String getPaymentTimeout() { return paymentTimeout; }
     public void setPaymentTimeout(String paymentTimeout) { this.paymentTimeout = paymentTimeout; }
-    public List<OrderDetail> getOrderDetails() { return orderDetails; }
-    public void setOrderDetails(List<OrderDetail> orderDetails) { this.orderDetails = orderDetails; }
+    public List<OrderDetailGroup> getOrderDetails() { return orderDetails; }
+    public void setOrderDetails(List<OrderDetailGroup> orderDetails) { this.orderDetails = orderDetails; }
     public String getQrcode() { return qrcode; }
     public void setQrcode(String qrcode) { this.qrcode = qrcode; }
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+    public int getDepositAmount() { return depositAmount; }
+    public void setDepositAmount(int depositAmount) { this.depositAmount = depositAmount; }
 
     public String getTotalTime() {
         if (orderDetails == null || orderDetails.isEmpty()) {
             return "0h00";
         }
         int totalMinutes = 0;
-        for (OrderDetail detail : orderDetails) {
-            totalMinutes += calculateMinutes(detail.getStartTime(), detail.getEndTime());
+        for (OrderDetailGroup group : orderDetails) {
+            for (OrderDetail detail : group.getBookingSlots()) {
+                totalMinutes += calculateMinutes(detail.getStartTime(), detail.getEndTime());
+            }
         }
         int hours = totalMinutes / 60;
         int mins = totalMinutes % 60;

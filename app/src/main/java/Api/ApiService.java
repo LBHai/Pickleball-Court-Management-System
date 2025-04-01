@@ -81,5 +81,4 @@ public interface ApiService {
             @Query("courtId") String courtId,
             @Query("isMap") boolean isMap
     );
-
 }

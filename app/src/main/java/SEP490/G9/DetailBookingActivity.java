@@ -26,6 +26,7 @@ public class DetailBookingActivity extends AppCompatActivity {
     private View lineBookingInfo, lineServiceDetail;
     private ScrollView layoutBookingInfo, layoutServiceDetail;
     private TextView tvStadiumName, tvAddress, tvBookingDate, tvTotalTime, tvTotalPrice, tvPaymentStatus, tvPhonenumber, tvName, tvNote;
+    private TextView tvAmountPaid, tvPaymentAmount, tvRefundAmount;
     private Button btnCancelBooking, btnChangeBooking;
 
     private String orderId, totalTime, selectedDate, orderStatus, courtId;
@@ -56,6 +57,9 @@ public class DetailBookingActivity extends AppCompatActivity {
         tvName = findViewById(R.id.tvName);
         tvPhonenumber = findViewById(R.id.tvPhonenumber);
         tvNote = findViewById(R.id.tvNote);
+        tvAmountPaid = findViewById(R.id.tvAmountPaid);
+        tvPaymentAmount = findViewById(R.id.tvPaymentAmount);
+        tvRefundAmount = findViewById(R.id.tvRefundAmount);
         btnCancelBooking = findViewById(R.id.btnCancelBooking);
         btnChangeBooking = findViewById(R.id.btnChangeBooking);
 
@@ -79,17 +83,16 @@ public class DetailBookingActivity extends AppCompatActivity {
         selectedDate = getIntent().getStringExtra("selectedDate");
         totalPrice = getIntent().getIntExtra("totalPrice", 0);
         orderStatus = getIntent().getStringExtra("orderStatus");
-        Log.d("DetailBookingActivity", "orderStatus nhận được: " + orderStatus);
+        courtId = getIntent().getStringExtra("courtId");
+
         if (orderId == null || orderId.isEmpty()) {
             Toast.makeText(this, "Không có orderId", Toast.LENGTH_SHORT).show();
             return;
         }
-        courtId = getIntent().getStringExtra("courtId");
-        Log.d("DetailBookingActivity", "courtId nhận được: " + courtId);
 
         tvBookingDate.setText("Ngày: " + selectedDate);
         tvTotalTime.setText("Tổng thời gian: " + totalTime);
-        tvTotalPrice.setText("Tổng tiền: " + totalPrice + " đ");
+        tvTotalPrice.setText("Tổng tiền: " + formatMoney(totalPrice));
 
         updateButtonsBasedOnStatus(orderStatus);
         fetchOrderDetails(orderId);
@@ -150,18 +153,34 @@ public class DetailBookingActivity extends AppCompatActivity {
                 String phoneNumber = order.getPhoneNumber();
                 String note = order.getNote();
                 String updatedOrderStatus = order.getOrderStatus();
+                int amountPaid = order.getAmountPaid();
+                int paymentAmount = order.getPaymentAmount();
 
                 runOnUiThread(() -> {
                     tvStadiumName.setText("Tên sân: " + courtName);
-                    tvAddress.setText("Địa chỉ: "+ address);
+                    tvAddress.setText("Địa chỉ: " + address);
                     tvPaymentStatus.setText("Trạng thái thanh toán: " + paymentStatus);
                     tvName.setText("Khách Hàng: " + customerName);
                     tvPhonenumber.setText("SDT: " + phoneNumber);
                     tvNote.setText("Khách hàng ghi chú: " + ((note == null || note.isEmpty()) ? "Không có" : note));
+                    tvAmountPaid.setText("Số tiền đã trả: " + formatMoney(amountPaid));
+
+                    if ("Đã thanh toán".equals(paymentStatus)) {
+                        tvPaymentAmount.setText("Số tiền cần thanh toán: 0 đ");
+                        int refundAmount = getIntent().getIntExtra("refundAmount", 0);
+                        if (refundAmount > 0) {
+                            tvRefundAmount.setText("Số tiền đã hoàn lại: " + formatMoney(refundAmount));
+                            tvRefundAmount.setVisibility(View.VISIBLE);
+                        } else {
+                            tvRefundAmount.setVisibility(View.GONE);
+                        }
+                    } else {
+                        tvPaymentAmount.setText("Số tiền cần thanh toán: " + formatMoney(paymentAmount));
+                        tvRefundAmount.setVisibility(View.GONE);
+                    }
 
                     if (!updatedOrderStatus.equals(orderStatus)) {
                         orderStatus = updatedOrderStatus;
-                        Log.d("DetailBookingActivity", "orderStatus cập nhật: " + orderStatus);
                         updateButtonsBasedOnStatus(orderStatus);
                     }
                 });
@@ -175,15 +194,12 @@ public class DetailBookingActivity extends AppCompatActivity {
     }
 
     private void updateButtonsBasedOnStatus(String status) {
-        // Nếu trạng thái là hủy lịch hoặc thay đổi lịch thì ẩn 2 nút
         if ("Hủy đặt lịch".equals(status) ||
                 "Hủy đặt lịch do quá giờ thanh toán".equals(status) ||
-                "Thay đổi lịch đặt".equals(status) ||"Thay đổi lịch đặt thành công".equals(status)) {
+                "Thay đổi lịch đặt".equals(status) || "Thay đổi lịch đặt thành công".equals(status)) {
             btnCancelBooking.setVisibility(View.GONE);
             btnChangeBooking.setVisibility(View.GONE);
-        }
-        // Nếu trạng thái đang xử lý thì hiển thị nút Thanh toán và nút hủy
-        else if ("Đang xử lý".equals(status)) {
+        } else if ("Đang xử lý".equals(status)) {
             btnChangeBooking.setText("Thanh toán");
             btnChangeBooking.setVisibility(View.VISIBLE);
             btnCancelBooking.setVisibility(View.VISIBLE);
@@ -192,13 +208,11 @@ public class DetailBookingActivity extends AppCompatActivity {
                 intent.putExtra("orderId", orderId);
                 intent.putExtra("totalTime", totalTime);
                 intent.putExtra("selectedDate", selectedDate);
-                intent.putExtra("totalPrice", totalPrice);
+                intent.putExtra("totalPrice", totalPrice); // Truyền totalPrice
                 intent.putExtra("courtId", courtId);
                 startActivity(intent);
             });
-        }
-        // THÊM: Nếu trạng thái là "Đặt lịch thành công" thì hiển thị cả 2 nút với hành động thay đổi lịch đặt
-        else if ("Đặt lịch thành công".equals(status)) {
+        } else if ("Đặt lịch thành công".equals(status)) {
             btnChangeBooking.setText("Thay đổi lịch đặt");
             btnChangeBooking.setVisibility(View.VISIBLE);
             btnCancelBooking.setVisibility(View.VISIBLE);
@@ -209,15 +223,13 @@ public class DetailBookingActivity extends AppCompatActivity {
                         .setPositiveButton("Có", (dialog, which) -> {
                             Intent intent = new Intent(DetailBookingActivity.this, BookingTableActivity.class);
                             intent.putExtra("orderId", orderId);
-                            intent.putExtra("club_id", courtId); // Truyền courtId như club_id
+                            intent.putExtra("club_id", courtId);
                             startActivity(intent);
                         })
                         .setNegativeButton("Không", null)
                         .show();
             });
-        }
-        // Trường hợp mặc định (các trạng thái khác)
-        else {
+        } else {
             btnChangeBooking.setText("Thay đổi lịch đặt");
             btnChangeBooking.setVisibility(View.VISIBLE);
             btnCancelBooking.setVisibility(View.VISIBLE);
@@ -228,7 +240,7 @@ public class DetailBookingActivity extends AppCompatActivity {
                         .setPositiveButton("Có", (dialog, which) -> {
                             Intent intent = new Intent(DetailBookingActivity.this, BookingTableActivity.class);
                             intent.putExtra("orderId", orderId);
-                            intent.putExtra("club_id", courtId); // Truyền courtId như club_id
+                            intent.putExtra("club_id", courtId);
                             startActivity(intent);
                         })
                         .setNegativeButton("Không", null)
@@ -253,5 +265,9 @@ public class DetailBookingActivity extends AppCompatActivity {
         lineServiceDetail.setVisibility(View.VISIBLE);
         layoutBookingInfo.setVisibility(View.GONE);
         layoutServiceDetail.setVisibility(View.VISIBLE);
+    }
+
+    private String formatMoney(int amount) {
+        return new java.text.DecimalFormat("#,###").format(amount) + " ₫";
     }
 }
