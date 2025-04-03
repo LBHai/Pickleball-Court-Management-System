@@ -87,6 +87,7 @@ public class PaymentSuccessActivity extends AppCompatActivity {
                 finish();
             }
         });
+        btnBack.setOnClickListener(v -> goBackToMainActivity());
 
         // Xử lý nút Quay về: quay trở lại MainActivity
         btnQuayVe.setOnClickListener(new View.OnClickListener() {
@@ -97,5 +98,17 @@ public class PaymentSuccessActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+    }
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        goBackToMainActivity();
+    }
+    private void goBackToMainActivity() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
     }
 }

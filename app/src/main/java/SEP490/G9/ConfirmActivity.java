@@ -14,18 +14,22 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
+
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+
 import Api.ApiService;
 import Api.NetworkUtils;
 import Api.RetrofitClient;
@@ -192,9 +196,15 @@ public class ConfirmActivity extends AppCompatActivity {
         if (n == 1) {
             depositAmount = totalAmount;
         } else {
-            int pricePerSlot = overallTotalPrice / n;
-            int depositSlots = (int) Math.ceil(n / 3.0);
-            depositAmount = pricePerSlot * depositSlots;
+            List<Integer> slotPrices = new ArrayList<>();
+            for (ConfirmOrder o : confirmOrders) {
+                slotPrices.add((int) o.getDailyPrice());
+            }
+            Collections.sort(slotPrices); // Sắp xếp giá tăng dần
+            int k = (int) Math.ceil(n / 3.0); // Số slot cần cọc
+            for (int i = 0; i < k && i < slotPrices.size(); i++) {
+                depositAmount += slotPrices.get(i); // Tổng giá của k slot thấp nhất
+            }
         }
 
         final int finalTotalAmount = totalAmount;
@@ -234,7 +244,6 @@ public class ConfirmActivity extends AppCompatActivity {
         }
         req.setOrderDetails(orderDetailGroups);
 
-        // Extract slot prices to pass to DetailBookingActivity
         ArrayList<Integer> slotPrices = new ArrayList<>();
         for (ConfirmOrder o : confirmOrders) {
             slotPrices.add((int) o.getDailyPrice());
@@ -253,6 +262,7 @@ public class ConfirmActivity extends AppCompatActivity {
 
                     if (isDeposit) {
                         initialPaymentAmount = finalDepositAmount - amountPaid;
+                        // Điều chỉnh logic: nếu initialPaymentAmount < 0, vẫn giữ giá trị âm
                         paymentStatus = (initialPaymentAmount > 0) ? ((n == 1) ? "Chưa thanh toán" : "Chưa đặt cọc")
                                 : ((n == 1) ? "Đã thanh toán" : "Đã đặt cọc");
                     } else {
@@ -271,11 +281,11 @@ public class ConfirmActivity extends AppCompatActivity {
                     } else {
                         int tempRefund = Math.abs(initialPaymentAmount);
                         if (tempRefund > maxAllowedRefund) {
-                            computedPaymentAmount = -maxAllowedRefund;
+                            computedPaymentAmount = -maxAllowedRefund; // Giữ âm nếu vượt quá maxAllowedRefund
                             computedRefundAmount = maxAllowedRefund;
                             Toast.makeText(ConfirmActivity.this, "Số tiền hoàn lại tối đa là " + formatMoney(maxAllowedRefund), Toast.LENGTH_SHORT).show();
                         } else {
-                            computedPaymentAmount = 0;
+                            computedPaymentAmount = initialPaymentAmount; // Giữ giá trị âm như yêu cầu
                             computedRefundAmount = tempRefund;
                         }
                     }
@@ -375,7 +385,7 @@ public class ConfirmActivity extends AppCompatActivity {
                         i.putExtra("orderStatus", r.getOrderStatus());
                         i.putExtra("courtId", clubId);
                         i.putExtra("confirmOrdersJson", confirmOrdersJson);
-                        i.putIntegerArrayListExtra("slotPrices", slotPrices); // Pass slot prices
+                        i.putIntegerArrayListExtra("slotPrices", slotPrices);
                         startActivity(i);
                         finish();
                     } else {
@@ -387,7 +397,7 @@ public class ConfirmActivity extends AppCompatActivity {
                         i.putExtra("orderStatus", r.getOrderStatus());
                         i.putExtra("courtId", clubId);
                         i.putExtra("confirmOrdersJson", confirmOrdersJson);
-                        i.putIntegerArrayListExtra("slotPrices", slotPrices); // Pass slot prices
+                        i.putIntegerArrayListExtra("slotPrices", slotPrices);
                         startActivity(i);
                         finish();
                     }
@@ -531,5 +541,16 @@ public class ConfirmActivity extends AppCompatActivity {
                 Log.e("Notify", "Lỗi khi đăng ký FCM token cho key " + key, t);
             }
         });
+    }
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        goBackToMainActivity();
+    }
+    private void goBackToMainActivity() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
     }
 }

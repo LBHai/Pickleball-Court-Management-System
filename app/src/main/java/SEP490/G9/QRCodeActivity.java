@@ -262,7 +262,7 @@ public class QRCodeActivity extends AppCompatActivity {
         if (!hasRedirected && !isFinishing()) {
             hasRedirected = true;
             Log.d("QRCodeActivity", "Payment success với orderId: " + orderIdToUse);
-            Intent intent = new Intent(QRCodeActivity.this, DetailBookingActivity.class);
+            Intent intent = new Intent(QRCodeActivity.this, PaymentSuccessActivity.class);
             intent.putExtra("resCode", 200);
             intent.putExtra("orderId", orderIdToUse);
             intent.putExtra("totalTime", totalTime);
@@ -280,7 +280,7 @@ public class QRCodeActivity extends AppCompatActivity {
         if (!hasRedirected && !isFinishing()) {
             hasRedirected = true;
             Log.d("QRCodeActivity", "Navigating to DetailBookingActivity");
-            Intent intent = new Intent(QRCodeActivity.this, DetailBookingActivity.class);
+            Intent intent = new Intent(QRCodeActivity.this, PaymentFailedActivity.class);
             intent.putExtra("orderId", orderId);
             intent.putExtra("totalTime", totalTime);
             intent.putExtra("selectedDate", selectedDate);

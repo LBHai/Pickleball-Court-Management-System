@@ -38,8 +38,7 @@ public class DetailBookingActivity extends AppCompatActivity {
     private LinearLayout layoutBookingSlots;
 
     private String orderId, totalTime, orderStatus, courtId;
-    private int totalPrice; // From Intent
-    // Lấy slotPrices từ DataHolder
+    private int totalPrice;
     private ArrayList<Integer> slotPrices;
     private Handler handler = new Handler();
     private Runnable checkOrderStatusRunnable;
@@ -49,7 +48,7 @@ public class DetailBookingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_booking);
 
-        // Initialize UI components
+        // Khởi tạo các thành phần giao diện
         btnBack = findViewById(R.id.btnBack);
         tvTitleMain = findViewById(R.id.tvTitleMain);
         tvTabBookingInfo = findViewById(R.id.tvTabBookingInfo);
@@ -73,7 +72,7 @@ public class DetailBookingActivity extends AppCompatActivity {
         btnChangeBooking = findViewById(R.id.btnChangeBooking);
         layoutBookingSlots = findViewById(R.id.layoutBookingSlots);
 
-        // Button listeners
+        // Xử lý sự kiện nút Hủy đặt lịch
         btnCancelBooking.setOnClickListener(v -> {
             new AlertDialog.Builder(this)
                     .setTitle("Xác nhận")
@@ -83,54 +82,59 @@ public class DetailBookingActivity extends AppCompatActivity {
                     .show();
         });
 
-        btnBack.setOnClickListener(v -> {
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-            finish();
-        });
+        // Xử lý sự kiện nút Quay lại
+        btnBack.setOnClickListener(v -> goBackToMainActivity());
 
-        // Retrieve Intent data
+        // Lấy dữ liệu từ Intent
         orderId = getIntent().getStringExtra("orderId");
         totalTime = getIntent().getStringExtra("totalTime");
         totalPrice = getIntent().getIntExtra("totalPrice", 0);
         orderStatus = getIntent().getStringExtra("orderStatus");
         courtId = getIntent().getStringExtra("courtId");
 
-        // Lấy slotPrices từ DataHolder thay vì Intent
-        slotPrices = DataHolder.getInstance().getSlotPrices();
-        // Log Intent data for debugging
+        // Lấy slotPrices: Mặc định từ DataHolder, nếu có thay đổi lịch thì lấy từ Intent
+        slotPrices = DataHolder.getInstance().getSlotPrices(); // Lấy từ DataHolder trước
+        ArrayList<Integer> intentSlotPrices = getIntent().getIntegerArrayListExtra("slotPrices");
+        if (intentSlotPrices != null && !intentSlotPrices.isEmpty()) {
+            slotPrices = intentSlotPrices; // Nếu Intent có dữ liệu, ưu tiên dùng từ Intent
+        }
+
         Log.d("DetailBookingActivity", "Intent Data - orderId: " + orderId + ", totalTime: " + totalTime +
                 ", totalPrice: " + totalPrice + ", slotPrices: " + (slotPrices != null ? slotPrices.toString() : "null"));
 
-        // Validate orderId
+        // Kiểm tra orderId
         if (orderId == null || orderId.isEmpty()) {
             Toast.makeText(this, "Không có orderId", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        // Set initial UI values with Intent data
+        // Hiển thị thông tin ban đầu
         tvTotalTime.setText("Tổng thời gian: " + (totalTime != null ? totalTime : "N/A"));
-        tvTotalPrice.setText("Tổng tiền: " + formatMoney(totalPrice)); // Initial display from Intent
+        tvTotalPrice.setText("Tổng tiền: " + formatMoney(totalPrice));
 
-        // Update buttons based on initial status
         updateButtonsBasedOnStatus(orderStatus);
-
-        // Fetch order details from API
         fetchOrderDetails(orderId);
 
-        // Periodic status check
+        // Cập nhật trạng thái định kỳ
         checkOrderStatusRunnable = new Runnable() {
             @Override
             public void run() {
                 fetchOrderDetails(orderId);
-                handler.postDelayed(this, 10000); // Lên lịch lại Runnable sau 10000ms
+                handler.postDelayed(this, 10000);
             }
         };
         handler.postDelayed(checkOrderStatusRunnable, 10000);
-        // Tab listeners
+
+        // Xử lý sự kiện chuyển tab
         tvTabBookingInfo.setOnClickListener(v -> showBookingInfoTab());
         tvTabServiceDetail.setOnClickListener(v -> showServiceDetailTab());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        fetchOrderDetails(orderId); // Cập nhật ngay khi quay lại activity
     }
 
     @Override
@@ -175,7 +179,6 @@ public class DetailBookingActivity extends AppCompatActivity {
                     return;
                 }
 
-                // Log API response for debugging
                 Log.d("DetailBookingActivity", "API Response - totalAmount: " + order.getTotalAmount());
                 for (OrderDetail detail : order.getOrderDetails()) {
                     Log.d("DetailBookingActivity", "Slot: " + detail.getCourtSlotName() + ", Price: " + detail.getPrice());
@@ -193,7 +196,6 @@ public class DetailBookingActivity extends AppCompatActivity {
                 int refundAmount = order.getAmountRefund();
 
                 runOnUiThread(() -> {
-                    // Update UI with API data
                     tvStadiumName.setText("Tên sân: " + (courtName != null ? courtName : "N/A"));
                     tvAddress.setText("Địa chỉ: " + (address != null ? address : "N/A"));
                     tvPaymentStatus.setText("Trạng thái thanh toán: " + (paymentStatus != null ? paymentStatus : "N/A"));
@@ -201,12 +203,14 @@ public class DetailBookingActivity extends AppCompatActivity {
                     tvPhonenumber.setText("SDT: " + (phoneNumber != null ? phoneNumber : "N/A"));
                     tvNote.setText("Khách hàng ghi chú: " + (note == null || note.isEmpty() ? "Không có" : note));
                     tvAmountPaid.setText("Số tiền đã trả: " + formatMoney(amountPaid));
-
-                    // Update total price with API data
                     tvTotalPrice.setText("Tổng tiền: " + formatMoney(order.getTotalAmount()));
 
-                    if ("Đã thanh toán".equals(paymentStatus)) {
-                        tvPaymentAmount.setText("Số tiền cần thanh toán: 0 đ");
+                    if ("Đã thanh toán".equals(paymentStatus) || "Đã đặt cọc".equals(paymentStatus)) {
+                        if (paymentAmount < 0) {
+                            tvPaymentAmount.setText("Số tiền thừa: " + formatMoney(Math.abs(paymentAmount)));
+                        } else {
+                            tvPaymentAmount.setText("Số tiền cần thanh toán: " + formatMoney(paymentAmount));
+                        }
                         if (refundAmount > 0) {
                             tvRefundAmount.setText("Số tiền đã hoàn lại: " + formatMoney(refundAmount));
                             tvRefundAmount.setVisibility(View.VISIBLE);
@@ -218,10 +222,8 @@ public class DetailBookingActivity extends AppCompatActivity {
                         tvRefundAmount.setVisibility(View.GONE);
                     }
 
-                    // Build slot UI với dữ liệu từ API và dùng slotPrices từ DataHolder nếu có
                     buildBookingSlotsUI(order);
 
-                    // Update button states if status changed
                     if (!updatedOrderStatus.equals(orderStatus)) {
                         orderStatus = updatedOrderStatus;
                         updateButtonsBasedOnStatus(orderStatus);
@@ -257,7 +259,7 @@ public class DetailBookingActivity extends AppCompatActivity {
             }
         }
 
-        int priceIndex = 0; // Index để theo dõi slotPrices từ DataHolder
+        int priceIndex = 0;
 
         for (Map.Entry<String, List<OrderDetail>> entry : slotsByDate.entrySet()) {
             String date = entry.getKey();
@@ -275,14 +277,8 @@ public class DetailBookingActivity extends AppCompatActivity {
                 tvSlot.setTextColor(Color.WHITE);
                 tvSlot.setTextSize(14);
 
-                // Sử dụng slotPrices từ DataHolder nếu có, ngược lại dùng giá từ API
-                int slotPrice = 0;
-                if (slotPrices != null && priceIndex < slotPrices.size()) {
-                    slotPrice = slotPrices.get(priceIndex);
-                    priceIndex++;
-                } else {
-                    slotPrice = detail.getPrice();
-                }
+                // Sử dụng slotPrices từ DataHolder hoặc Intent nếu có, nếu không thì dùng giá từ API
+                int slotPrice = (slotPrices != null && priceIndex < slotPrices.size()) ? slotPrices.get(priceIndex++) : detail.getPrice();
 
                 String slotDetail = "   - " + detail.getCourtSlotName() + ": " +
                         detail.getStartTime().substring(0, 5) + " - " +
@@ -311,7 +307,7 @@ public class DetailBookingActivity extends AppCompatActivity {
                 intent.putExtra("totalTime", totalTime);
                 intent.putExtra("totalPrice", totalPrice);
                 intent.putExtra("courtId", courtId);
-                // Không cần truyền slotPrices vì đã lấy từ DataHolder
+                intent.putIntegerArrayListExtra("slotPrices", slotPrices);
                 startActivity(intent);
             });
         } else if ("Đặt lịch thành công".equals(status)) {
@@ -376,5 +372,16 @@ public class DetailBookingActivity extends AppCompatActivity {
     private int toMinutes(String time) {
         String[] parts = time.split(":");
         return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]);
+    }
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        goBackToMainActivity();
+    }
+    private void goBackToMainActivity() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
     }
 }

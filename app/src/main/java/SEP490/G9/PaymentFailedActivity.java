@@ -34,12 +34,7 @@ public class PaymentFailedActivity extends AppCompatActivity {
         orderStatus = getIntent().getStringExtra("orderStatus");
         courtId = getIntent().getStringExtra("courtId");
 
-        btnBack.setOnClickListener(v -> {
-            Intent intent = new Intent(PaymentFailedActivity.this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-            finish();
-        });
+        btnBack.setOnClickListener(v -> goBackToMainActivity());
 
         // Khi nhấn nút History: chuyển sang DetailBookingActivity và truyền orderId (có thể truyền thêm các dữ liệu khác nếu cần)
         btnHistory.setOnClickListener(v -> {
@@ -56,5 +51,16 @@ public class PaymentFailedActivity extends AppCompatActivity {
             finish();
         });
 
+    }
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        goBackToMainActivity();
+    }
+    private void goBackToMainActivity() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
     }
 }
