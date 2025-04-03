@@ -5,9 +5,8 @@ public class ConfirmOrder {
     private String courtSlotName;
     private String startTime;
     private String endTime;
-    private double dailyPrice; // hoặc int, tùy thuộc vào yêu cầu
+    private double dailyPrice;
     private String dayBooking;
-    // Thêm getter và setter cho courtSlotId
     public String getCourtSlotId() {
         return courtSlotId;
     }

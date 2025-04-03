@@ -9,6 +9,8 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 public class PaymentSuccessActivity extends AppCompatActivity {
 
     private TextView tvTitle, tvSubTitle;
@@ -16,6 +18,7 @@ public class PaymentSuccessActivity extends AppCompatActivity {
     private ImageButton btnBack;
     private String orderId, totalTime, selectedDate,courtId;
     private int totalPrice;
+    private ArrayList<Integer> slotPrices; // Sửa từ IntegerArrayList -> ArrayList<Integer>
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +41,16 @@ public class PaymentSuccessActivity extends AppCompatActivity {
             totalPrice = intent.getIntExtra("totalPrice", 0);
             courtId = intent.getStringExtra("courtId");
 
+        }
+        slotPrices = getIntent().getIntegerArrayListExtra("slotPrices");
+
+        // In log danh sách giá nếu slotPrices không null
+        if (slotPrices != null) {
+            for (Integer price : slotPrices) {
+                Log.d("QRCodeActivity", "Slot price: " + price);
+            }
+        } else {
+            Log.d("QRCodeActivity", "Không có dữ liệu slotPrices được truyền qua Intent");
         }
 
         // Log giá trị orderId nhận được
@@ -68,7 +81,8 @@ public class PaymentSuccessActivity extends AppCompatActivity {
                 detailIntent.putExtra("selectedDate", selectedDate);
                 detailIntent.putExtra("totalPrice", totalPrice);
                 detailIntent.putExtra("courtId", courtId);
-                Log.d("DetailBookingActivity", "courtId truyen di: " + courtId);
+                detailIntent.putIntegerArrayListExtra("slotPrices", getIntent().getIntegerArrayListExtra("slotPrices")); // Truyền tiếp slotPrices
+                Log.d("Paymentsuscess", "slotPrices truyen di: " + slotPrices);
                 startActivity(detailIntent);
                 finish();
             }

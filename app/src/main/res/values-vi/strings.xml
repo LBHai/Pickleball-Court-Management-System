@@ -36,13 +36,13 @@
     </string-array>
 
     <string name="avatar">Ảnh đại diện</string>
-<!--    <string name="so_dien_thoai" >Số điện thoại</string>-->
-<!--    <string name="ma_quoc_gia">Mã quốc gia</string>-->
-<!--    <string name="nhap_so_dien_thoai">Nhập số điện thoại</string>-->
-<!--    <string name="ten_day_du">Tên đầy đủ</string>-->
-<!--    <string name="gioi_tinh">Giới tính</string>-->
-<!--    <string name="ngay_sinh">Ngày sinh</string>-->
-<!--    <string name="luu">Lưu</string>-->
+    <!--    <string name="so_dien_thoai" >Số điện thoại</string>-->
+    <!--    <string name="ma_quoc_gia">Mã quốc gia</string>-->
+    <!--    <string name="nhap_so_dien_thoai">Nhập số điện thoại</string>-->
+    <!--    <string name="ten_day_du">Tên đầy đủ</string>-->
+    <!--    <string name="gioi_tinh">Giới tính</string>-->
+    <!--    <string name="ngay_sinh">Ngày sinh</string>-->
+    <!--    <string name="luu">Lưu</string>-->
 
     <!-- Mảng ngày (1-31) -->
     <string-array name="day_array">
@@ -70,5 +70,8 @@
         <!-- ... -->
         <item>2030</item>
     </string-array>
+    <string name="old_password">Mật khẩu cũ</string>
+    <string name="new_password">Mật khẩu mới</string>
+    <string name="re_enter_new_password">Nhập lại mật khẩu mới</string>
 
 </resources>

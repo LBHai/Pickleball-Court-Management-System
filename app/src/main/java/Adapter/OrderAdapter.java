@@ -14,7 +14,6 @@ import java.util.List;
 
 import Model.Orders;
 import Model.OrderDetail;
-import Model.OrderDetailGroup; // Đảm bảo import lớp OrderDetailGroup
 import SEP490.G9.DetailBookingActivity;
 import SEP490.G9.R;
 
@@ -28,7 +27,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     }
 
     @Override
-    public OrderAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_order_history, parent, false);
         return new ViewHolder(view);
     }
@@ -44,16 +43,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         // Kiểm tra và hiển thị thông tin chi tiết
         if (order.getOrderDetails() != null && !order.getOrderDetails().isEmpty()) {
-            OrderDetailGroup firstGroup = order.getOrderDetails().get(0); // Lấy nhóm đầu tiên
-            if (firstGroup.getBookingSlots() != null && !firstGroup.getBookingSlots().isEmpty()) {
-                OrderDetail firstDetail = firstGroup.getBookingSlots().get(0); // Lấy slot đầu tiên trong nhóm
-                String detailText = "Chi tiết: " + firstDetail.getCourtSlotName()
-                        + " " + firstDetail.getStartTime()
-                        + " - " + firstDetail.getEndTime();
-                holder.tvDetail.setText(detailText);
-            } else {
-                holder.tvDetail.setText("Chi tiết: Không có");
-            }
+            OrderDetail firstDetail = order.getOrderDetails().get(0); // Lấy slot đầu tiên
+            String detailText = "Chi tiết: " + firstDetail.getCourtSlotName()
+                    + " " + firstDetail.getStartTime().substring(0, 5)
+                    + " - " + firstDetail.getEndTime().substring(0, 5);
+            holder.tvDetail.setText(detailText);
         } else {
             holder.tvDetail.setText("Chi tiết: Không có");
         }
@@ -61,7 +55,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, DetailBookingActivity.class);
             intent.putExtra("orderId", order.getId());
-            intent.putExtra("selectedDate", order.getBookingDate());
+            // Xử lý selectedDate từ OrderDetail thay vì Orders
+            if (order.getOrderDetails() != null && !order.getOrderDetails().isEmpty()) {
+                OrderDetail firstDetail = order.getOrderDetails().get(0);
+                if (firstDetail.getBookingDates() != null && !firstDetail.getBookingDates().isEmpty()) {
+                    intent.putExtra("selectedDate", firstDetail.getBookingDates().get(0));
+                }
+            }
             intent.putExtra("totalPrice", order.getTotalAmount());
             intent.putExtra("totalTime", order.getTotalTime());
             intent.putExtra("orderStatus", order.getOrderStatus());

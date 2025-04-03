@@ -1,7 +1,5 @@
 package SEP490.G9;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -10,13 +8,22 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import Api.NetworkUtils;
 import Api.RetrofitClient;
+import Model.OrderDetail;
 import Model.Orders;
 import retrofit2.Call;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import Holder.DataHolder;
 
 public class DetailBookingActivity extends AppCompatActivity {
 
@@ -28,10 +35,12 @@ public class DetailBookingActivity extends AppCompatActivity {
     private TextView tvStadiumName, tvAddress, tvBookingDate, tvTotalTime, tvTotalPrice, tvPaymentStatus, tvPhonenumber, tvName, tvNote;
     private TextView tvAmountPaid, tvPaymentAmount, tvRefundAmount;
     private Button btnCancelBooking, btnChangeBooking;
+    private LinearLayout layoutBookingSlots;
 
-    private String orderId, totalTime, selectedDate, orderStatus, courtId;
-    private int totalPrice;
-
+    private String orderId, totalTime, orderStatus, courtId;
+    private int totalPrice; // From Intent
+    // Lấy slotPrices từ DataHolder
+    private ArrayList<Integer> slotPrices;
     private Handler handler = new Handler();
     private Runnable checkOrderStatusRunnable;
 
@@ -40,6 +49,7 @@ public class DetailBookingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_booking);
 
+        // Initialize UI components
         btnBack = findViewById(R.id.btnBack);
         tvTitleMain = findViewById(R.id.tvTitleMain);
         tvTabBookingInfo = findViewById(R.id.tvTabBookingInfo);
@@ -50,7 +60,6 @@ public class DetailBookingActivity extends AppCompatActivity {
         layoutServiceDetail = findViewById(R.id.layoutServiceDetail);
         tvStadiumName = findViewById(R.id.tvStadiumName);
         tvAddress = findViewById(R.id.tvAddress);
-        tvBookingDate = findViewById(R.id.tvBookingDate);
         tvTotalTime = findViewById(R.id.tvTotalTime);
         tvTotalPrice = findViewById(R.id.tvTotalPrice);
         tvPaymentStatus = findViewById(R.id.tvPaymentStatus);
@@ -62,9 +71,11 @@ public class DetailBookingActivity extends AppCompatActivity {
         tvRefundAmount = findViewById(R.id.tvRefundAmount);
         btnCancelBooking = findViewById(R.id.btnCancelBooking);
         btnChangeBooking = findViewById(R.id.btnChangeBooking);
+        layoutBookingSlots = findViewById(R.id.layoutBookingSlots);
 
+        // Button listeners
         btnCancelBooking.setOnClickListener(v -> {
-            new AlertDialog.Builder(DetailBookingActivity.this)
+            new AlertDialog.Builder(this)
                     .setTitle("Xác nhận")
                     .setMessage("Bạn có chắc chắn là muốn hủy đặt lịch không?")
                     .setPositiveButton("Có", (dialog, which) -> cancelOrder(orderId))
@@ -73,39 +84,51 @@ public class DetailBookingActivity extends AppCompatActivity {
         });
 
         btnBack.setOnClickListener(v -> {
-            Intent intent = new Intent(DetailBookingActivity.this, MainActivity.class);
+            Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
             finish();
         });
 
+        // Retrieve Intent data
         orderId = getIntent().getStringExtra("orderId");
         totalTime = getIntent().getStringExtra("totalTime");
-        selectedDate = getIntent().getStringExtra("selectedDate");
         totalPrice = getIntent().getIntExtra("totalPrice", 0);
         orderStatus = getIntent().getStringExtra("orderStatus");
         courtId = getIntent().getStringExtra("courtId");
 
+        // Lấy slotPrices từ DataHolder thay vì Intent
+        slotPrices = DataHolder.getInstance().getSlotPrices();
+        // Log Intent data for debugging
+        Log.d("DetailBookingActivity", "Intent Data - orderId: " + orderId + ", totalTime: " + totalTime +
+                ", totalPrice: " + totalPrice + ", slotPrices: " + (slotPrices != null ? slotPrices.toString() : "null"));
+
+        // Validate orderId
         if (orderId == null || orderId.isEmpty()) {
             Toast.makeText(this, "Không có orderId", Toast.LENGTH_SHORT).show();
+            finish();
             return;
         }
 
-        tvBookingDate.setText("Ngày: " + selectedDate);
-        tvTotalTime.setText("Tổng thời gian: " + totalTime);
-        tvTotalPrice.setText("Tổng tiền: " + formatMoney(totalPrice));
+        // Set initial UI values with Intent data
+        tvTotalTime.setText("Tổng thời gian: " + (totalTime != null ? totalTime : "N/A"));
+        tvTotalPrice.setText("Tổng tiền: " + formatMoney(totalPrice)); // Initial display from Intent
 
+        // Update buttons based on initial status
         updateButtonsBasedOnStatus(orderStatus);
+
+        // Fetch order details from API
         fetchOrderDetails(orderId);
 
+        // Periodic status check
         checkOrderStatusRunnable = new Runnable() {
             @Override
             public void run() {
                 fetchOrderDetails(orderId);
-                handler.postDelayed(this, 500);
+                handler.postDelayed(this, 10000); // Lên lịch lại Runnable sau 10000ms
             }
         };
-        handler.postDelayed(checkOrderStatusRunnable, 500);
-
+        handler.postDelayed(checkOrderStatusRunnable, 10000);
+        // Tab listeners
         tvTabBookingInfo.setOnClickListener(v -> showBookingInfoTab());
         tvTabServiceDetail.setOnClickListener(v -> showServiceDetailTab());
     }
@@ -146,6 +169,18 @@ public class DetailBookingActivity extends AppCompatActivity {
         NetworkUtils.callApi(call, this, new NetworkUtils.ApiCallback<Orders>() {
             @Override
             public void onSuccess(Orders order) {
+                if (order == null) {
+                    Log.e("DetailBookingActivity", "Order is null from API");
+                    runOnUiThread(() -> Toast.makeText(DetailBookingActivity.this, "Không thể tải dữ liệu đơn hàng", Toast.LENGTH_SHORT).show());
+                    return;
+                }
+
+                // Log API response for debugging
+                Log.d("DetailBookingActivity", "API Response - totalAmount: " + order.getTotalAmount());
+                for (OrderDetail detail : order.getOrderDetails()) {
+                    Log.d("DetailBookingActivity", "Slot: " + detail.getCourtSlotName() + ", Price: " + detail.getPrice());
+                }
+
                 String courtName = order.getCourtName();
                 String address = order.getAddress();
                 String paymentStatus = order.getPaymentStatus();
@@ -155,19 +190,23 @@ public class DetailBookingActivity extends AppCompatActivity {
                 String updatedOrderStatus = order.getOrderStatus();
                 int amountPaid = order.getAmountPaid();
                 int paymentAmount = order.getPaymentAmount();
+                int refundAmount = order.getAmountRefund();
 
                 runOnUiThread(() -> {
-                    tvStadiumName.setText("Tên sân: " + courtName);
-                    tvAddress.setText("Địa chỉ: " + address);
-                    tvPaymentStatus.setText("Trạng thái thanh toán: " + paymentStatus);
-                    tvName.setText("Khách Hàng: " + customerName);
-                    tvPhonenumber.setText("SDT: " + phoneNumber);
-                    tvNote.setText("Khách hàng ghi chú: " + ((note == null || note.isEmpty()) ? "Không có" : note));
+                    // Update UI with API data
+                    tvStadiumName.setText("Tên sân: " + (courtName != null ? courtName : "N/A"));
+                    tvAddress.setText("Địa chỉ: " + (address != null ? address : "N/A"));
+                    tvPaymentStatus.setText("Trạng thái thanh toán: " + (paymentStatus != null ? paymentStatus : "N/A"));
+                    tvName.setText("Khách Hàng: " + (customerName != null ? customerName : "N/A"));
+                    tvPhonenumber.setText("SDT: " + (phoneNumber != null ? phoneNumber : "N/A"));
+                    tvNote.setText("Khách hàng ghi chú: " + (note == null || note.isEmpty() ? "Không có" : note));
                     tvAmountPaid.setText("Số tiền đã trả: " + formatMoney(amountPaid));
+
+                    // Update total price with API data
+                    tvTotalPrice.setText("Tổng tiền: " + formatMoney(order.getTotalAmount()));
 
                     if ("Đã thanh toán".equals(paymentStatus)) {
                         tvPaymentAmount.setText("Số tiền cần thanh toán: 0 đ");
-                        int refundAmount = getIntent().getIntExtra("refundAmount", 0);
                         if (refundAmount > 0) {
                             tvRefundAmount.setText("Số tiền đã hoàn lại: " + formatMoney(refundAmount));
                             tvRefundAmount.setVisibility(View.VISIBLE);
@@ -179,6 +218,10 @@ public class DetailBookingActivity extends AppCompatActivity {
                         tvRefundAmount.setVisibility(View.GONE);
                     }
 
+                    // Build slot UI với dữ liệu từ API và dùng slotPrices từ DataHolder nếu có
+                    buildBookingSlotsUI(order);
+
+                    // Update button states if status changed
                     if (!updatedOrderStatus.equals(orderStatus)) {
                         orderStatus = updatedOrderStatus;
                         updateButtonsBasedOnStatus(orderStatus);
@@ -189,11 +232,70 @@ public class DetailBookingActivity extends AppCompatActivity {
             @Override
             public void onError(String errorMessage) {
                 Log.e("DetailBookingActivity", "Lỗi khi lấy dữ liệu: " + errorMessage);
+                runOnUiThread(() -> Toast.makeText(DetailBookingActivity.this, "Lỗi khi lấy dữ liệu đơn hàng", Toast.LENGTH_SHORT).show());
             }
         });
     }
 
+    private void buildBookingSlotsUI(Orders order) {
+        layoutBookingSlots.removeAllViews();
+        if (order == null || order.getOrderDetails() == null || order.getOrderDetails().isEmpty()) {
+            TextView tvNoSlots = new TextView(this);
+            tvNoSlots.setTextColor(Color.WHITE);
+            tvNoSlots.setTextSize(14);
+            tvNoSlots.setText("Không có slot nào được chọn");
+            layoutBookingSlots.addView(tvNoSlots);
+            return;
+        }
+
+        Map<String, List<OrderDetail>> slotsByDate = new HashMap<>();
+        for (OrderDetail detail : order.getOrderDetails()) {
+            if (detail.getBookingDates() != null) {
+                for (String date : detail.getBookingDates()) {
+                    slotsByDate.computeIfAbsent(date, k -> new ArrayList<>()).add(detail);
+                }
+            }
+        }
+
+        int priceIndex = 0; // Index để theo dõi slotPrices từ DataHolder
+
+        for (Map.Entry<String, List<OrderDetail>> entry : slotsByDate.entrySet()) {
+            String date = entry.getKey();
+            List<OrderDetail> slots = entry.getValue();
+
+            TextView tvDayHeader = new TextView(this);
+            tvDayHeader.setTextColor(Color.WHITE);
+            tvDayHeader.setTextSize(16);
+            tvDayHeader.setText("Ngày: " + date);
+            layoutBookingSlots.addView(tvDayHeader);
+
+            slots.sort((o1, o2) -> Integer.compare(toMinutes(o1.getStartTime()), toMinutes(o2.getStartTime())));
+            for (OrderDetail detail : slots) {
+                TextView tvSlot = new TextView(this);
+                tvSlot.setTextColor(Color.WHITE);
+                tvSlot.setTextSize(14);
+
+                // Sử dụng slotPrices từ DataHolder nếu có, ngược lại dùng giá từ API
+                int slotPrice = 0;
+                if (slotPrices != null && priceIndex < slotPrices.size()) {
+                    slotPrice = slotPrices.get(priceIndex);
+                    priceIndex++;
+                } else {
+                    slotPrice = detail.getPrice();
+                }
+
+                String slotDetail = "   - " + detail.getCourtSlotName() + ": " +
+                        detail.getStartTime().substring(0, 5) + " - " +
+                        detail.getEndTime().substring(0, 5) + " | " +
+                        formatMoney(slotPrice);
+                tvSlot.setText(slotDetail);
+                layoutBookingSlots.addView(tvSlot);
+            }
+        }
+    }
+
     private void updateButtonsBasedOnStatus(String status) {
+        if (status == null) return;
         if ("Hủy đặt lịch".equals(status) ||
                 "Hủy đặt lịch do quá giờ thanh toán".equals(status) ||
                 "Thay đổi lịch đặt".equals(status) || "Thay đổi lịch đặt thành công".equals(status)) {
@@ -207,9 +309,9 @@ public class DetailBookingActivity extends AppCompatActivity {
                 Intent intent = new Intent(DetailBookingActivity.this, QRCodeActivity.class);
                 intent.putExtra("orderId", orderId);
                 intent.putExtra("totalTime", totalTime);
-                intent.putExtra("selectedDate", selectedDate);
-                intent.putExtra("totalPrice", totalPrice); // Truyền totalPrice
+                intent.putExtra("totalPrice", totalPrice);
                 intent.putExtra("courtId", courtId);
+                // Không cần truyền slotPrices vì đã lấy từ DataHolder
                 startActivity(intent);
             });
         } else if ("Đặt lịch thành công".equals(status)) {
@@ -217,7 +319,7 @@ public class DetailBookingActivity extends AppCompatActivity {
             btnChangeBooking.setVisibility(View.VISIBLE);
             btnCancelBooking.setVisibility(View.VISIBLE);
             btnChangeBooking.setOnClickListener(v -> {
-                new AlertDialog.Builder(DetailBookingActivity.this)
+                new AlertDialog.Builder(this)
                         .setTitle("Xác nhận")
                         .setMessage("Bạn có chắc chắn là muốn thay đổi lịch đặt không?")
                         .setPositiveButton("Có", (dialog, which) -> {
@@ -234,7 +336,7 @@ public class DetailBookingActivity extends AppCompatActivity {
             btnChangeBooking.setVisibility(View.VISIBLE);
             btnCancelBooking.setVisibility(View.VISIBLE);
             btnChangeBooking.setOnClickListener(v -> {
-                new AlertDialog.Builder(DetailBookingActivity.this)
+                new AlertDialog.Builder(this)
                         .setTitle("Xác nhận")
                         .setMessage("Bạn có chắc chắn là muốn thay đổi lịch đặt không?")
                         .setPositiveButton("Có", (dialog, which) -> {
@@ -269,5 +371,10 @@ public class DetailBookingActivity extends AppCompatActivity {
 
     private String formatMoney(int amount) {
         return new java.text.DecimalFormat("#,###").format(amount) + " ₫";
+    }
+
+    private int toMinutes(String time) {
+        String[] parts = time.split(":");
+        return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]);
     }
 }

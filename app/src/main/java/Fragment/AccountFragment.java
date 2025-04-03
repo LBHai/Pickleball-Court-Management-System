@@ -32,6 +32,7 @@ import Api.RetrofitClient;
 import Model.MyInfo;
 import Model.MyInfoResponse;
 import Model.Orders;
+import SEP490.G9.ChangePassword;
 import SEP490.G9.DetailBookingActivity;
 import SEP490.G9.EditInformationActivity;
 import SEP490.G9.LoginActivity;
@@ -56,6 +57,8 @@ public class AccountFragment extends Fragment {
     private RecyclerView recyclerOrder;
     private OrderAdapter orderAdapter;
     private List<Orders> orderList;
+    private boolean student;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -212,6 +215,7 @@ public class AccountFragment extends Fragment {
                             userRank = info.getUserRank();
                             gender = info.getGender();
                             dob = info.getDob();
+                            student = info.isStudent();
                             tvUserName.setText(firstName + " " + lastName);
                             tvPhoneNumber.setText(info.getPhoneNumber());
 
@@ -273,9 +277,12 @@ public class AccountFragment extends Fragment {
                 intent.putExtra("userRank", userRank);
                 intent.putExtra("gender", gender);
                 intent.putExtra("dob", dob);
+                intent.putExtra("student", student);
                 startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_changepassword) {
+                Intent intent = new Intent(getActivity(), ChangePassword.class);
+                startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_transalate) {
                 showLanguageDialog();

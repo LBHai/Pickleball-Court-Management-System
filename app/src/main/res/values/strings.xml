@@ -64,7 +64,7 @@
     <string name="user_rank" translatable="false">User Rank</string>
     <string name="enter_user_rank" translatable="false">User Rank</string>
     <string name="gender" translatable="false">Gender</string>
-    <string name="ngay_sinh">Ngày sinh</string>
+    <string name="birthday">Birthday</string>
     <string name="save" translatable="false">Save</string>
 
     <!-- Mảng ngày (1-31) -->
@@ -93,6 +93,7 @@
         <!-- ... -->
         <item>2030</item>
     </string-array>
-
-
+    <string name="old_password">Old Password</string>
+    <string name="new_password">New Password</string>
+    <string name="re_enter_new_password">Re-enter new password</string>
 </resources>

@@ -11,7 +11,7 @@ public class UpdateMyInfor {
     private String phoneNumber;
     private String userRank;
     private String gender;  // đổi từ String sang int (0: MALE, 1: FEMALE)
-    private boolean student;
+    private transient boolean student;
 
     public UpdateMyInfor() {
     }

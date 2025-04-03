@@ -15,6 +15,7 @@ import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.google.zxing.BarcodeFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -24,6 +25,7 @@ import Model.Orders;
 import retrofit2.Call;
 import Socket.PaymentSocketListener;
 import Socket.PaymentSocketListener.ExtendedPaymentStatusCallback;
+import Holder.DataHolder;
 
 public class QRCodeActivity extends AppCompatActivity {
 
@@ -39,7 +41,7 @@ public class QRCodeActivity extends AppCompatActivity {
     private int overallTotalPrice, totalPrice, depositAmount, paymentAmount;
     private boolean isDeposit;
     private String orderStatus, totalTime, selectedDate, source, courtId;
-
+    private ArrayList<Integer> slotPrices;
     private PaymentSocketListener socketListener;
     private Handler socketHandler = new Handler();
     private Runnable socketCheckRunnable = new Runnable() {
@@ -72,13 +74,14 @@ public class QRCodeActivity extends AppCompatActivity {
         tvCountdownTimer = findViewById(R.id.tvCountdownTimer);
         tvWarning = findViewById(R.id.tvWarning);
 
+        // Nhận dữ liệu truyền từ Intent
         String qrCodeData = getIntent().getStringExtra("qrCodeData");
         String paymentTimeoutStr = getIntent().getStringExtra("paymentTimeout");
         orderId = getIntent().getStringExtra("orderId");
         Log.d("QRCode", "orderId: " + orderId);
         totalTime = getIntent().getStringExtra("totalTime");
         selectedDate = getIntent().getStringExtra("selectedDate");
-        totalPrice = getIntent().getIntExtra("totalPrice", 0); // Nhận totalPrice
+        totalPrice = getIntent().getIntExtra("totalPrice", 0);
         source = getIntent().getStringExtra("source");
         depositAmount = getIntent().getIntExtra("depositAmount", 0);
         overallTotalPrice = getIntent().getIntExtra("overallTotalPrice", 0);
@@ -86,6 +89,19 @@ public class QRCodeActivity extends AppCompatActivity {
         orderStatus = getIntent().getStringExtra("orderStatus");
         courtId = getIntent().getStringExtra("courtId");
         paymentAmount = getIntent().getIntExtra("paymentAmount", 0);
+        slotPrices = getIntent().getIntegerArrayListExtra("slotPrices");
+
+        // Log danh sách slotPrices
+        if (slotPrices != null) {
+            for (Integer price : slotPrices) {
+                Log.d("QRCodeActivity", "Slot price: " + price);
+            }
+        } else {
+            Log.d("QRCodeActivity", "Không có dữ liệu slotPrices được truyền qua Intent");
+        }
+
+        // Lưu slotPrices vào DataHolder
+        DataHolder.getInstance().setSlotPrices(slotPrices);
 
         // Nếu không có qrCodeData, gọi API để lấy
         if (qrCodeData == null || qrCodeData.isEmpty()) {
@@ -115,7 +131,7 @@ public class QRCodeActivity extends AppCompatActivity {
                 }
                 @Override
                 public void onPaymentFailure(String error) {
-                    runOnUiThread(() -> navigateToPaymentFailed());
+                    runOnUiThread(() -> navigateToDetailBooking());
                 }
             });
             socketListener.connect();
@@ -174,10 +190,10 @@ public class QRCodeActivity extends AppCompatActivity {
                 timeoutTimeMillis = timeoutDate.getTime();
             } catch (Exception e) {
                 Log.e("QRCodeActivity", "Lỗi parse paymentTimeout: " + e.getMessage());
-                timeoutTimeMillis = System.currentTimeMillis() + 15 * 60 * 1000; // Mặc định 15 phút
+                timeoutTimeMillis = System.currentTimeMillis() + 15 * 60 * 1000;
             }
         } else {
-            timeoutTimeMillis = System.currentTimeMillis() + 15 * 60 * 1000; // Mặc định 15 phút
+            timeoutTimeMillis = System.currentTimeMillis() + 15 * 60 * 1000;
         }
 
         startCountdown();
@@ -187,7 +203,7 @@ public class QRCodeActivity extends AppCompatActivity {
         long remainingTime = timeoutTimeMillis - System.currentTimeMillis();
         if (remainingTime <= 0) {
             tvCountdownTimer.setText("Hết thời gian thanh toán");
-            navigateToPaymentFailed();
+            navigateToDetailBooking();
             return;
         }
         if (countDownTimer != null) {
@@ -203,7 +219,7 @@ public class QRCodeActivity extends AppCompatActivity {
             @Override
             public void onFinish() {
                 tvCountdownTimer.setText("Hết thời gian thanh toán");
-                navigateToPaymentFailed();
+                navigateToDetailBooking();
             }
         }.start();
     }
@@ -246,29 +262,33 @@ public class QRCodeActivity extends AppCompatActivity {
         if (!hasRedirected && !isFinishing()) {
             hasRedirected = true;
             Log.d("QRCodeActivity", "Payment success với orderId: " + orderIdToUse);
-            Intent intent = new Intent(QRCodeActivity.this, PaymentSuccessActivity.class);
+            Intent intent = new Intent(QRCodeActivity.this, DetailBookingActivity.class);
             intent.putExtra("resCode", 200);
             intent.putExtra("orderId", orderIdToUse);
             intent.putExtra("totalTime", totalTime);
             intent.putExtra("selectedDate", selectedDate);
             intent.putExtra("totalPrice", totalPrice);
             intent.putExtra("courtId", courtId);
+            // Không cần truyền slotPrices qua Intent vì đã lưu vào DataHolder
+            Log.d("QRCodeActivity", "slotPrices đã được lưu vào DataHolder");
             startActivity(intent);
             finish();
         }
     }
 
-    private void navigateToPaymentFailed() {
+    private void navigateToDetailBooking() {
         if (!hasRedirected && !isFinishing()) {
             hasRedirected = true;
-            Log.d("QRCodeActivity", "Navigating to PaymentFailedActivity");
-            Intent intent = new Intent(QRCodeActivity.this, PaymentFailedActivity.class);
+            Log.d("QRCodeActivity", "Navigating to DetailBookingActivity");
+            Intent intent = new Intent(QRCodeActivity.this, DetailBookingActivity.class);
             intent.putExtra("orderId", orderId);
             intent.putExtra("totalTime", totalTime);
             intent.putExtra("selectedDate", selectedDate);
             intent.putExtra("totalPrice", totalPrice);
             intent.putExtra("orderStatus", orderStatus);
             intent.putExtra("courtId", courtId);
+            // Không cần truyền slotPrices qua Intent vì đã lưu vào DataHolder
+            Log.d("QRCodeActivity", "slotPrices đã được lưu vào DataHolder");
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             finish();

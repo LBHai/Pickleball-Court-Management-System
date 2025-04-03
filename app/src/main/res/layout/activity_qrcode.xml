@@ -69,6 +69,7 @@
             android:textSize="16sp" />
     </LinearLayout>
 
+
     <androidx.cardview.widget.CardView
         android:id="@+id/cardViewQRCode"
         android:layout_width="320dp"

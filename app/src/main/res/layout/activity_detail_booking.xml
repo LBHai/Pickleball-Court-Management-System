@@ -253,14 +253,12 @@
                         android:textColor="#FFFFFF"
                         android:textSize="14sp" />
 
-                    <TextView
-                        android:id="@+id/tvBookingDate"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:id="@+id/layoutBookingSlots"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="Ngày: "
-                        android:textColor="#FFFFFF"
-                        android:textSize="14sp" />
+                        android:orientation="vertical"
+                        android:layout_marginBottom="8dp" />
 
                     <TextView
                         android:id="@+id/tvTotalTime"

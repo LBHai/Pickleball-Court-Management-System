@@ -3,6 +3,7 @@ package Api;
 import java.util.List;
 
 import Model.CUser;
+import Model.ChangePasswordRequest;
 import Model.CourtImage;
 import Model.CourtPrice;
 import Model.Courts;
@@ -15,6 +16,7 @@ import Model.NotificationRequest;
 import Model.NotificationResponse;
 import Model.OrderDetail;
 import Model.Orders;
+import Model.UploadAvatar;
 import Model.User;
 import Model.UpdateMyInfor;
 import retrofit2.Call;
@@ -81,4 +83,9 @@ public interface ApiService {
             @Query("courtId") String courtId,
             @Query("isMap") boolean isMap
     );
+
+    @POST("identity/users/upload-avatar")
+    Call<UploadAvatar> uploadAvatar(@Query("orderId") String orderId);
+    @PUT("identity/users/change-password")
+    Call<Void> changePassword(@Header("Authorization") String authHeader, @Body ChangePasswordRequest request);
 }

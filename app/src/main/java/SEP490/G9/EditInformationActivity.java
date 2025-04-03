@@ -25,7 +25,7 @@ import java.util.List;
 
 public class EditInformationActivity extends AppCompatActivity {
 
-    private EditText etEmail, etFirstName, etLastName, etPhoneNumber, etUserRank,etPassword;
+    private EditText etEmail, etFirstName, etLastName, etPhoneNumber, etUserRank;
     private Spinner spGender, spDay, spMonth, spYear;
     private CheckBox cbStudent;
     private Button btnSave;
@@ -104,8 +104,6 @@ public class EditInformationActivity extends AppCompatActivity {
         if (intent != null) {
             id = intent.getStringExtra("id");
             username = intent.getStringExtra("username");
-            Log.d("EditInfo", "ID: " + id + ", username: " + username);
-
             etEmail.setText(intent.getStringExtra("email"));
             etFirstName.setText(intent.getStringExtra("firstName"));
             etLastName.setText(intent.getStringExtra("lastName"));
@@ -158,14 +156,9 @@ public class EditInformationActivity extends AppCompatActivity {
                 }
 
             }
-
-
-            String studentStr = intent.getStringExtra("student");
-            if (studentStr != null) {
-                cbStudent.setChecked(Boolean.parseBoolean(studentStr));
-            } else {
-                cbStudent.setChecked(false);
-            }
+            boolean isStudent = getIntent().getBooleanExtra("student", false);
+            Log.d("EditInfo", "Student value from Intent: " + isStudent);
+            cbStudent.setChecked(isStudent);
         }
     }
 
@@ -202,18 +195,19 @@ public class EditInformationActivity extends AppCompatActivity {
                 + "-" + String.format("%02d", Integer.parseInt(day));
 
         // Tạo đối tượng UpdateMyInfor với các dữ liệu lấy được
-        UpdateMyInfor updateUser = new UpdateMyInfor();
-        updateUser.setId(id);
-        updateUser.setUsername(username);
+        UpdateMyInfor updateMyInfor = new UpdateMyInfor();
+        Log.d("UserInfo", "Student value from API: " + updateMyInfor.isStudent());
+        updateMyInfor.setId(id);
+        updateMyInfor.setUsername(username);
         //updateUser.setPassword(password);
-        updateUser.setEmail(email);
-        updateUser.setFirstName(firstName);
-        updateUser.setLastName(lastName);
-        updateUser.setDob(dob);
-        updateUser.setPhoneNumber(phoneNumber);
-        updateUser.setUserRank(null);
-        updateUser.setGender(gender);  // "MALE"/"FEMALE" hoặc null nếu chưa chọn
-        updateUser.setStudent(student);
+        updateMyInfor.setEmail(email);
+        updateMyInfor.setFirstName(firstName);
+        updateMyInfor.setLastName(lastName);
+        updateMyInfor.setDob(dob);
+        updateMyInfor.setPhoneNumber(phoneNumber);
+        //updateUser.setUserRank(null);
+        updateMyInfor.setGender(gender);  // "MALE"/"FEMALE" hoặc null nếu chưa chọn
+        updateMyInfor.setStudent(student);
 
         // Lấy token từ SessionManager
         SessionManager sessionManager = new SessionManager(this);
@@ -225,7 +219,7 @@ public class EditInformationActivity extends AppCompatActivity {
 
         // Gọi API cập nhật thông tin người dùng
         ApiService apiService = RetrofitClient.getApiService(this);
-        apiService.updateMyInfo("Bearer " + token, updateUser).enqueue(new Callback<UpdateMyInfor>() {
+        apiService.updateMyInfo("Bearer " + token, updateMyInfor).enqueue(new Callback<UpdateMyInfor>() {
             @Override
             public void onResponse(Call<UpdateMyInfor> call, Response<UpdateMyInfor> response) {
                 if (response.isSuccessful() && response.body() != null) {

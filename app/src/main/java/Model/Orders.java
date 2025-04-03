@@ -8,7 +8,6 @@ public class Orders {
     private String courtId;
     private String courtName;
     private String address;
-    private String bookingDate;
     private String userId;
     private String customerName;
     private String phoneNumber;
@@ -23,12 +22,12 @@ public class Orders {
     private int amountPaid;
     private int amountRefund;
     private String paymentTimeout;
-    private List<OrderDetailGroup> orderDetails; // Đổi sang List<OrderDetailGroup>
+    private List<OrderDetail> orderDetails; // Thay đổi từ List<OrderDetailGroup> thành List<OrderDetail>
     private String qrcode;
     private String createdAt;
-    private int depositAmount; // Đổi sang int
+    private int depositAmount;
 
-    // Constructors, Getters & Setters
+    // Getters & Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
     public String getCourtId() { return courtId; }
@@ -37,8 +36,6 @@ public class Orders {
     public void setCourtName(String courtName) { this.courtName = courtName; }
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
-    public String getBookingDate() { return bookingDate; }
-    public void setBookingDate(String bookingDate) { this.bookingDate = bookingDate; }
     public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }
     public String getCustomerName() { return customerName; }
@@ -67,8 +64,8 @@ public class Orders {
     public void setAmountRefund(int amountRefund) { this.amountRefund = amountRefund; }
     public String getPaymentTimeout() { return paymentTimeout; }
     public void setPaymentTimeout(String paymentTimeout) { this.paymentTimeout = paymentTimeout; }
-    public List<OrderDetailGroup> getOrderDetails() { return orderDetails; }
-    public void setOrderDetails(List<OrderDetailGroup> orderDetails) { this.orderDetails = orderDetails; }
+    public List<OrderDetail> getOrderDetails() { return orderDetails; }
+    public void setOrderDetails(List<OrderDetail> orderDetails) { this.orderDetails = orderDetails; }
     public String getQrcode() { return qrcode; }
     public void setQrcode(String qrcode) { this.qrcode = qrcode; }
     public String getCreatedAt() { return createdAt; }
@@ -81,10 +78,8 @@ public class Orders {
             return "0h00";
         }
         int totalMinutes = 0;
-        for (OrderDetailGroup group : orderDetails) {
-            for (OrderDetail detail : group.getBookingSlots()) {
-                totalMinutes += calculateMinutes(detail.getStartTime(), detail.getEndTime());
-            }
+        for (OrderDetail detail : orderDetails) {
+            totalMinutes += calculateMinutes(detail.getStartTime(), detail.getEndTime());
         }
         int hours = totalMinutes / 60;
         int mins = totalMinutes % 60;
@@ -92,14 +87,18 @@ public class Orders {
     }
 
     private int calculateMinutes(String startTime, String endTime) {
+        if (startTime == null || endTime == null) return 0;
         String[] startParts = startTime.split(":");
         String[] endParts = endTime.split(":");
-        int startHour = Integer.parseInt(startParts[0]);
-        int startMin = Integer.parseInt(startParts[1]);
-        int endHour = Integer.parseInt(endParts[0]);
-        int endMin = Integer.parseInt(endParts[1]);
-        int startTotalMin = startHour * 60 + startMin;
-        int endTotalMin = endHour * 60 + endMin;
-        return endTotalMin - startTotalMin;
+        if (startParts.length < 2 || endParts.length < 2) return 0;
+        try {
+            int startHour = Integer.parseInt(startParts[0]);
+            int startMin = Integer.parseInt(startParts[1]);
+            int endHour = Integer.parseInt(endParts[0]);
+            int endMin = Integer.parseInt(endParts[1]);
+            return (endHour * 60 + endMin) - (startHour * 60 + startMin);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 }

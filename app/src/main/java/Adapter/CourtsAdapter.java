@@ -1,6 +1,7 @@
 package Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Model.Courts;
+import SEP490.G9.BookingTableActivity;
 import SEP490.G9.R;
 
 public class CourtsAdapter extends RecyclerView.Adapter<CourtsAdapter.CourtViewHolder> {
@@ -73,9 +75,11 @@ public class CourtsAdapter extends RecyclerView.Adapter<CourtsAdapter.CourtViewH
 
         // Xử lý nút Book
         holder.btnBook.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onCourtClick(court);
-            }
+            // Giả định Courts có phương thức getId() trả về club_id
+            String clubId = court.getId(); // Thay đổi tùy theo tên phương thức thực tế trong model Courts
+            Intent intent = new Intent(context, BookingTableActivity.class);
+            intent.putExtra("club_id", clubId);
+            context.startActivity(intent); // Sử dụng context để khởi động Activity
         });
     }
 
