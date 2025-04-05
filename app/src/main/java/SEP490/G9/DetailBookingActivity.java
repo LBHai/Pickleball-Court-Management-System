@@ -32,7 +32,7 @@ public class DetailBookingActivity extends AppCompatActivity {
     private TextView tvTabBookingInfo, tvTabServiceDetail;
     private View lineBookingInfo, lineServiceDetail;
     private ScrollView layoutBookingInfo, layoutServiceDetail;
-    private TextView tvStadiumName, tvAddress, tvBookingDate, tvTotalTime, tvTotalPrice, tvPaymentStatus, tvPhonenumber, tvName, tvNote;
+    private TextView tvStadiumName, tvAddress, tvTotalTime, tvTotalPrice, tvPaymentStatus, tvPhonenumber, tvName, tvNote;
     private TextView tvAmountPaid, tvPaymentAmount, tvRefundAmount;
     private Button btnCancelBooking, btnChangeBooking;
     private LinearLayout layoutBookingSlots;
@@ -195,6 +195,9 @@ public class DetailBookingActivity extends AppCompatActivity {
                 int paymentAmount = order.getPaymentAmount();
                 int refundAmount = order.getAmountRefund();
 
+                // Tính totalTime từ Orders và lưu vào DataHolder
+                final String computedTotalTime = order.getTotalTime();
+
                 runOnUiThread(() -> {
                     tvStadiumName.setText("Tên sân: " + (courtName != null ? courtName : "N/A"));
                     tvAddress.setText("Địa chỉ: " + (address != null ? address : "N/A"));
@@ -202,8 +205,15 @@ public class DetailBookingActivity extends AppCompatActivity {
                     tvName.setText("Khách Hàng: " + (customerName != null ? customerName : "N/A"));
                     tvPhonenumber.setText("SDT: " + (phoneNumber != null ? phoneNumber : "N/A"));
                     tvNote.setText("Khách hàng ghi chú: " + (note == null || note.isEmpty() ? "Không có" : note));
+
                     tvAmountPaid.setText("Số tiền đã trả: " + formatMoney(amountPaid));
                     tvTotalPrice.setText("Tổng tiền: " + formatMoney(order.getTotalAmount()));
+
+                    // Cập nhật và hiển thị totalTime tính được
+                    totalTime = computedTotalTime;
+                    tvTotalTime.setText("Tổng thời gian: " + computedTotalTime);
+                    // Lưu giá trị totalTime vào DataHolder để sử dụng cho các nơi khác
+                    DataHolder.getInstance().setTotalTime(computedTotalTime);
 
                     if ("Đã thanh toán".equals(paymentStatus) || "Đã đặt cọc".equals(paymentStatus)) {
                         if (paymentAmount < 0) {
@@ -373,11 +383,13 @@ public class DetailBookingActivity extends AppCompatActivity {
         String[] parts = time.split(":");
         return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]);
     }
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         goBackToMainActivity();
     }
+
     private void goBackToMainActivity() {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

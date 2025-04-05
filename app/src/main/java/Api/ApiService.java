@@ -4,6 +4,8 @@ import java.util.List;
 
 import Model.CUser;
 import Model.ChangePasswordRequest;
+import Model.CheckInvalidSlotsRequest;
+import Model.CheckInvalidSlotsResponse;
 import Model.CourtImage;
 import Model.CourtPrice;
 import Model.Courts;
@@ -14,7 +16,6 @@ import Model.GetToken;
 import Model.MyInfoResponse;
 import Model.NotificationRequest;
 import Model.NotificationResponse;
-import Model.OrderDetail;
 import Model.Orders;
 import Model.UploadAvatar;
 import Model.User;
@@ -86,6 +87,11 @@ public interface ApiService {
 
     @POST("identity/users/upload-avatar")
     Call<UploadAvatar> uploadAvatar(@Query("orderId") String orderId);
+
     @PUT("identity/users/change-password")
     Call<Void> changePassword(@Header("Authorization") String authHeader, @Body ChangePasswordRequest request);
+
+    @POST("identity/public/check-invalid-slots")
+    Call<CheckInvalidSlotsResponse> checkInvalidSlots(@Body CheckInvalidSlotsRequest request);
+
 }

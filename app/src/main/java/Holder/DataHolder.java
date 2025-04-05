@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class DataHolder {
     private static DataHolder instance;
     private ArrayList<Integer> slotPrices;
+    private String totalTime; // thêm biến totalTime
 
     private DataHolder() {
         slotPrices = new ArrayList<>();
@@ -23,5 +24,13 @@ public class DataHolder {
 
     public ArrayList<Integer> getSlotPrices() {
         return slotPrices;
+    }
+
+    public void setTotalTime(String totalTime) {
+        this.totalTime = totalTime;
+    }
+
+    public String getTotalTime() {
+        return totalTime;
     }
 }

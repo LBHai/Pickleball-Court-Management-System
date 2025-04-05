@@ -81,4 +81,5 @@ public class SessionManager {
         // Không xóa KEY_HAS_SHOWN_GUEST_DIALOG để giữ trạng thái hiển thị dialog
         editor.apply();
     }
+
 }

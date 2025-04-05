@@ -157,10 +157,8 @@ public class ConfirmActivity extends AppCompatActivity {
             processOrder(true);
         });
 
+        // Khi nhấn btnBack, chỉ gọi finish() để quay lại màn hình trước đó và giữ nguyên các slot đã chọn.
         btnBack.setOnClickListener(v -> {
-            Intent intent = new Intent(this, BookingTableActivity.class);
-            intent.putExtra("club_id", clubId);
-            startActivity(intent);
             finish();
         });
     }
@@ -541,16 +539,5 @@ public class ConfirmActivity extends AppCompatActivity {
                 Log.e("Notify", "Lỗi khi đăng ký FCM token cho key " + key, t);
             }
         });
-    }
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        goBackToMainActivity();
-    }
-    private void goBackToMainActivity() {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-        finish();
     }
 }

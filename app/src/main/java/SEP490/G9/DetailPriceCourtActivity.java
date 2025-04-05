@@ -26,8 +26,6 @@ public class DetailPriceCourtActivity extends AppCompatActivity {
 
     private ImageButton btnBack;
     private String clubId;
-
-    // Thay vì 1 TableLayout chung, ta tách riêng 2 bảng con:
     private TableLayout tableWeekday;
     private TableLayout tableWeekend;
 
@@ -36,15 +34,12 @@ public class DetailPriceCourtActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_price_court);
 
-        // Lấy dữ liệu club_id truyền sang
         clubId = getIntent().getStringExtra("club_id");
 
-        // Ánh xạ các view
         btnBack = findViewById(R.id.btnBack);
         tableWeekday = findViewById(R.id.tableWeekday);
         tableWeekend = findViewById(R.id.tableWeekend);
 
-        // Xử lý nút Back
         btnBack.setOnClickListener(v -> {
             Intent intent = new Intent(DetailPriceCourtActivity.this, BookingTableActivity.class);
             intent.putExtra("club_id", clubId);
@@ -52,7 +47,6 @@ public class DetailPriceCourtActivity extends AppCompatActivity {
             finish();
         });
 
-        // Gọi API lấy dữ liệu bảng giá
         fetchCourtPrice(clubId);
     }
 
@@ -64,13 +58,8 @@ public class DetailPriceCourtActivity extends AppCompatActivity {
             public void onResponse(Call<CourtPrice> call, Response<CourtPrice> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     CourtPrice cp = response.body();
-
-                    // Đổ dữ liệu T2 - T6
                     fillTimeSlots(tableWeekday, cp.getWeekdayTimeSlots());
-
-                    // Đổ dữ liệu T7 - CN
                     fillTimeSlots(tableWeekend, cp.getWeekendTimeSlots());
-
                 } else {
                     Toast.makeText(DetailPriceCourtActivity.this, "Không có dữ liệu!", Toast.LENGTH_SHORT).show();
                 }
@@ -83,82 +72,84 @@ public class DetailPriceCourtActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Đổ danh sách slots vào một TableLayout con.
-     * Mỗi dòng: 3 cột [Khung giờ | Học sinh | Người lớn].
-     * Nếu không có slot => hiển thị 1 dòng trống với dấu "-"
-     */
     private void fillTimeSlots(TableLayout tableLayout, List<TimeSlot> slots) {
-        // Tạo 1 row header (nếu muốn hiển thị tiêu đề cột cho mỗi bảng)
         TableRow headerRow = new TableRow(this);
-        headerRow.addView(createCell("Khung giờ", true));
-        headerRow.addView(createCell("Học sinh", true));
-        headerRow.addView(createCell("Người lớn", true));
+        // Ô "Khung giờ" có trọng số lớn hơn (ví dụ 3f) để mở rộng theo chiều ngang
+        headerRow.addView(createCell("Khung giờ", true, 1.5f));
+        headerRow.addView(createCell("Học sinh", true, 1.2f));
+        headerRow.addView(createCell("Người lớn", true, 1.2f));
         tableLayout.addView(headerRow);
 
         if (slots == null || slots.isEmpty()) {
             TableRow emptyRow = new TableRow(this);
-            emptyRow.addView(createCell("-", false));
-            emptyRow.addView(createCell("-", false));
-            emptyRow.addView(createCell("-", false));
+            emptyRow.addView(createCell("-", false, 1.5f));
+            emptyRow.addView(createCell("-", false, 1.2f));
+            emptyRow.addView(createCell("-", false, 1.2f));
             tableLayout.addView(emptyRow);
             return;
         }
 
-        // Nếu có dữ liệu
         for (TimeSlot slot : slots) {
             TableRow row = new TableRow(this);
-
-            // Cột 1: Khung giờ
-            String timeRange = slot.getStartTime().substring(0, 5)
-                    + " - " + slot.getEndTime().substring(0, 5);
-            row.addView(createCell(timeRange, false));
-
-            // Cột 2: Giá học sinh
-            row.addView(createCell(formatMoney(slot.getStudentPrice()), false));
-
-            // Cột 3: Giá người lớn
-            row.addView(createCell(formatMoney(slot.getDailyPrice()), false));
-
+            String timeRange = formatTimeSlot(slot.getStartTime() + "-" + slot.getEndTime());
+            row.addView(createCell(timeRange, false, 1.5f));
+            row.addView(createCell(formatMoney(slot.getStudentPrice()), false, 1.2f));
+            row.addView(createCell(formatMoney(slot.getDailyPrice()), false, 1.2f));
             tableLayout.addView(row);
         }
     }
 
-    /**
-     * Tạo một TextView làm cell, có viền, canh giữa.
-     * isHeader = true => font to hơn, in đậm hơn (nếu muốn).
-     */
-    private TextView createCell(String text, boolean isHeader) {
+    private TextView createCell(String text, boolean isHeader, float weight) {
         TextView tv = new TextView(this);
         tv.setText(text);
         tv.setPadding(16, 16, 16, 16);
         tv.setGravity(Gravity.CENTER);
-
-        // LayoutParams cho TableRow, chia đều các cột
-        tv.setLayoutParams(new TableRow.LayoutParams(
-                0,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                1f
-        ));
-        // Đặt viền cho ô
+        TableRow.LayoutParams params = new TableRow.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, weight);
+        tv.setLayoutParams(params);
         tv.setBackgroundResource(R.drawable.cell_border);
-
         if (isHeader) {
-            tv.setTextSize(16);
+            tv.setTextSize(14);
             tv.setTypeface(null, android.graphics.Typeface.BOLD);
         } else {
-            tv.setTextSize(14);
+            tv.setTextSize(12);
         }
         tv.setTextColor(getResources().getColor(android.R.color.black));
-
         return tv;
     }
 
-    /**
-     * Định dạng tiền tệ. Nếu amount <= 0 => trả về "-"
-     */
     private String formatMoney(double amount) {
         if (amount <= 0) return "-";
         return String.format(Locale.getDefault(), "%,.0f đ", amount);
+    }
+
+    private String formatTimeSlot(String timeSlot) {
+        // Tách chuỗi thành thời gian bắt đầu và kết thúc
+        String[] parts = timeSlot.split("-");
+        if (parts.length != 2) {
+            return timeSlot; // Trả về chuỗi gốc nếu định dạng không đúng
+        }
+
+        // Chuyển đổi thời gian bắt đầu
+        String startTime = formatTime(parts[0]);
+        // Chuyển đổi thời gian kết thúc
+        String endTime = formatTime(parts[1]);
+
+        // Kết hợp lại với "h"
+        return startTime + "h-" + endTime + "h";
+    }
+
+    private String formatTime(String time) {
+        // Tách chuỗi thời gian bằng dấu ":"
+        String[] timeParts = time.split(":");
+        if (timeParts.length >= 1) {
+            try {
+                // Lấy phần giờ (phần đầu tiên) và chuyển thành số nguyên để bỏ số 0 đầu
+                int hour = Integer.parseInt(timeParts[0]);
+                return String.valueOf(hour);
+            } catch (NumberFormatException e) {
+                return time; // Trả về chuỗi gốc nếu không parse được
+            }
+        }
+        return time; // Trả về chuỗi gốc nếu không có dấu ":"
     }
 }

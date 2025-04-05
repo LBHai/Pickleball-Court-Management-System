@@ -1,15 +1,20 @@
 package Adapter;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -18,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Model.Courts;
+import SEP490.G9.BookingRegularTableActivity;
 import SEP490.G9.BookingTableActivity;
 import SEP490.G9.R;
 
@@ -59,11 +65,11 @@ public class CourtsAdapter extends RecyclerView.Adapter<CourtsAdapter.CourtViewH
         if (logoUrl != null && !logoUrl.isEmpty()) {
             Glide.with(context)
                     .load(logoUrl)
-                    .placeholder(R.drawable.logo) // Ảnh placeholder khi đang tải
-                    .error(R.drawable.logo) // Ảnh hiển thị nếu lỗi
+                    .placeholder(R.drawable.logo)
+                    .error(R.drawable.logo)
                     .into(holder.imgClubLogo);
         } else {
-            holder.imgClubLogo.setImageResource(R.drawable.logo); // Ảnh mặc định nếu không có URL
+            holder.imgClubLogo.setImageResource(R.drawable.logo);
         }
 
         // Xử lý sự kiện nhấn vào item
@@ -73,13 +79,10 @@ public class CourtsAdapter extends RecyclerView.Adapter<CourtsAdapter.CourtViewH
             }
         });
 
-        // Xử lý nút Book
+        // Xử lý nút Book hiển thị Dialog
         holder.btnBook.setOnClickListener(v -> {
-            // Giả định Courts có phương thức getId() trả về club_id
-            String clubId = court.getId(); // Thay đổi tùy theo tên phương thức thực tế trong model Courts
-            Intent intent = new Intent(context, BookingTableActivity.class);
-            intent.putExtra("club_id", clubId);
-            context.startActivity(intent); // Sử dụng context để khởi động Activity
+            String clubId = court.getId(); // Giả định Courts có phương thức getId()
+            showBookingDialog(context, clubId);
         });
     }
 
@@ -91,6 +94,53 @@ public class CourtsAdapter extends RecyclerView.Adapter<CourtsAdapter.CourtViewH
     public void updateList(List<Courts> newList) {
         this.courtsList = newList != null ? newList : new ArrayList<>();
         notifyDataSetChanged();
+    }
+
+    private void showBookingDialog(Context context, String clubId) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View dialogView = inflater.inflate(R.layout.dialog_booking, null);
+        builder.setView(dialogView);
+
+        AlertDialog dialog = builder.create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+        dialog.show();
+
+        // Lấy các thành phần trong dialog
+        ImageView imgClose = dialogView.findViewById(R.id.imgClose);
+        CardView cardHangNgay = dialogView.findViewById(R.id.cardHangNgay);
+        CardView cardCoDinh = dialogView.findViewById(R.id.cardCoDinh);
+        ImageButton btnBook = dialogView.findViewById(R.id.btnBook);
+        ImageButton btnBookRegular = dialogView.findViewById(R.id.btnBookRegular);
+
+        imgClose.setOnClickListener(v -> dialog.dismiss());
+
+        // Listener cho BookingTableActivity
+        View.OnClickListener bookingTableClick = v -> {
+            dialog.dismiss();
+            Intent intent = new Intent(context, BookingTableActivity.class);
+            intent.putExtra("club_id", clubId);
+            intent.putExtra("booking_type", "truc_quan");
+            context.startActivity(intent);
+        };
+
+        // Listener cho BookingRegularTableActivity
+        View.OnClickListener bookingRegularClick = v -> {
+            dialog.dismiss();
+            Intent intent = new Intent(context, BookingRegularTableActivity.class);
+            intent.putExtra("club_id", clubId);
+            intent.putExtra("booking_type", "xe_ve");
+            context.startActivity(intent);
+        };
+
+        // Áp dụng listener cho card và nút tương ứng
+        cardHangNgay.setOnClickListener(bookingTableClick);
+        btnBook.setOnClickListener(bookingTableClick);
+
+        cardCoDinh.setOnClickListener(bookingRegularClick);
+        btnBookRegular.setOnClickListener(bookingRegularClick);
     }
 
     static class CourtViewHolder extends RecyclerView.ViewHolder {

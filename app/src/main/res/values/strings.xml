@@ -36,7 +36,8 @@
     <string name="book">Book</string>
     <string name="map">View Map</string>
     <string name="choose_language">Choose Language</string>
-
+    <string name="book_description">Book</string>
+    <string name="book_regular_description">Book Regular</string>
 
     <string name="menu_edit">Edit information</string>
     <string name="menu_changepassword">Change Password</string>
@@ -96,4 +97,5 @@
     <string name="old_password">Old Password</string>
     <string name="new_password">New Password</string>
     <string name="re_enter_new_password">Re-enter new password</string>
+
 </resources>

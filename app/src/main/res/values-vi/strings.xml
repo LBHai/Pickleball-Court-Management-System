@@ -20,7 +20,8 @@
     <string name="map">Xem bản đồ</string>
     <string name="phone">Số điện thoại</string>
     <string name="choose_language">Chọn ngôn ngữ</string>
-
+    <string name="book_regular_description">Đặt lịch cố định</string>
+    <string name="book_description">Đặt lịch hàng ngày</string>
 
     <string name="menu_edit">Chỉnh sửa thông tin</string>
     <string name="menu_changepassword">Thay đổi mật khẩu</string>

@@ -1,16 +1,23 @@
 package Adapter;
 
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import Holder.DataHolder;
 import Model.Notification;
+import Model.NotificationData;
+import SEP490.G9.DetailBookingActivity;
 import SEP490.G9.R;
 
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.ViewHolder> {
@@ -20,8 +27,8 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     private OnNotificationItemClickListener listener;
 
     public interface OnNotificationItemClickListener {
-        void onCloseClick(int position);
-        void onItemClick(int position);
+        void onCloseClick(Notification notification);
+        void onItemClick(Notification notification);
     }
 
     public NotificationAdapter(Context context, List<Notification> notificationList, OnNotificationItemClickListener listener) {
@@ -40,12 +47,20 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     @Override
     public void onBindViewHolder(@NonNull NotificationAdapter.ViewHolder holder, int position) {
         Notification notification = notificationList.get(position);
-
-        // Gán dữ liệu
         holder.tvTitle.setText(notification.getTitle());
         holder.tvDescription.setText(notification.getDescription());
-        holder.tvTime.setText(notification.getCreateAt());
-        // Icon bên trái => holder.imgNotificationIcon.setImageResource(...) nếu cần
+
+        // Định dạng thời gian từ createAt
+        String timeString = notification.getCreateAt();
+        try {
+            SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault());
+            Date date = isoFormat.parse(timeString);
+            SimpleDateFormat displayFormat = new SimpleDateFormat("dd/MM/yyyy, 'lúc' HH:mm", Locale.getDefault());
+            String formattedTime = displayFormat.format(date);
+            holder.tvTime.setText(formattedTime);
+        } catch (ParseException e) {
+            holder.tvTime.setText(timeString);
+        }
     }
 
     @Override
@@ -54,30 +69,50 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        ImageButton btnBack;
         TextView tvTitle, tvDescription, tvTime;
-        ImageButton btnCloseNotification;
 
         public ViewHolder(@NonNull View itemView, OnNotificationItemClickListener listener) {
             super(itemView);
-            btnBack = itemView.findViewById(R.id.btnBack);
             tvTitle = itemView.findViewById(R.id.tvTitle);
             tvDescription = itemView.findViewById(R.id.tvDescription);
             tvTime = itemView.findViewById(R.id.tvTime);
-            btnCloseNotification = itemView.findViewById(R.id.btnCloseNotification);
 
-            // Click cả item
+            // Xử lý click vào toàn bộ item
             itemView.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onItemClick(getAdapterPosition());
-                }
-            });
+                Notification notification = notificationList.get(getAdapterPosition());
+                listener.onItemClick(notification);
 
-            // Click nút X
-            btnCloseNotification.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onCloseClick(getAdapterPosition());
+                // Tạo Intent chuyển sang DetailBookingActivity
+                Intent intent = new Intent(context, DetailBookingActivity.class);
+
+                // Truyền thông tin cơ bản của thông báo
+                intent.putExtra("notificationId", notification.getId());
+                intent.putExtra("notificationTitle", notification.getTitle());
+                intent.putExtra("notificationDescription", notification.getDescription());
+                intent.putExtra("notificationTime", notification.getCreateAt());
+                intent.putExtra("notificationStatus", notification.getStatus());
+
+                // Nếu có thông tin đặt lịch trong NotificationData thì truyền thêm các thông tin chi tiết
+                NotificationData data = notification.getNotificationData();
+                if (data != null) {
+                    intent.putExtra("dateBooking", data.getDateBooking());
+                    intent.putExtra("orderId", data.getOrderId());
+                    if (data.getTotalTime() != null && !data.getTotalTime().isEmpty()) {
+                        intent.putExtra("totalTime", data.getTotalTime());
+                    } else {
+                        intent.putExtra("totalTime", DataHolder.getInstance().getTotalTime());
+                    }
+                    intent.putExtra("totalPrice", data.getTotalPrice());
+                    intent.putExtra("orderStatus", data.getOrderStatus());
+                    intent.putExtra("courtId", data.getCourtId());
+                    if (data.getSlotPrices() != null) {
+                        intent.putIntegerArrayListExtra("slotPrices", data.getSlotPrices());
+                    }
+                } else {
+                    intent.putExtra("totalTime", DataHolder.getInstance().getTotalTime());
                 }
+
+                context.startActivity(intent);
             });
         }
     }

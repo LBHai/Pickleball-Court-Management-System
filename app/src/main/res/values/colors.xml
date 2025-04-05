@@ -23,9 +23,11 @@
     <color name="darkGreen">#059862</color>
     <color name="lightGreen">#0BCB73</color>
     <color name="buttonGreen">#7FFFC4</color>
-
-        <color name="greenBackground">#246d35</color> <!-- Màu xanh ví dụ -->
-        <!-- ... các màu khác -->
-
-
+    <color name="greenBackground">#246d35</color>
+    <color name="green_book">#2b8600</color>
+    <color name="purple_book">#c133c5</color>
+    <color name="green_book_sub">#4a9b26</color>
+    <color name="purple_book_sub">#c02ec5</color>
+    <color name="light_green_book">#ddffda</color>
+    <color name="light_purple_book">#fae2fb</color>
 </resources>

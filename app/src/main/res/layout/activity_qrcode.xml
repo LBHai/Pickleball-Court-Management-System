@@ -26,13 +26,13 @@
             tools:ignore="TouchTargetSizeCheck" />
 
         <TextView
-            android:id="@+id/tvInstruction"
+            android:id="@+id/tvTitleback"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="Quét mã QR để thanh toán ngay 😍"
+            android:text="Quét mã QR"
             android:textColor="#FFFFFF"
-            android:textSize="18sp"
+            android:textSize="28sp"
             android:gravity="center"
             android:textStyle="bold" />
 
@@ -44,11 +44,25 @@
             android:visibility="invisible" />
     </RelativeLayout>
 
+    <TextView
+        android:id="@+id/tvInstruction"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_below="@id/layoutHeader"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="1dp"
+        android:text="Để thanh toán ngay 😍"
+        android:layout_marginBottom="20dp"
+        android:textColor="#FFFFFF"
+        android:textSize="22sp"
+        android:gravity="center"
+        android:textStyle="bold" />
+
     <LinearLayout
         android:id="@+id/layoutWarning"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/layoutHeader"
+        android:layout_below="@id/tvInstruction"
         android:layout_marginBottom="12dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
@@ -59,6 +73,7 @@
             android:layout_height="24dp"
             android:src="@drawable/warning"
             android:contentDescription="Cảnh báo" />
+
         <TextView
             android:id="@+id/tvWarning"
             android:layout_width="wrap_content"
@@ -68,7 +83,6 @@
             android:textColor="@android:color/white"
             android:textSize="16sp" />
     </LinearLayout>
-
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardViewQRCode"
@@ -111,4 +125,5 @@
         android:textColor="#FFFFFF"
         android:textSize="25sp"
         android:textStyle="bold" />
+
 </RelativeLayout>
