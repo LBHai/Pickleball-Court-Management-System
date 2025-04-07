@@ -18,7 +18,6 @@
     <color name="dark_green">#2E7D32</color>
     <color name="green">#4CAF50</color>
     <color name="light_green">#8BC34A</color>
-    <color name="yellow">#FFC107</color>
     <color name="gray">#9E9E9E</color>
     <color name="darkGreen">#059862</color>
     <color name="lightGreen">#0BCB73</color>
@@ -30,4 +29,12 @@
     <color name="purple_book_sub">#c02ec5</color>
     <color name="light_green_book">#ddffda</color>
     <color name="light_purple_book">#fae2fb</color>
+    <color name="bright_green">#2E7D32</color>
+    <color name="orange">#FF9800</color>
+    <color name="light_gray">#E0E0E0</color>
+    <color name="yellow">#FFC107</color>
+        <color name="ribbon_green">#4CAF50</color> <!-- Màu ribbon "Đơn ngày" -->
+        <color name="status_red">#FF6666</color> <!-- Màu trạng thái -->
+        <color name="icon_orange">#FF5722</color> <!-- Màu biểu tượng -->
+
 </resources>

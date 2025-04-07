@@ -1,0 +1,17 @@
+<!-- res/drawable/label_with_reversed_indent.xml -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp"
+    android:height="40dp"
+    android:viewportWidth="100"
+    android:viewportHeight="40">
+
+    <!-- Mô tả hình dạng:
+         Bắt đầu từ (0,0) ở góc trên bên trái,
+         vẽ đến góc trên bên phải (100,0),
+         sau đó tạo một cạnh cắt lõm vào bên trong với điểm (80,20),
+         rồi đi đến góc dưới bên phải (100,40) và cuối cùng về góc dưới bên trái (0,40).
+         Điểm (80,20) sẽ tạo ra hiệu ứng "đâm ngược" (cắt lõm vào). -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M0,0 L100,0 L80,20 L100,40 L0,40 Z" />
+</vector>

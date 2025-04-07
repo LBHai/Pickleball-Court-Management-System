@@ -10,7 +10,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import Model.Orders;
 import Model.OrderDetail;
@@ -39,23 +43,47 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.tvDonNgay.setText(order.getOrderType());
         holder.tvStatus.setText(order.getOrderStatus());
         holder.tvTitle.setText(order.getCourtName());
-        holder.tvAddress.setText(order.getAddress());
+        holder.tvAddress.setText("Địa chỉ: " + order.getAddress());
 
-        // Kiểm tra và hiển thị thông tin chi tiết
+        // Tạo chuỗi thông tin chi tiết
+        String detailInfo = "Chi tiết: ";
         if (order.getOrderDetails() != null && !order.getOrderDetails().isEmpty()) {
-            OrderDetail firstDetail = order.getOrderDetails().get(0); // Lấy slot đầu tiên
-            String detailText = "Chi tiết: " + firstDetail.getCourtSlotName()
-                    + " " + firstDetail.getStartTime().substring(0, 5)
-                    + " - " + firstDetail.getEndTime().substring(0, 5);
-            holder.tvDetail.setText(detailText);
+            OrderDetail firstDetail = order.getOrderDetails().get(0);
+            String slotName = firstDetail.getCourtSlotName();
+            String startTime = firstDetail.getStartTime();
+            String endTime = firstDetail.getEndTime();
+            if (startTime != null && startTime.length() >= 5 && endTime != null && endTime.length() >= 5) {
+                detailInfo += slotName + " : " + startTime.substring(0, 5) + " - " + endTime.substring(0, 5);
+            } else {
+                detailInfo += "Không hợp lệ";
+            }
         } else {
-            holder.tvDetail.setText("Chi tiết: Không có");
+            detailInfo += "Không có";
         }
 
+        // Format ngày tạo sang định dạng dd/MM/yyyy
+        String createdAtStr = order.getCreatedAt();
+        String formattedDate = createdAtStr; // fallback nếu parse lỗi
+        try {
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+            SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            Date date = inputFormat.parse(createdAtStr);
+            formattedDate = outputFormat.format(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        // Gộp thông tin chi tiết và ngày tạo theo định dạng mong muốn
+        String finalText = detailInfo + "  |  " + formattedDate;
+        holder.tvDetail.setText(finalText);
+
+        // Nếu bạn không sử dụng tvCreatedAt riêng, có thể ẩn nó đi
+        holder.tvCreatedAt.setVisibility(View.GONE);
+
+        // Xử lý sự kiện click
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, DetailBookingActivity.class);
             intent.putExtra("orderId", order.getId());
-            // Xử lý selectedDate từ OrderDetail thay vì Orders
             if (order.getOrderDetails() != null && !order.getOrderDetails().isEmpty()) {
                 OrderDetail firstDetail = order.getOrderDetails().get(0);
                 if (firstDetail.getBookingDates() != null && !firstDetail.getBookingDates().isEmpty()) {
@@ -76,7 +104,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView tvDonNgay, tvStatus, tvTitle, tvDetail, tvAddress;
+        public TextView tvDonNgay, tvStatus, tvTitle, tvDetail, tvAddress, tvCreatedAt;
+        // Nếu cần, bạn có thể ánh xạ tvPipe nhưng nếu nội dung cố định (" | ") thì không bắt buộc
+        // public TextView tvPipe;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -85,6 +115,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             tvTitle = itemView.findViewById(R.id.tvTitle);
             tvDetail = itemView.findViewById(R.id.tvDetail);
             tvAddress = itemView.findViewById(R.id.tvAddress);
+            tvCreatedAt = itemView.findViewById(R.id.tvCreatedAt);
+            // tvPipe = itemView.findViewById(R.id.tvPipe);
         }
     }
+
 }

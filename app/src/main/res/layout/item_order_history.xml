@@ -4,9 +4,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    android:layout_margin="0dp"
+    app:cardCornerRadius="0dp"
+    app:cardElevation="0dp"
+    app:cardBackgroundColor="@color/dark_green"> <!-- Trùng với background -->
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,68 +15,74 @@
         android:orientation="vertical"
         android:padding="12dp">
 
-        <!-- Hàng đầu tiên: Loại đơn và Trạng thái -->
+        <TextView
+            android:id="@+id/tvDonNgay"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:background="@drawable/don_ngay"
+            android:text="@string/day"
+            android:textColor="@android:color/white"
+            android:textSize="14sp" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp">
 
-            <!-- TextView: Đơn ngày -->
             <TextView
-                android:id="@+id/tvDonNgay"
-                android:layout_width="wrap_content"
+                android:id="@+id/tvTitle"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Đơn ngày"
-                android:textColor="@android:color/white"
-                android:background="@drawable/bg_rounded_green"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="4dp"
-                android:textSize="14sp"
+                android:layout_weight="1"
+                android:text="Tên CLB"
+                android:textColor="#ebea97"
+                android:textSize="16sp"
                 android:textStyle="bold" />
 
-            <!-- TextView: Trạng thái -->
             <TextView
                 android:id="@+id/tvStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
                 android:text="Hủy do quá giờ thanh toán"
-                android:textColor="@android:color/holo_red_dark"
-                android:textSize="14sp"
-                android:drawablePadding="4dp" />
+                android:textColor="#c3e593"
+                android:textSize="14sp" />
         </LinearLayout>
 
-        <!-- Tên sân / CLB -->
-        <TextView
-            android:id="@+id/tvTitle"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Tên sân / CLB"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <!-- Chi tiết -->
-        <TextView
-            android:id="@+id/tvDetail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:layout_marginTop="4dp"
-            android:text="Chi tiết: Thời gian, giá,..."
-            android:textColor="@android:color/black"
-            android:textSize="14sp" />
+            android:gravity="center_vertical">
 
-        <!-- Địa chỉ -->
+            <!-- Label cho Chi tiết -->
+            <TextView
+                android:id="@+id/tvDetail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chi tiết:"
+                android:textColor="@android:color/white"
+                android:textSize="14sp" />
+
+            <!-- Giá trị chi tiết được hiển thị trong tvCreatedAt -->
+            <TextView
+                android:id="@+id/tvCreatedAt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"/>
+        </LinearLayout>
+
         <TextView
             android:id="@+id/tvAddress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="Địa chỉ:"
-            android:textColor="@android:color/black"
+            android:textColor="@android:color/white"
             android:textSize="14sp" />
-
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
