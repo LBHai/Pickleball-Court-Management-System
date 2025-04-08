@@ -4,7 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.ImageButton;
@@ -32,17 +31,21 @@ public class QRCodeActivity extends AppCompatActivity {
     private ImageView ivQRCode;
     private ImageButton btnBack;
     private TextView tvCountdownTimer, tvWarning;
-    private CountDownTimer countDownTimer;
     private Handler handler = new Handler();
+    private Runnable countdownRunnable;
 
     private long timeoutTimeMillis;
+    private long createdTimeMillis; // Thời gian tạo đơn
+    private static final long DEFAULT_TIMEOUT_DURATION; // Khai báo tĩnh
     private String orderId;
     private boolean hasRedirected = false;
-    private int overallTotalPrice, totalPrice, depositAmount, paymentAmount;
+    private int overallTotalPrice, totalPrice, depositAmount, paymentAmount, totalPriceFixedOrder;
     private boolean isDeposit;
-    private String orderStatus, totalTime, selectedDate, source, courtId;
+    private String orderStatus, totalTime, selectedDate, source, courtId, orderType;
     private ArrayList<Integer> slotPrices;
     private PaymentSocketListener socketListener;
+    private Orders currentOrder; // Lưu trữ thông tin đơn hàng hiện tại để đồng bộ
+
     private Handler socketHandler = new Handler();
     private Runnable socketCheckRunnable = new Runnable() {
         @Override
@@ -60,9 +63,25 @@ public class QRCodeActivity extends AppCompatActivity {
         @Override
         public void run() {
             updatePaymentTimeout();
-            timeoutHandler.postDelayed(this, 30000);
+            timeoutHandler.postDelayed(this, 30000); // Cập nhật mỗi 30 giây
         }
     };
+
+    // Khởi tạo DEFAULT_TIMEOUT_DURATION dựa trên orderType từ Intent
+    static {
+        String orderTypeFromIntent = null;
+        try {
+            Intent intent = new Intent(); // Tạo Intent giả để lấy orderType (trong thực tế, Intent sẽ được truyền từ Activity trước)
+            orderTypeFromIntent = intent.getStringExtra("orderType");
+        } catch (Exception e) {
+            Log.e("QRCodeActivity", "Lỗi khi lấy orderType từ Intent: " + e.getMessage());
+        }
+        if ("Đơn cố định".equals(orderTypeFromIntent)) {
+            DEFAULT_TIMEOUT_DURATION = 15 * 60 * 1000; // 15 phút
+        } else {
+            DEFAULT_TIMEOUT_DURATION = 6 * 60 * 1000; // 5 phút
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +93,6 @@ public class QRCodeActivity extends AppCompatActivity {
         tvCountdownTimer = findViewById(R.id.tvCountdownTimer);
         tvWarning = findViewById(R.id.tvWarning);
 
-        // Nhận dữ liệu truyền từ Intent
         String qrCodeData = getIntent().getStringExtra("qrCodeData");
         String paymentTimeoutStr = getIntent().getStringExtra("paymentTimeout");
         orderId = getIntent().getStringExtra("orderId");
@@ -90,8 +108,9 @@ public class QRCodeActivity extends AppCompatActivity {
         courtId = getIntent().getStringExtra("courtId");
         paymentAmount = getIntent().getIntExtra("paymentAmount", 0);
         slotPrices = getIntent().getIntegerArrayListExtra("slotPrices");
+        orderType = getIntent().getStringExtra("orderType");
+        totalPriceFixedOrder = getIntent().getIntExtra("totalPriceFixedOrder", 0); // Nhận giá trị từ ConfirmActivity
 
-        // Log danh sách slotPrices
         if (slotPrices != null) {
             for (Integer price : slotPrices) {
                 Log.d("QRCodeActivity", "Slot price: " + price);
@@ -100,10 +119,8 @@ public class QRCodeActivity extends AppCompatActivity {
             Log.d("QRCodeActivity", "Không có dữ liệu slotPrices được truyền qua Intent");
         }
 
-        // Lưu slotPrices vào DataHolder
         DataHolder.getInstance().setSlotPrices(slotPrices);
 
-        // Nếu không có qrCodeData, gọi API để lấy
         if (qrCodeData == null || qrCodeData.isEmpty()) {
             if (orderId != null && !orderId.isEmpty()) {
                 fetchOrderDetails(orderId);
@@ -144,8 +161,23 @@ public class QRCodeActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Orders order) {
                 if (order != null) {
+                    currentOrder = order; // Lưu thông tin đơn hàng
                     String qrCodeData = order.getQrcode();
                     String paymentTimeoutStr = order.getPaymentTimeout();
+                    String createdAt = order.getCreatedAt();
+                    if (createdAt != null && !createdAt.isEmpty()) {
+                        try {
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS", Locale.getDefault());
+                            sdf.setTimeZone(TimeZone.getTimeZone("GMT+7"));
+                            Date createdDate = sdf.parse(createdAt);
+                            createdTimeMillis = createdDate.getTime();
+                            timeoutTimeMillis = createdTimeMillis + DEFAULT_TIMEOUT_DURATION; // Timeout sau 15 phút từ createdAt
+                        } catch (Exception e) {
+                            Log.e("QRCodeActivity", "Lỗi parse createdAt: " + e.getMessage());
+                            createdTimeMillis = System.currentTimeMillis();
+                            timeoutTimeMillis = createdTimeMillis + DEFAULT_TIMEOUT_DURATION;
+                        }
+                    }
                     if (qrCodeData != null && !qrCodeData.isEmpty()) {
                         processQRCodeData(qrCodeData, paymentTimeoutStr);
                     } else {
@@ -174,54 +206,57 @@ public class QRCodeActivity extends AppCompatActivity {
         }
 
         DecimalFormat decimalFormat = new DecimalFormat("#,###");
-        if (isDeposit) {
-            String formattedDeposit = decimalFormat.format(depositAmount);
-            tvWarning.setText("Vui lòng chuyển khoản " + formattedDeposit + "₫ để hoàn tất đặt cọc!");
-        } else {
-            String formattedPaymentAmount = decimalFormat.format(paymentAmount > 0 ? paymentAmount : totalPrice);
-            tvWarning.setText("Vui lòng chuyển khoản " + formattedPaymentAmount + "₫ để hoàn tất thanh toán!");
-        }
-
-        if (paymentTimeoutStr != null && !paymentTimeoutStr.isEmpty()) {
-            try {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS", Locale.getDefault());
-                sdf.setTimeZone(TimeZone.getTimeZone("GMT+7"));
-                Date timeoutDate = sdf.parse(paymentTimeoutStr);
-                timeoutTimeMillis = timeoutDate.getTime();
-            } catch (Exception e) {
-                Log.e("QRCodeActivity", "Lỗi parse paymentTimeout: " + e.getMessage());
-                timeoutTimeMillis = System.currentTimeMillis() + 15 * 60 * 1000;
+        if ("Đơn cố định".equals(orderType)) {
+            if (isDeposit) {
+                String formattedTotalPriceFixedOrder = decimalFormat.format(totalPriceFixedOrder);
+                tvWarning.setText("Vui lòng chuyển khoản " + formattedTotalPriceFixedOrder + "₫ để hoàn tất đặt cọc!");
+            } else {
+                String formattedTotalPriceFixedOrder = decimalFormat.format(totalPriceFixedOrder);
+                tvWarning.setText("Vui lòng chuyển khoản " + formattedTotalPriceFixedOrder + "₫ để hoàn tất thanh toán!");
             }
         } else {
-            timeoutTimeMillis = System.currentTimeMillis() + 15 * 60 * 1000;
+            if (isDeposit) {
+                String formattedDeposit = decimalFormat.format(depositAmount);
+                tvWarning.setText("Vui lòng chuyển khoản " + formattedDeposit + "₫ để hoàn tất đặt cọc!");
+            } else {
+                String formattedPaymentAmount = decimalFormat.format(paymentAmount > 0 ? paymentAmount : totalPrice);
+                tvWarning.setText("Vui lòng chuyển khoản " + formattedPaymentAmount + "₫ để hoàn tất thanh toán!");
+            }
         }
 
+        // Khởi động đếm ngược dựa trên createdAt
         startCountdown();
     }
 
     private void startCountdown() {
-        long remainingTime = timeoutTimeMillis - System.currentTimeMillis();
-        if (remainingTime <= 0) {
-            tvCountdownTimer.setText("Hết thời gian thanh toán");
-            navigateToDetailBooking();
-            return;
+        if (createdTimeMillis == 0) {
+            // Nếu chưa có createdTimeMillis, dùng thời gian hiện tại làm mặc định
+            createdTimeMillis = System.currentTimeMillis();
+            timeoutTimeMillis = createdTimeMillis + DEFAULT_TIMEOUT_DURATION;
         }
-        if (countDownTimer != null) {
-            countDownTimer.cancel();
-        }
-        countDownTimer = new CountDownTimer(remainingTime, 1000) {
+
+        countdownRunnable = new Runnable() {
             @Override
-            public void onTick(long millisUntilFinished) {
-                long minutes = millisUntilFinished / 60000;
-                long seconds = (millisUntilFinished % 60000) / 1000;
-                tvCountdownTimer.setText(String.format("%02d:%02d", minutes, seconds));
+            public void run() {
+                long currentTimeMillis = System.currentTimeMillis();
+                long remainingTime = timeoutTimeMillis - currentTimeMillis;
+                if (remainingTime <= 0) {
+                    tvCountdownTimer.setText("Hết thời gian thanh toán");
+                    handler.removeCallbacks(countdownRunnable);
+                    navigateToDetailBooking();
+                } else {
+                    long minutes = remainingTime / 60000;
+                    long seconds = (remainingTime % 60000) / 1000;
+                    if ("Đơn cố định".equals(orderType)) {
+                        tvCountdownTimer.setText(String.format("%02d:%02d", minutes, seconds));
+                    } else {
+                        tvCountdownTimer.setText(String.format("%02d:%02d", minutes, seconds));
+                    }
+                    handler.postDelayed(this, 1000); // Cập nhật mỗi giây
+                }
             }
-            @Override
-            public void onFinish() {
-                tvCountdownTimer.setText("Hết thời gian thanh toán");
-                navigateToDetailBooking();
-            }
-        }.start();
+        };
+        handler.post(countdownRunnable);
     }
 
     private void updatePaymentTimeout() {
@@ -229,20 +264,24 @@ public class QRCodeActivity extends AppCompatActivity {
         NetworkUtils.callApi(call, this, new NetworkUtils.ApiCallback<Orders>() {
             @Override
             public void onSuccess(Orders order) {
-                String paymentTimeoutStr = order.getPaymentTimeout();
-                if (paymentTimeoutStr != null && !paymentTimeoutStr.isEmpty()) {
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS", Locale.getDefault());
-                    try {
-                        Date timeoutDate = sdf.parse(paymentTimeoutStr);
-                        if (timeoutDate != null) {
-                            long newTimeoutMillis = timeoutDate.getTime();
-                            if (newTimeoutMillis > System.currentTimeMillis()) {
-                                timeoutTimeMillis = newTimeoutMillis;
-                                runOnUiThread(() -> startCountdown());
+                if (order != null) {
+                    currentOrder = order; // Cập nhật thông tin đơn hàng mới nhất
+                    String createdAt = order.getCreatedAt();
+                    if (createdAt != null && !createdAt.isEmpty()) {
+                        try {
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS", Locale.getDefault());
+                            sdf.setTimeZone(TimeZone.getTimeZone("GMT+7"));
+                            Date createdDate = sdf.parse(createdAt);
+                            long newCreatedTimeMillis = createdDate.getTime();
+                            if (newCreatedTimeMillis != createdTimeMillis) {
+                                createdTimeMillis = newCreatedTimeMillis;
+                                timeoutTimeMillis = createdTimeMillis + DEFAULT_TIMEOUT_DURATION;
+                                handler.removeCallbacks(countdownRunnable);
+                                startCountdown(); // Khởi động lại đếm ngược với thời gian mới
                             }
+                        } catch (Exception e) {
+                            Log.e("QRCodeActivity", "Lỗi parse createdAt trong update: " + e.getMessage());
                         }
-                    } catch (Exception e) {
-                        Log.e("QRCodeActivity", "Lỗi parse paymentTimeout: " + e.getMessage());
                     }
                 }
             }
@@ -269,7 +308,7 @@ public class QRCodeActivity extends AppCompatActivity {
             intent.putExtra("selectedDate", selectedDate);
             intent.putExtra("totalPrice", totalPrice);
             intent.putExtra("courtId", courtId);
-            // Không cần truyền slotPrices qua Intent vì đã lưu vào DataHolder
+            intent.putExtra("orderType", orderType);
             Log.d("QRCodeActivity", "slotPrices đã được lưu vào DataHolder");
             startActivity(intent);
             finish();
@@ -287,7 +326,7 @@ public class QRCodeActivity extends AppCompatActivity {
             intent.putExtra("totalPrice", totalPrice);
             intent.putExtra("orderStatus", orderStatus);
             intent.putExtra("courtId", courtId);
-            // Không cần truyền slotPrices qua Intent vì đã lưu vào DataHolder
+            intent.putExtra("orderType", orderType);
             Log.d("QRCodeActivity", "slotPrices đã được lưu vào DataHolder");
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
@@ -300,15 +339,15 @@ public class QRCodeActivity extends AppCompatActivity {
         super.onResume();
         socketHandler.post(socketCheckRunnable);
         timeoutHandler.post(updateTimeoutRunnable);
+        if (countdownRunnable != null) {
+            handler.post(countdownRunnable); // Tiếp tục đếm khi vào lại
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (countDownTimer != null) {
-            countDownTimer.cancel();
-            countDownTimer = null;
-        }
+        handler.removeCallbacks(countdownRunnable); // Tạm dừng đếm nhưng không reset
         socketHandler.removeCallbacks(socketCheckRunnable);
         timeoutHandler.removeCallbacks(updateTimeoutRunnable);
         if (socketListener != null) {

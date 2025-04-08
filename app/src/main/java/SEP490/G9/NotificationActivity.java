@@ -1,3 +1,4 @@
+// NotificationActivity.java
 package SEP490.G9;
 
 import android.content.SharedPreferences;
@@ -56,13 +57,19 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
         // Kiểm tra thông tin người dùng
         sessionManager = new SessionManager(this);
         String userId = sessionManager.getUserId();
-        if (userId == null || userId.isEmpty()) {
+        String phoneNumber = sessionManager.getPhoneNumber();
+
+        if (userId != null && !userId.isEmpty()) {
+            // Nếu có userId, lấy thông báo bằng userId
+            getNotificationsByUserId(userId);
+        } else if (phoneNumber != null && !phoneNumber.isEmpty()) {
+            // Nếu không có userId nhưng có phoneNumber, lấy thông báo bằng phoneNumber
+            getNotificationsByPhone(phoneNumber);
+        } else {
+            // Nếu không có cả userId và phoneNumber
             Toast.makeText(this, "Không có thông tin người dùng", Toast.LENGTH_SHORT).show();
             return;
         }
-
-        // Lấy danh sách thông báo từ API
-        getNotifications(userId);
 
         // Xử lý vuốt để xóa một thông báo
         ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0,
@@ -89,34 +96,12 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
         btnClearAll.setOnClickListener(v -> clearAllNotifications());
     }
 
-    /**
-     * Gọi API để lấy danh sách thông báo
-     */
-    private void getNotifications(String userId) {
+    private void getNotificationsByUserId(String userId) {
         ApiService apiService = RetrofitClient.getApiService(this);
         apiService.getNotifications(userId).enqueue(new Callback<NotificationResponse>() {
             @Override
             public void onResponse(Call<NotificationResponse> call, Response<NotificationResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Notification> allNotifications = response.body().getNotifications();
-
-                    // Lấy danh sách thông báo đã xóa
-                    //deletedNotificationIds = sharedPreferences.getStringSet("deletedIds", new HashSet<>());
-                    // Đọc lại danh sách đã xóa từ SharedPreferences
-                    deletedNotificationIds = new HashSet<>(sharedPreferences.getStringSet("deletedIds", new HashSet<>()));
-                    // Lọc danh sách, loại bỏ các thông báo đã bị xóa
-                    notificationList.clear();
-                    for (Notification notification : allNotifications) {
-                        if (!deletedNotificationIds.contains(notification.getId())) {
-                            notificationList.add(notification);
-                        }
-                    }
-
-                    // Cập nhật giao diện
-                    notificationAdapter.notifyDataSetChanged();
-                } else {
-                    Toast.makeText(NotificationActivity.this, "Không thể lấy danh sách thông báo", Toast.LENGTH_SHORT).show();
-                }
+                handleNotificationResponse(response);
             }
 
             @Override
@@ -126,37 +111,53 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
         });
     }
 
-    /**
-     * Xóa một thông báo
-     */
+    private void getNotificationsByPhone(String phoneNumber) {
+        ApiService apiService = RetrofitClient.getApiService(this);
+        apiService.getNotificationsByPhone(phoneNumber).enqueue(new Callback<NotificationResponse>() {
+            @Override
+            public void onResponse(Call<NotificationResponse> call, Response<NotificationResponse> response) {
+                handleNotificationResponse(response);
+            }
+
+            @Override
+            public void onFailure(Call<NotificationResponse> call, Throwable t) {
+                Toast.makeText(NotificationActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void handleNotificationResponse(Response<NotificationResponse> response) {
+        if (response.isSuccessful() && response.body() != null) {
+            List<Notification> allNotifications = response.body().getNotifications();
+            deletedNotificationIds = new HashSet<>(sharedPreferences.getStringSet("deletedIds", new HashSet<>()));
+            notificationList.clear();
+            for (Notification notification : allNotifications) {
+                if (!deletedNotificationIds.contains(notification.getId())) {
+                    notificationList.add(notification);
+                }
+            }
+            notificationAdapter.notifyDataSetChanged();
+        } else {
+            Toast.makeText(NotificationActivity.this, "Không thể lấy danh sách thông báo", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     public void onCloseClick(Notification notification) {
-        // Thêm ID vào danh sách xóa
         deletedNotificationIds.add(notification.getId());
         sharedPreferences.edit().putStringSet("deletedIds", deletedNotificationIds).commit();
-
-        // Xóa thông báo khỏi danh sách hiển thị
         notificationList.remove(notification);
         notificationAdapter.notifyDataSetChanged();
-
         Toast.makeText(this, "Đã xóa thông báo", Toast.LENGTH_SHORT).show();
     }
 
-    /**
-     * Xóa tất cả thông báo
-     */
     private void clearAllNotifications() {
-        // Lấy tất cả ID hiện tại
         Set<String> idsToDelete = new HashSet<>();
         for (Notification notification : notificationList) {
             idsToDelete.add(notification.getId());
         }
-
-        // Đọc lại danh sách đã xóa và thêm mới
         deletedNotificationIds = new HashSet<>(sharedPreferences.getStringSet("deletedIds", new HashSet<>()));
         deletedNotificationIds.addAll(idsToDelete);
-
-        // Lưu và xóa
         sharedPreferences.edit().putStringSet("deletedIds", deletedNotificationIds).commit();
         notificationList.clear();
         notificationAdapter.notifyDataSetChanged();

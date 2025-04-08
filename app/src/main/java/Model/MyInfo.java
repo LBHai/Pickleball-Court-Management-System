@@ -14,13 +14,15 @@ public class MyInfo {
     private String userRank;
     private String gender;
     private boolean student;
+    private String avatar;
+
 
     // Getters và setters
 
     public MyInfo() {
     }
 
-    public MyInfo(String id, String username, String firstName, String lastName, String dob, List<Role> roles, String email, String phoneNumber, String userRank, String gender, boolean student) {
+    public MyInfo(String id, String username, String firstName, String lastName, String dob, List<Role> roles, String email, String phoneNumber, String userRank, String gender, boolean student, String avatarUrl) {
         this.id = id;
         this.username = username;
         this.firstName = firstName;
@@ -32,6 +34,7 @@ public class MyInfo {
         this.userRank = userRank;
         this.gender = gender;
         this.student = student;
+        this.avatar = avatar;
     }
 
     public String getId() {
@@ -120,5 +123,13 @@ public class MyInfo {
 
     public void setStudent(boolean student) {
         this.student = student;
+    }
+
+    public String getAvatarUrl() {
+        return avatar;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatar = avatarUrl;
     }
 }

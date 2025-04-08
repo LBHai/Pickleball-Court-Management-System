@@ -10,12 +10,16 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -35,6 +39,7 @@ import Api.NetworkUtils;
 import Api.RetrofitClient;
 import Model.ConfirmOrder;
 import Model.Courts;
+import Model.CreateOrderRegularRequest;
 import Model.CreateOrderRequest;
 import Model.CreateOrderResponse;
 import Model.MyInfoResponse;
@@ -59,11 +64,15 @@ public class ConfirmActivity extends AppCompatActivity {
     private List<ConfirmOrder> confirmOrders;
     private static final String HMAC_SHA256 = "HmacSHA256";
     private static final String SALT = "dHRzX2phdmFfMDFAaHlwZXJsb2d5LmNvbTpIeXBlckAxMjN0dHNfamF2YV8wMUBoeXBlcmxvZ3kuY29t";
-
     private SessionManager sessionManager;
     private String courtName;
     private String courtAddress;
     private String totalTime;
+
+    // Thêm các biến cho đơn cố định
+    private String courtId, selectedDays, startDate, endDate, startTime, endTime;
+    private List<String> selectedCourtSlots;
+    private int totalPriceFixedOrder; // Biến để lưu tổng tiền cho đơn cố định
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,10 +94,201 @@ public class ConfirmActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
 
         sessionManager = new SessionManager(this);
-        clubId = getIntent().getStringExtra("club_id");
-        selectedDate = getIntent().getStringExtra("selectedDate");
-        confirmOrdersJson = getIntent().getStringExtra("confirmOrdersJson");
-        orderId = getIntent().getStringExtra("orderId");
+
+        Intent intent = getIntent();
+        String orderType = intent.getStringExtra("orderType");
+
+        if ("Đơn cố định".equals(orderType)) {
+            handleFixedOrder(intent);
+        } else {
+            handleRegularOrder(intent);
+        }
+    }
+
+    private void handleFixedOrder(Intent intent) {
+        String token = sessionManager.getToken();
+        ApiService apiService = RetrofitClient.getApiService(this);
+
+        // Lấy thông tin người dùng nếu đã đăng nhập
+        if (token != null && !token.isEmpty()) {
+            String authHeader = "Bearer " + token;
+            NetworkUtils.callApi(apiService.getMyInfo(authHeader), this, new NetworkUtils.ApiCallback<MyInfoResponse>() {
+                @Override
+                public void onSuccess(MyInfoResponse r) {
+                    if (r != null && r.getResult() != null) {
+                        String fullName = r.getResult().getFirstName() + " " + r.getResult().getLastName();
+                        etName.setText(fullName);
+                        etPhone.setText(r.getResult().getPhoneNumber());
+                        userId = r.getResult().getId();
+                        sessionManager.saveUserId(userId);
+                        registerNotification();
+                    }
+                }
+                @Override
+                public void onError(String e) {
+                    Toast.makeText(ConfirmActivity.this, "Lấy thông tin thất bại!", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Toast.makeText(this, "Bạn đang đặt sân với vai trò là Guest!", Toast.LENGTH_SHORT).show();
+            List<String> guestPhones = sessionManager.getGuestPhones();
+            if (!guestPhones.isEmpty()) {
+                etPhone.setText(guestPhones.get(0));
+            }
+        }
+
+        // Lấy dữ liệu từ Intent
+        courtId = intent.getStringExtra("courtId");
+        selectedDays = intent.getStringExtra("selectedDays");
+        startDate = intent.getStringExtra("startDate");
+        endDate = intent.getStringExtra("endDate");
+        startTime = intent.getStringExtra("startTime");
+        endTime = intent.getStringExtra("endTime");
+        selectedCourtSlots = intent.getStringArrayListExtra("selectedCourtSlots");
+
+        // Kiểm tra dữ liệu đầu vào
+        if (courtId == null || courtId.isEmpty() ||
+                selectedDays == null || selectedDays.isEmpty() ||
+                startDate == null || endDate == null ||
+                startTime == null || endTime == null ||
+                selectedCourtSlots == null || selectedCourtSlots.isEmpty()) {
+            Toast.makeText(this, "Không có dữ liệu đặt sân!", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        // Định dạng thời gian cho API
+        String formattedStartTime = startTime.contains(":") && startTime.split(":").length == 2 ? startTime + ":00" : startTime;
+        String formattedEndTime = endTime.contains(":") && endTime.split(":").length == 2 ? endTime + ":00" : endTime;
+
+        // Gọi API để lấy tổng tiền
+        Call<Double> call = apiService.getPaymentValue(courtId, selectedDays, startDate, endDate, formattedStartTime, formattedEndTime);
+        call.enqueue(new Callback<Double>() {
+            @Override
+            public void onResponse(Call<Double> call, Response<Double> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    totalPriceFixedOrder = response.body().intValue(); // Lưu tổng tiền vào biến instance
+                    tvTotalPriceLine.setText(Html.fromHtml("Tổng tiền: <b>" + formatMoney(totalPriceFixedOrder) + "</b>"));
+                    Log.d("ConfirmActivity", "Tổng tiền nhận từ API: " + totalPriceFixedOrder);
+                } else {
+                    Toast.makeText(ConfirmActivity.this, "Lỗi khi lấy tổng tiền", Toast.LENGTH_SHORT).show();
+                    tvTotalPriceLine.setText("Tổng tiền: Lỗi");
+                    Log.e("ConfirmActivity", "Lỗi API: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Double> call, Throwable t) {
+                Toast.makeText(ConfirmActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                tvTotalPriceLine.setText("Tổng tiền: Lỗi mạng");
+                Log.e("ConfirmActivity", "Lỗi mạng: " + t.getMessage());
+            }
+        });
+
+        // Lấy thông tin sân
+        fetchCourtDetails(courtId);
+
+        // Hiển thị thông tin ngày giờ
+        tvDate.setText(" Ngày " + startDate + " đến ngày " + endDate + "\n Thời gian: " + startTime + " - " + endTime + "\n Trong: " + selectedDays);
+
+        // Hiển thị danh sách sân đã chọn
+        layoutConfirmOrders.removeAllViews();
+        for (String courtSlot : selectedCourtSlots) {
+            TextView tvCourtSlot = new TextView(this);
+            tvCourtSlot.setText("Sân đang chọn: " + courtSlot);
+            tvCourtSlot.setTextColor(getResources().getColor(android.R.color.white));
+            tvCourtSlot.setTextSize(14);
+            layoutConfirmOrders.addView(tvCourtSlot);
+        }
+
+        // Xử lý sự kiện nút
+        btnPayment.setOnClickListener(v -> {
+            String phone = etPhone.getText().toString().trim();
+            if (!validateInput(phone)) return;
+            createFixedOrder(false, totalPriceFixedOrder); // Thanh toán với totalPriceFixedOrder
+        });
+
+        btnDeposit.setOnClickListener(v -> {
+            String phone = etPhone.getText().toString().trim();
+            if (!validateInput(phone)) return;
+            createFixedOrder(true, totalPriceFixedOrder); // Đặt cọc với totalPriceFixedOrder
+        });
+
+        btnBack.setOnClickListener(v -> finish());
+    }
+
+    private void createFixedOrder(boolean isDeposit, int totalPriceFixedOrder) {
+        String name = etName.getText().toString().trim();
+        String phone = etPhone.getText().toString().trim();
+        String note = etNote.getText().toString().trim();
+
+        if (name.isEmpty() || phone.isEmpty()) {
+            Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!name.matches("^[\\p{L}\\s]+$") || name.length() < 2) {
+            Toast.makeText(this, "Tên chỉ chứa chữ cái và khoảng trắng, ít nhất 2 ký tự", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!phone.matches("0\\d{9}")) {
+            Toast.makeText(this, "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        CreateOrderRegularRequest req = new CreateOrderRegularRequest();
+        req.setCourtId(courtId);
+        req.setCourtName(courtName);
+        req.setAddress(courtAddress);
+        req.setUserId(userId);
+        req.setCustomerName(name);
+        req.setPhoneNumber(phone);
+        req.setNote(note);
+        req.setPaymentStatus("Chưa thanh toán");
+        req.setOrderType("Đơn cố định");
+        req.setStartDate(startDate);
+        req.setEndDate(endDate);
+        req.setStartTime(startTime);
+        req.setEndTime(endTime);
+        req.setSelectedDays(selectedDays);
+        req.setSelectedCourtSlots(selectedCourtSlots);
+        req.setFlexibleCourtSlotFixes(null);
+
+        ApiService api = RetrofitClient.getApiService(this);
+        Call<CreateOrderResponse> call = api.createFixedOrder(req);
+        call.enqueue(new Callback<CreateOrderResponse>() {
+            @Override
+            public void onResponse(Call<CreateOrderResponse> call, Response<CreateOrderResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    CreateOrderResponse r = response.body();
+                    Intent i = new Intent(ConfirmActivity.this, QRCodeActivity.class); // Chuyển sang QRCodeActivity cho cả thanh toán và đặt cọc
+                    i.putExtra("orderType", "Đơn cố định");
+                    i.putExtra("orderId", r.getId());
+                    i.putExtra("totalPriceFixedOrder", totalPriceFixedOrder); // Truyền tổng tiền đơn cố định
+                    i.putExtra("qrCodeData", r.getQrcode());
+                    i.putExtra("paymentTimeout", r.getPaymentTimeout());
+                    i.putExtra("overallTotalPrice", r.getTotalAmount());
+                    i.putExtra("depositAmount", r.getDepositAmount());
+                    i.putExtra("isDeposit", isDeposit);
+                    i.putExtra("courtId", courtId);
+                    startActivity(i);
+                    finish();
+                } else {
+                    Toast.makeText(ConfirmActivity.this, "Tạo đơn thất bại!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CreateOrderResponse> call, Throwable t) {
+                Toast.makeText(ConfirmActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void handleRegularOrder(Intent intent) {
+        clubId = intent.getStringExtra("club_id");
+        selectedDate = intent.getStringExtra("selectedDate");
+        confirmOrdersJson = intent.getStringExtra("confirmOrdersJson");
+        orderId = intent.getStringExtra("orderId");
 
         if (selectedDate == null || selectedDate.trim().isEmpty()) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -131,7 +331,7 @@ public class ConfirmActivity extends AppCompatActivity {
             finish();
             return;
         }
-        Log.d("ConfirmActivity", "confirmOrdersJson: " + confirmOrdersJson);
+
         if (clubId != null && !clubId.isEmpty()) {
             fetchCourtDetails(clubId);
         }
@@ -157,10 +357,62 @@ public class ConfirmActivity extends AppCompatActivity {
             processOrder(true);
         });
 
-        // Khi nhấn btnBack, chỉ gọi finish() để quay lại màn hình trước đó và giữ nguyên các slot đã chọn.
-        btnBack.setOnClickListener(v -> {
-            finish();
+        btnBack.setOnClickListener(v -> finish());
+    }
+
+    private void fetchCourtDetails(String id) {
+        ApiService apiService = RetrofitClient.getApiService(this);
+        NetworkUtils.callApi(apiService.getCourtById(id), this, new NetworkUtils.ApiCallback<Courts>() {
+            @Override
+            public void onSuccess(Courts c) {
+                if (c != null) {
+                    courtName = c.getName();
+                    courtAddress = c.getAddress();
+                    tvStadiumName.setText("Tên sân: " + courtName);
+                    tvAddress.setText("Địa chỉ: " + courtAddress);
+                }
+            }
+            @Override
+            public void onError(String e) {
+                Toast.makeText(ConfirmActivity.this, "Lỗi khi lấy thông tin sân", Toast.LENGTH_SHORT).show();
+            }
         });
+    }
+
+    private void buildConfirmOrdersUI() {
+        if (confirmOrders == null || confirmOrders.isEmpty()) return;
+        TreeMap<String, List<ConfirmOrder>> ordersByDay = new TreeMap<>();
+        for (ConfirmOrder o : confirmOrders) {
+            String day = o.getDayBooking() != null ? o.getDayBooking() : selectedDate;
+            ordersByDay.computeIfAbsent(day, k -> new ArrayList<>()).add(o);
+        }
+        layoutConfirmOrders.removeAllViews();
+        overallTotalPrice = 0;
+        int totalMinutes = 0;
+        for (Map.Entry<String, List<ConfirmOrder>> e : ordersByDay.entrySet()) {
+            TextView tvDayHeader = new TextView(this);
+            tvDayHeader.setTextColor(getResources().getColor(android.R.color.white));
+            tvDayHeader.setTextSize(16);
+            tvDayHeader.setText("Ngày: " + e.getKey());
+            layoutConfirmOrders.addView(tvDayHeader);
+            List<ConfirmOrder> list = e.getValue();
+            list.sort((o1, o2) -> Integer.compare(toMinutes(o1.getStartTime()), toMinutes(o2.getStartTime())));
+            for (ConfirmOrder o : list) {
+                overallTotalPrice += (int) o.getDailyPrice();
+                totalMinutes += (toMinutes(o.getEndTime()) - toMinutes(o.getStartTime()));
+                TextView tvSlot = new TextView(this);
+                tvSlot.setTextColor(getResources().getColor(android.R.color.white));
+                tvSlot.setTextSize(14);
+                String detail = "   - " + o.getCourtSlotName() + ": " + o.getStartTime().substring(0, 5) + " - " + o.getEndTime().substring(0, 5) + " | " + formatMoney((int) o.getDailyPrice());
+                tvSlot.setText(detail);
+                layoutConfirmOrders.addView(tvSlot);
+            }
+        }
+        int hours = totalMinutes / 60;
+        int mins = totalMinutes % 60;
+        totalTime = String.format(Locale.getDefault(), "%dh%02d", hours, mins);
+        tvTotalPriceLine.setText(Html.fromHtml("Tổng tiền: <b>" + formatMoney(overallTotalPrice) + "</b>"));
+        tvTotalTimeLine.setText("Tổng thời gian chơi: " + totalTime);
     }
 
     private void processOrder(boolean isDeposit) {
@@ -180,12 +432,13 @@ public class ConfirmActivity extends AppCompatActivity {
             Toast.makeText(this, "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0", Toast.LENGTH_SHORT).show();
             return;
         }
+
         btnPayment.setEnabled(false);
         btnDeposit.setEnabled(false);
 
         overallTotalPrice = 0;
         for (ConfirmOrder o : confirmOrders) {
-            overallTotalPrice += o.getDailyPrice();
+            overallTotalPrice += (int) o.getDailyPrice();
         }
         int n = confirmOrders.size();
         int totalAmount = overallTotalPrice;
@@ -198,10 +451,10 @@ public class ConfirmActivity extends AppCompatActivity {
             for (ConfirmOrder o : confirmOrders) {
                 slotPrices.add((int) o.getDailyPrice());
             }
-            Collections.sort(slotPrices); // Sắp xếp giá tăng dần
-            int k = (int) Math.ceil(n / 3.0); // Số slot cần cọc
+            Collections.sort(slotPrices);
+            int k = (int) Math.ceil(n / 3.0);
             for (int i = 0; i < k && i < slotPrices.size(); i++) {
-                depositAmount += slotPrices.get(i); // Tổng giá của k slot thấp nhất
+                depositAmount += slotPrices.get(i);
             }
         }
 
@@ -242,11 +495,6 @@ public class ConfirmActivity extends AppCompatActivity {
         }
         req.setOrderDetails(orderDetailGroups);
 
-        ArrayList<Integer> slotPrices = new ArrayList<>();
-        for (ConfirmOrder o : confirmOrders) {
-            slotPrices.add((int) o.getDailyPrice());
-        }
-
         ApiService api = RetrofitClient.getApiService(this);
 
         if (orderId != null && !orderId.isEmpty()) {
@@ -260,7 +508,6 @@ public class ConfirmActivity extends AppCompatActivity {
 
                     if (isDeposit) {
                         initialPaymentAmount = finalDepositAmount - amountPaid;
-                        // Điều chỉnh logic: nếu initialPaymentAmount < 0, vẫn giữ giá trị âm
                         paymentStatus = (initialPaymentAmount > 0) ? ((n == 1) ? "Chưa thanh toán" : "Chưa đặt cọc")
                                 : ((n == 1) ? "Đã thanh toán" : "Đã đặt cọc");
                     } else {
@@ -279,11 +526,11 @@ public class ConfirmActivity extends AppCompatActivity {
                     } else {
                         int tempRefund = Math.abs(initialPaymentAmount);
                         if (tempRefund > maxAllowedRefund) {
-                            computedPaymentAmount = -maxAllowedRefund; // Giữ âm nếu vượt quá maxAllowedRefund
+                            computedPaymentAmount = -maxAllowedRefund;
                             computedRefundAmount = maxAllowedRefund;
                             Toast.makeText(ConfirmActivity.this, "Số tiền hoàn lại tối đa là " + formatMoney(maxAllowedRefund), Toast.LENGTH_SHORT).show();
                         } else {
-                            computedPaymentAmount = initialPaymentAmount; // Giữ giá trị âm như yêu cầu
+                            computedPaymentAmount = initialPaymentAmount;
                             computedRefundAmount = tempRefund;
                         }
                     }
@@ -296,7 +543,6 @@ public class ConfirmActivity extends AppCompatActivity {
                             String.valueOf(computedPaymentAmount),
                             String.valueOf(finalDepositAmount),
                             phone));
-
                     Call<CreateOrderResponse> call = api.changeOrder(orderId, req);
                     NetworkUtils.callApi(call, ConfirmActivity.this, new NetworkUtils.ApiCallback<CreateOrderResponse>() {
                         @Override
@@ -314,7 +560,7 @@ public class ConfirmActivity extends AppCompatActivity {
                                     i.putExtra("depositAmount", finalDepositAmount);
                                     i.putExtra("isDeposit", isDeposit);
                                     i.putExtra("courtId", clubId);
-                                    i.putIntegerArrayListExtra("slotPrices", slotPrices);
+                                    i.putExtra("orderType", getIntent().getStringExtra("orderType"));
                                 }
                                 i.putExtra("orderId", r.getId());
                                 i.putExtra("totalTime", totalTime);
@@ -323,7 +569,7 @@ public class ConfirmActivity extends AppCompatActivity {
                                 i.putExtra("courtId", clubId);
                                 i.putExtra("refundAmount", computedRefundAmount);
                                 i.putExtra("confirmOrdersJson", confirmOrdersJson);
-                                i.putIntegerArrayListExtra("slotPrices", slotPrices);
+                                i.putExtra("orderType", getIntent().getStringExtra("orderType"));
                                 startActivity(i);
                                 finish();
                             } else {
@@ -362,7 +608,6 @@ public class ConfirmActivity extends AppCompatActivity {
                     String.valueOf(paymentAmount),
                     String.valueOf(finalDepositAmount),
                     phone));
-
             Call<CreateOrderResponse> call = api.createOrder(req);
             NetworkUtils.callApi(call, ConfirmActivity.this, new NetworkUtils.ApiCallback<CreateOrderResponse>() {
                 @Override
@@ -380,10 +625,9 @@ public class ConfirmActivity extends AppCompatActivity {
                         i.putExtra("totalTime", totalTime);
                         i.putExtra("selectedDate", selectedDate);
                         i.putExtra("totalPrice", finalTotalAmount);
-                        i.putExtra("orderStatus", r.getOrderStatus());
                         i.putExtra("courtId", clubId);
                         i.putExtra("confirmOrdersJson", confirmOrdersJson);
-                        i.putIntegerArrayListExtra("slotPrices", slotPrices);
+                        i.putExtra("orderType", getIntent().getStringExtra("orderType"));
                         startActivity(i);
                         finish();
                     } else {
@@ -392,10 +636,9 @@ public class ConfirmActivity extends AppCompatActivity {
                         i.putExtra("totalTime", totalTime);
                         i.putExtra("selectedDate", selectedDate);
                         i.putExtra("totalPrice", finalTotalAmount);
-                        i.putExtra("orderStatus", r.getOrderStatus());
                         i.putExtra("courtId", clubId);
                         i.putExtra("confirmOrdersJson", confirmOrdersJson);
-                        i.putIntegerArrayListExtra("slotPrices", slotPrices);
+                        i.putExtra("orderType", getIntent().getStringExtra("orderType"));
                         startActivity(i);
                         finish();
                     }
@@ -411,68 +654,16 @@ public class ConfirmActivity extends AppCompatActivity {
         }
     }
 
-    private void fetchCourtDetails(String id) {
-        ApiService apiService = RetrofitClient.getApiService(this);
-        NetworkUtils.callApi(apiService.getCourtById(id), this, new NetworkUtils.ApiCallback<Courts>() {
-            @Override
-            public void onSuccess(Courts c) {
-                if (c != null) {
-                    courtName = c.getName();
-                    courtAddress = c.getAddress();
-                    tvStadiumName.setText("Tên sân: " + courtName);
-                    tvAddress.setText("Địa chỉ: " + courtAddress);
-                }
-            }
-            @Override
-            public void onError(String e) {
-                Toast.makeText(ConfirmActivity.this, "Lỗi khi lấy thông tin sân", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
     private int toMinutes(String time) {
         String[] parts = time.split(":");
         return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]);
     }
 
     private String formatMoney(int amount) {
-        return new java.text.DecimalFormat("#,###").format(amount) + " ₫";
-    }
-
-    private void buildConfirmOrdersUI() {
-        if (confirmOrders == null || confirmOrders.isEmpty()) return;
-        TreeMap<String, List<ConfirmOrder>> ordersByDay = new TreeMap<>();
-        for (ConfirmOrder o : confirmOrders) {
-            String day = o.getDayBooking() != null ? o.getDayBooking() : selectedDate;
-            ordersByDay.computeIfAbsent(day, k -> new ArrayList<>()).add(o);
-        }
-        layoutConfirmOrders.removeAllViews();
-        overallTotalPrice = 0;
-        int totalMinutes = 0;
-        for (Map.Entry<String, List<ConfirmOrder>> e : ordersByDay.entrySet()) {
-            TextView tvDayHeader = new TextView(this);
-            tvDayHeader.setTextColor(getResources().getColor(android.R.color.white));
-            tvDayHeader.setTextSize(16);
-            tvDayHeader.setText("Ngày: " + e.getKey());
-            layoutConfirmOrders.addView(tvDayHeader);
-            List<ConfirmOrder> list = e.getValue();
-            list.sort((o1, o2) -> Integer.compare(toMinutes(o1.getStartTime()), toMinutes(o2.getStartTime())));
-            for (ConfirmOrder o : list) {
-                overallTotalPrice += o.getDailyPrice();
-                totalMinutes += (toMinutes(o.getEndTime()) - toMinutes(o.getStartTime()));
-                TextView tvSlot = new TextView(this);
-                tvSlot.setTextColor(getResources().getColor(android.R.color.white));
-                tvSlot.setTextSize(14);
-                String detail = "   - " + o.getCourtSlotName() + ": " + o.getStartTime().substring(0, 5) + " - " + o.getEndTime().substring(0, 5) + " | " + formatMoney((int)o.getDailyPrice());
-                tvSlot.setText(detail);
-                layoutConfirmOrders.addView(tvSlot);
-            }
-        }
-        int hours = totalMinutes / 60;
-        int mins = totalMinutes % 60;
-        totalTime = String.format(Locale.getDefault(), "%dh%02d", hours, mins);
-        tvTotalPriceLine.setText(Html.fromHtml("Tổng tiền: <b>" + formatMoney(overallTotalPrice) + "</b>"));
-        tvTotalTimeLine.setText("Tổng thời gian chơi: " + totalTime);
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.getDefault());
+        symbols.setGroupingSeparator('.');
+        DecimalFormat formatter = new DecimalFormat("#,###", symbols);
+        return formatter.format(amount) + "đ";
     }
 
     public static String genSignature(String totalAmount, String paymentAmount, String depositAmount, String bookingDate) {

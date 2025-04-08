@@ -38,19 +38,15 @@ public class CourtsFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate file layout riêng dành cho fragment
         View view = inflater.inflate(R.layout.fragment_courts, container, false);
 
-        // Ánh xạ view
         rcvClubs = view.findViewById(R.id.rcvClubs);
         edtSearch = view.findViewById(R.id.edtSearch);
 
         rcvClubs.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Gọi API lấy danh sách CLB
         callApiGetCourts();
 
-        // Lắng nghe sự kiện nhập vào ô tìm kiếm
         edtSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
@@ -95,6 +91,9 @@ public class CourtsFragment extends Fragment {
             Fragment clubDetailFragment = new CourtDetailFragment();
             Bundle bundle = new Bundle();
             bundle.putString("club_id", club.getId());
+            bundle.putString("club_name", club.getName());
+            bundle.putString("background_url", club.getLogoUrl() != null ? club.getLogoUrl() : "");
+            bundle.putString("address", club.getAddress());
             clubDetailFragment.setArguments(bundle);
 
             getParentFragmentManager().beginTransaction()

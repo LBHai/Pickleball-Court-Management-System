@@ -11,6 +11,7 @@ public class SessionManager {
     private static final String PREF_NAME = "UserSession";
     private static final String KEY_TOKEN = "token";
     private static final String KEY_USER_ID = "userId";
+    private static final String KEY_PHONE_NUMBER = "phoneNumber";  // Thêm key cho phoneNumber
     private static final String KEY_GUEST_PHONES = "guestPhones";
     private static final String KEY_HAS_SHOWN_GUEST_DIALOG = "hasShownGuestDialog";
 
@@ -42,6 +43,17 @@ public class SessionManager {
 
     public String getUserId() {
         return pref.getString(KEY_USER_ID, null);
+    }
+
+    // Thêm phương thức để lưu phoneNumber
+    public void setPhoneNumber(String phoneNumber) {
+        editor.putString(KEY_PHONE_NUMBER, phoneNumber);
+        editor.apply();
+    }
+
+    // Thêm phương thức để lấy phoneNumber
+    public String getPhoneNumber() {
+        return pref.getString(KEY_PHONE_NUMBER, null);
     }
 
     public void addGuestPhone(String phone) {
@@ -78,8 +90,8 @@ public class SessionManager {
     public void clearSession() {
         editor.remove(KEY_TOKEN);
         editor.remove(KEY_USER_ID);
+        editor.remove(KEY_PHONE_NUMBER);  // Xóa phoneNumber khi clear session
         // Không xóa KEY_HAS_SHOWN_GUEST_DIALOG để giữ trạng thái hiển thị dialog
         editor.apply();
     }
-
 }

@@ -21,41 +21,54 @@
             android:id="@+id/btnBack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_margin="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/backicon"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- Avatar -->
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/imgAvatar"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:src="@drawable/avatar"
-            android:scaleType="centerCrop"
+        <!-- Container cho Avatar và nút chỉnh sửa -->
+        <FrameLayout
+            android:id="@+id/flAvatarContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            app:shapeAppearanceOverlay="@style/CircleImageView"
             app:layout_constraintTop_toBottomOf="@id/btnBack"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- (Nếu cần, bạn có thể thêm nút camera trên avatar tại đây) -->
+            <!-- Avatar -->
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/imgAvatar"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/avatar"
+                app:shapeAppearanceOverlay="@style/CircleImageView" />
 
-        <!-- Label: Email -->
+            <!-- Nút chỉnh sửa avatar (ví dụ nút camera) -->
+            <ImageButton
+                android:id="@+id/btnEditAvatar"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="bottom|end"
+                android:background="@android:color/transparent"
+                android:src="@drawable/camera"
+                />
+        </FrameLayout>
+
+        <!-- Label và EditText: Email -->
         <TextView
             android:id="@+id/tvEmailLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:text="@string/email"
             android:textColor="@android:color/white"
             android:textSize="16sp"
-            app:layout_constraintTop_toBottomOf="@id/imgAvatar"
-            app:layout_constraintStart_toStartOf="parent"/>
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/flAvatarContainer"
+            app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- EditText: Email -->
         <EditText
             android:id="@+id/etEmail"
             android:layout_width="0dp"
@@ -72,9 +85,9 @@
             android:textSize="16sp"
             app:layout_constraintTop_toBottomOf="@id/tvEmailLabel"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Label: Phone Number -->
+        <!-- Label và EditText: Phone Number -->
         <TextView
             android:id="@+id/tvPhoneNumberLabel"
             android:layout_width="wrap_content"
@@ -84,9 +97,7 @@
             android:textSize="16sp"
             android:layout_marginTop="16dp"
             app:layout_constraintTop_toBottomOf="@id/etEmail"
-            app:layout_constraintStart_toStartOf="parent"/>
-
-        <!-- EditText: Phone Number (Disabled) -->
+            app:layout_constraintStart_toStartOf="parent" />
 
         <EditText
             android:id="@+id/etPhoneNumber"
@@ -104,10 +115,9 @@
             android:textSize="16sp"
             app:layout_constraintTop_toBottomOf="@id/tvPhoneNumberLabel"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent" />
 
-
-        <!-- Label: First Name -->
+        <!-- Label và EditText: First Name -->
         <TextView
             android:id="@+id/tvFirstNameLabel"
             android:layout_width="wrap_content"
@@ -117,9 +127,8 @@
             android:textSize="16sp"
             android:layout_marginTop="16dp"
             app:layout_constraintTop_toBottomOf="@id/etPhoneNumber"
-            app:layout_constraintStart_toStartOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- EditText: First Name -->
         <EditText
             android:id="@+id/etFirstName"
             android:layout_width="0dp"
@@ -135,9 +144,9 @@
             android:textSize="16sp"
             app:layout_constraintTop_toBottomOf="@id/tvFirstNameLabel"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Label: Last Name -->
+        <!-- Label và EditText: Last Name -->
         <TextView
             android:id="@+id/tvLastNameLabel"
             android:layout_width="wrap_content"
@@ -147,9 +156,8 @@
             android:textSize="16sp"
             android:layout_marginTop="16dp"
             app:layout_constraintTop_toBottomOf="@id/etFirstName"
-            app:layout_constraintStart_toStartOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- EditText: Last Name -->
         <EditText
             android:id="@+id/etLastName"
             android:layout_width="0dp"
@@ -165,9 +173,9 @@
             android:textSize="16sp"
             app:layout_constraintTop_toBottomOf="@id/tvLastNameLabel"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Label: User Rank -->
+        <!-- Label và EditText: User Rank -->
         <TextView
             android:id="@+id/tvUserRankLabel"
             android:layout_width="wrap_content"
@@ -177,9 +185,8 @@
             android:textSize="16sp"
             android:layout_marginTop="16dp"
             app:layout_constraintTop_toBottomOf="@id/etLastName"
-            app:layout_constraintStart_toStartOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- EditText: User Rank -->
         <EditText
             android:id="@+id/etUserRank"
             android:layout_width="0dp"
@@ -196,7 +203,7 @@
             android:textSize="16sp"
             app:layout_constraintTop_toBottomOf="@id/tvUserRankLabel"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <!-- Nút xóa (clear) cho User Rank -->
         <ImageView
@@ -206,11 +213,11 @@
             android:layout_marginEnd="16dp"
             android:src="@drawable/bin"
             android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="@id/etUserRank"
             app:layout_constraintTop_toTopOf="@id/etUserRank"
-            app:layout_constraintBottom_toBottomOf="@id/etUserRank" />
+            app:layout_constraintBottom_toBottomOf="@id/etUserRank"
+            app:layout_constraintEnd_toEndOf="@id/etUserRank" />
 
-        <!-- Label: Gender -->
+        <!-- Label và Spinner: Gender -->
         <TextView
             android:id="@+id/tvGenderLabel"
             android:layout_width="wrap_content"
@@ -220,9 +227,8 @@
             android:textSize="16sp"
             android:layout_marginTop="16dp"
             app:layout_constraintTop_toBottomOf="@id/etUserRank"
-            app:layout_constraintStart_toStartOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- Spinner: Gender -->
         <Spinner
             android:id="@+id/spGender"
             android:layout_width="0dp"
@@ -238,19 +244,20 @@
             android:textSize="16sp"
             app:layout_constraintTop_toBottomOf="@id/tvGenderLabel"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <!-- Mũi tên dropdown cho Spinner -->
         <ImageView
+            android:id="@+id/ivDropdownGender"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_marginEnd="16dp"
             android:src="@android:drawable/arrow_down_float"
-            app:layout_constraintEnd_toEndOf="@id/spGender"
             app:layout_constraintTop_toTopOf="@id/spGender"
-            app:layout_constraintBottom_toBottomOf="@id/spGender" />
+            app:layout_constraintBottom_toBottomOf="@id/spGender"
+            app:layout_constraintEnd_toEndOf="@id/spGender" />
 
-        <!-- Label: Date of Birth -->
+        <!-- Label và Spinner: Date of Birth -->
         <TextView
             android:id="@+id/tvDobLabel"
             android:layout_width="wrap_content"
@@ -260,9 +267,9 @@
             android:textSize="16sp"
             android:layout_marginTop="16dp"
             app:layout_constraintTop_toBottomOf="@id/spGender"
-            app:layout_constraintStart_toStartOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- Date of Birth Container (3 columns) -->
+        <!-- Container cho ngày, tháng, năm sinh -->
         <LinearLayout
             android:id="@+id/llDobContainer"
             android:layout_width="match_parent"
@@ -273,7 +280,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <!-- Spinner: Day -->
             <Spinner
                 android:id="@+id/spDay"
                 android:layout_width="0dp"
@@ -288,7 +294,6 @@
                 android:gravity="center_vertical|start"
                 android:textSize="16sp" />
 
-            <!-- Spinner: Month -->
             <Spinner
                 android:id="@+id/spMonth"
                 android:layout_width="0dp"
@@ -303,7 +308,6 @@
                 android:gravity="center_vertical|start"
                 android:textSize="16sp" />
 
-            <!-- Spinner: Year -->
             <Spinner
                 android:id="@+id/spYear"
                 android:layout_width="0dp"
@@ -345,7 +349,7 @@
             android:textSize="16sp"
             app:layout_constraintTop_toBottomOf="@id/cbStudent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

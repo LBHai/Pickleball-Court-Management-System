@@ -10,6 +10,7 @@ import Model.CourtImage;
 import Model.CourtPrice;
 import Model.Courts;
 import Model.CourtSlot;
+import Model.CreateOrderRegularRequest;
 import Model.CreateOrderRequest;
 import Model.CreateOrderResponse;
 import Model.GetToken;
@@ -20,12 +21,17 @@ import Model.Orders;
 import Model.UploadAvatar;
 import Model.User;
 import Model.UpdateMyInfor;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import retrofit2.http.Headers;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -85,13 +91,35 @@ public interface ApiService {
             @Query("isMap") boolean isMap
     );
 
-    @POST("identity/users/upload-avatar")
-    Call<UploadAvatar> uploadAvatar(@Query("orderId") String orderId);
 
     @PUT("identity/users/change-password")
     Call<Void> changePassword(@Header("Authorization") String authHeader, @Body ChangePasswordRequest request);
 
     @POST("identity/public/check-invalid-slots")
     Call<CheckInvalidSlotsResponse> checkInvalidSlots(@Body CheckInvalidSlotsRequest request);
+
+    @GET("identity/public/payment-value")
+    Call<Double> getPaymentValue(
+            @Query("courtId") String courtId,
+            @Query("daysOfWeek") String daysOfWeek,
+            @Query("startDate") String startDate,
+            @Query("endDate") String endDate,
+            @Query("startTime") String startTime,
+            @Query("endTime") String endTime
+    );
+
+    @POST("identity/public/order-fixed")
+    Call<CreateOrderResponse> createFixedOrder(@Body CreateOrderRegularRequest request);
+    @Multipart
+    @POST("identity/users/upload-avatar")
+    @Headers("Accept: text/plain") // hoặc "application/json" nếu server để trống content-type
+    Call<String> uploadAvatar(
+            @Header("Authorization") String token,
+            @Part MultipartBody.Part file,
+            @Part("oldPath") RequestBody oldPath
+    );
+    @GET("notifications/by-phone") // Adjust this endpoint as per your API
+    Call<NotificationResponse> getNotificationsByPhone(@Query("phone") String phoneNumber);
+
 
 }
