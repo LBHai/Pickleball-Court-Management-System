@@ -23,9 +23,7 @@
         <activity
             android:name=".BookingRegularTableActivity"
             android:exported="false" />
-        <activity
-            android:name=".ConfirmRegularActivity"
-            android:exported="false" />
+
         <activity
             android:name=".ChangePassword"
             android:exported="false" />
@@ -66,7 +64,7 @@
             android:exported="true" />
         <activity
             android:name=".ConfirmActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name=".QRCodeActivity"
             android:exported="true" />

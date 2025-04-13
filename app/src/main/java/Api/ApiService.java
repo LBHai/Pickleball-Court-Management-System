@@ -17,6 +17,7 @@ import Model.GetToken;
 import Model.MyInfoResponse;
 import Model.NotificationRequest;
 import Model.NotificationResponse;
+import Model.CreateOrderRegularRequest;
 import Model.Orders;
 import Model.UploadAvatar;
 import Model.User;
@@ -60,6 +61,7 @@ public interface ApiService {
 
     @POST("identity/public/create_order")
     Call<CreateOrderResponse> createOrder(@Body CreateOrderRequest request);
+
     @PUT("identity/users/update")
     Call<UpdateMyInfor> updateMyInfo(@Header("Authorization") String authHeader, @Body UpdateMyInfor updateUser);
 
@@ -112,14 +114,13 @@ public interface ApiService {
     Call<CreateOrderResponse> createFixedOrder(@Body CreateOrderRegularRequest request);
     @Multipart
     @POST("identity/users/upload-avatar")
-    @Headers("Accept: text/plain") // hoặc "application/json" nếu server để trống content-type
+    @Headers("Accept: text/plain")
     Call<String> uploadAvatar(
             @Header("Authorization") String token,
             @Part MultipartBody.Part file,
             @Part("oldPath") RequestBody oldPath
     );
-    @GET("notifications/by-phone") // Adjust this endpoint as per your API
+    @GET("notifications/by-phone")
     Call<NotificationResponse> getNotificationsByPhone(@Query("phone") String phoneNumber);
-
 
 }

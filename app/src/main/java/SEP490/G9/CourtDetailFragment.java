@@ -38,6 +38,7 @@ public class CourtDetailFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.activity_court_detail_fragment, container, false);
 
+        // Ánh xạ các view
         tvClubName = view.findViewById(R.id.tvClubName);
         tvAddress  = view.findViewById(R.id.tvAddress);
         tabLayout  = view.findViewById(R.id.tabLayout);
@@ -45,53 +46,53 @@ public class CourtDetailFragment extends Fragment {
         btnBooking = view.findViewById(R.id.btnBooking);
         imgClubCover = view.findViewById(R.id.imgClubCover);
 
+        // Lấy dữ liệu từ Bundle
         Bundle args = getArguments();
-        final String clubId; // Khai báo là final
-        String backgroundUrl = "";
+        final String clubId;
+        String backgroundUrl = getArguments().getString("backgroundUrl", "");
+        Log.d("CourtDetailFragment", "Received backgroundUrl: " + backgroundUrl);
+        args.putString("backgroundUrl", backgroundUrl);
         if (args != null) {
             String clubName = args.getString("club_name", "Tên câu lạc bộ");
-            tvClubName.setText(clubName);
-            clubId = args.getString("club_id", ""); // Gán giá trị một lần
-            backgroundUrl = args.getString("background_url", "");
+            clubId = args.getString("club_id", "");
+            backgroundUrl = args.getString("backgroundUrl", "");
             String address = args.getString("address", "");
+            tvClubName.setText(clubName);
             tvAddress.setText(address);
 
+            // Log để kiểm tra giá trị
             Log.d("CourtDetailFragment", "Received backgroundUrl: " + backgroundUrl);
         } else {
-            clubId = ""; // Gán giá trị mặc định
+            clubId = "";
         }
 
-        if (!backgroundUrl.isEmpty()) {
+        // Hiển thị hình ảnh vào imgClubCover
+        if (backgroundUrl != null && !backgroundUrl.isEmpty()) {
             Glide.with(this)
                     .load(backgroundUrl)
-                    .placeholder(R.drawable.pickleball)
-                    .error(R.drawable.warning)
+                    .placeholder(R.drawable.pickleball) // Hình ảnh trong khi tải
+                    .error(R.drawable.warning)          // Hình ảnh nếu lỗi
                     .into(imgClubCover);
         } else {
-            imgClubCover.setImageResource(R.drawable.pickleball);
-            Log.d("CourtDetailFragment", "backgroundUrl is empty");
+            imgClubCover.setImageResource(R.drawable.pickleball); // Hình ảnh mặc định
+            Log.d("CourtDetailFragment", "backgroundUrl is empty or null");
         }
 
+        // Cấu hình ViewPager và TabLayout
         CourtDetailPagerAdapter adapter = new CourtDetailPagerAdapter(this, clubId);
         viewPager.setAdapter(adapter);
-
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position) {
-                case 0:
-                    tab.setText("Thông tin");
-                    break;
-                case 1:
-                    tab.setText("Dịch vụ");
-                    break;
-                case 2:
-                    tab.setText("Hình ảnh");
-                    break;
+                case 0: tab.setText("Thông tin"); break;
+                case 1: tab.setText("Dịch vụ"); break;
+                case 2: tab.setText("Hình ảnh"); break;
             }
         }).attach();
 
+        // Xử lý sự kiện nút Booking
         btnBooking.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), BookingTableActivity.class);
-            intent.putExtra("club_id", clubId); // clubId là final, không lỗi
+            intent.putExtra("club_id", clubId);
             startActivity(intent);
         });
 

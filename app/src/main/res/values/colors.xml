@@ -37,4 +37,5 @@
         <color name="status_red">#FF6666</color>
         <color name="icon_orange">#FF5722</color>
         <color name="light_blue">#E6F0FA</color>
+        <color name="colorPrimaryDark">#1976D2</color>
 </resources>

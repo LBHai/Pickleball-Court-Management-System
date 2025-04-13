@@ -25,6 +25,41 @@ public class CreateOrderResponse {
     private List<OrderDetailGroup> orderDetails; // Đổi sang List<OrderDetailGroup>
     private String qrcode;
     private String createdAt;
+    private String serviceDetails;
+
+    public CreateOrderResponse(String serviceDetails, String createdAt, String qrcode, List<OrderDetailGroup> orderDetails, String paymentTimeout, Integer amountRefund, Integer amountPaid, int depositAmount, int paymentAmount, int discountAmount, int totalAmount, String discountCode, String paymentStatus, String orderStatus, String orderType, String note, String phoneNumber, String customerName, String userId, String address, String courtName, String courtId, String id) {
+        this.serviceDetails = serviceDetails;
+        this.createdAt = createdAt;
+        this.qrcode = qrcode;
+        this.orderDetails = orderDetails;
+        this.paymentTimeout = paymentTimeout;
+        this.amountRefund = amountRefund;
+        this.amountPaid = amountPaid;
+        this.depositAmount = depositAmount;
+        this.paymentAmount = paymentAmount;
+        this.discountAmount = discountAmount;
+        this.totalAmount = totalAmount;
+        this.discountCode = discountCode;
+        this.paymentStatus = paymentStatus;
+        this.orderStatus = orderStatus;
+        this.orderType = orderType;
+        this.note = note;
+        this.phoneNumber = phoneNumber;
+        this.customerName = customerName;
+        this.userId = userId;
+        this.address = address;
+        this.courtName = courtName;
+        this.courtId = courtId;
+        this.id = id;
+    }
+
+    public String getServiceDetails() {
+        return serviceDetails;
+    }
+
+    public void setServiceDetails(String serviceDetails) {
+        this.serviceDetails = serviceDetails;
+    }
 
     // Getters & Setters
     public String getId() { return id; }

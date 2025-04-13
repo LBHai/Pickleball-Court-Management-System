@@ -80,6 +80,20 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         // Nếu bạn không sử dụng tvCreatedAt riêng, có thể ẩn nó đi
         holder.tvCreatedAt.setVisibility(View.GONE);
 
+        // Thiết lập màu sắc cho tvStatus dựa trên trạng thái
+        String status = order.getOrderStatus();
+        if (status.equals("Hủy đặt lịch") || status.equals("Hủy đặt lịch do quá giờ thanh toán") || status.equals("Đổi lịch thất bại") || status.equals("Không sử dụng lịch đặt")) {
+            holder.tvStatus.setTextColor(context.getResources().getColor(android.R.color.holo_red_light));
+        } else if (status.equals("Đang xử lý")) {
+            holder.tvStatus.setTextColor(context.getResources().getColor(android.R.color.holo_orange_light));
+        } else if (status.equals("Đã hoàn thành") || status.equals("Đã sử dụng lịch đặt") ||
+                status.equals("Đặt dịch vụ tại sân") || status.equals("Đặt lịch thành công") || status.equals("Thay đổi lịch đặt thành công")) {
+            holder.tvStatus.setTextColor(context.getResources().getColor(android.R.color.holo_green_light));
+        } else {
+            // Màu mặc định nếu trạng thái không xác định
+            holder.tvStatus.setTextColor(context.getResources().getColor(android.R.color.black));
+        }
+
         // Xử lý sự kiện click
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, DetailBookingActivity.class);
@@ -105,8 +119,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public TextView tvDonNgay, tvStatus, tvTitle, tvDetail, tvAddress, tvCreatedAt;
-        // Nếu cần, bạn có thể ánh xạ tvPipe nhưng nếu nội dung cố định (" | ") thì không bắt buộc
-        // public TextView tvPipe;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -116,8 +128,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             tvDetail = itemView.findViewById(R.id.tvDetail);
             tvAddress = itemView.findViewById(R.id.tvAddress);
             tvCreatedAt = itemView.findViewById(R.id.tvCreatedAt);
-            // tvPipe = itemView.findViewById(R.id.tvPipe);
         }
     }
-
 }

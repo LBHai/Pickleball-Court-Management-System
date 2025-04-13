@@ -41,24 +41,24 @@ public class CourtsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_courts, container, false);
 
         rcvClubs = view.findViewById(R.id.rcvClubs);
-        edtSearch = view.findViewById(R.id.edtSearch);
+        //edtSearch = view.findViewById(R.id.edtSearch);
 
         rcvClubs.setLayoutManager(new LinearLayoutManager(getContext()));
 
         callApiGetCourts();
 
-        edtSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                filterClubs(s.toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) { }
-        });
+//        edtSearch.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//                filterClubs(s.toString());
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) { }
+//        });
 
         return view;
     }
@@ -87,12 +87,11 @@ public class CourtsFragment extends Fragment {
 
     private void setupRecyclerView(List<Courts> list) {
         courtsAdapter = new CourtsAdapter(getContext(), list, club -> {
-            // Mở CourtDetailFragment khi item được nhấn
             Fragment clubDetailFragment = new CourtDetailFragment();
             Bundle bundle = new Bundle();
             bundle.putString("club_id", club.getId());
             bundle.putString("club_name", club.getName());
-            bundle.putString("background_url", club.getLogoUrl() != null ? club.getLogoUrl() : "");
+            bundle.putString("backgroundUrl", club.getBackgroundUrl() != null ? club.getBackgroundUrl() : "");
             bundle.putString("address", club.getAddress());
             clubDetailFragment.setArguments(bundle);
 

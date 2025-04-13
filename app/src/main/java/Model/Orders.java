@@ -22,7 +22,7 @@ public class Orders {
     private int amountPaid;
     private int amountRefund;
     private String paymentTimeout;
-    private List<OrderDetail> orderDetails; // Thay đổi từ List<OrderDetailGroup> thành List<OrderDetail>
+    private List<OrderDetail> orderDetails;
     private String qrcode;
     private String createdAt;
     private int depositAmount;

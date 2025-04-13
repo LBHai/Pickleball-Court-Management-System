@@ -104,6 +104,22 @@
                 android:textColor="#e1fc87"
                 android:textSize="18sp"
                 android:textStyle="bold" />
+
+            <!-- Thêm View spacer để đẩy btn_filter sang bên phải -->
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+            <ImageButton
+                android:id="@+id/btn_filter"
+                android:layout_width="36dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Filter"
+                android:src="@drawable/calendar"
+                tools:ignore="TouchTargetSizeCheck" />
         </LinearLayout>
 
         <!-- 2 "tab" bằng TextView -->

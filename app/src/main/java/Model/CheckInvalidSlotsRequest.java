@@ -1,5 +1,7 @@
 package Model;
 
+import java.util.List;
+
 public class CheckInvalidSlotsRequest {
     private String courtId;
     private String daysOfWeek;
@@ -17,17 +19,51 @@ public class CheckInvalidSlotsRequest {
         this.endTime = endTime;
     }
 
-    // Getter và Setter
-    public String getCourtId() { return courtId; }
-    public void setCourtId(String courtId) { this.courtId = courtId; }
-    public String getDaysOfWeek() { return daysOfWeek; }
-    public void setDaysOfWeek(String daysOfWeek) { this.daysOfWeek = daysOfWeek; }
-    public String getStartDate() { return startDate; }
-    public void setStartDate(String startDate) { this.startDate = startDate; }
-    public String getEndDate() { return endDate; }
-    public void setEndDate(String endDate) { this.endDate = endDate; }
-    public String getStartTime() { return startTime; }
-    public void setStartTime(String startTime) { this.startTime = startTime; }
-    public String getEndTime() { return endTime; }
-    public void setEndTime(String endTime) { this.endTime = endTime; }
+    public String getCourtId() {
+        return courtId;
+    }
+
+    public void setCourtId(String courtId) {
+        this.courtId = courtId;
+    }
+
+    public String getDaysOfWeek() {
+        return daysOfWeek;
+    }
+
+    public void setDaysOfWeek(String daysOfWeek) {
+        this.daysOfWeek = daysOfWeek;
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
+    }
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
+    }
 }
