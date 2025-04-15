@@ -204,7 +204,7 @@ public class QRCodeActivity extends AppCompatActivity {
         } catch (Exception e) {
             Toast.makeText(this, "Lỗi tạo QR Code: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
-
+        Log.d("QRCodeActivity", "Received totalPriceFixedOrder: " + totalPriceFixedOrder + ", overallTotalPrice: " + overallTotalPrice);
         DecimalFormat decimalFormat = new DecimalFormat("#,###");
         if ("Đơn cố định".equals(orderType)) {
             if (isDeposit) {

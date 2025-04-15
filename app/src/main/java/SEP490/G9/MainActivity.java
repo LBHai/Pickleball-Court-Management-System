@@ -17,7 +17,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import Fragment.AccountFragment;
 import Fragment.CourtsFragment;
 import Fragment.MapFragment;
-import Fragment.ProminentFragment;
+import Fragment.CourtServiceFragment;
 import Session.SessionManager;
 
 public class MainActivity extends AppCompatActivity {
@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     AccountFragment accountFragment;
     CourtsFragment courtsFragment;
     MapFragment mapFragment;
-    ProminentFragment prominentFragment;
+    CourtServiceFragment courtServiceFragment;
     private SessionManager sessionManager;
 
     @Override
@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         accountFragment = new AccountFragment();
         courtsFragment = new CourtsFragment();
         mapFragment = new MapFragment();
-        prominentFragment = new ProminentFragment();
+        courtServiceFragment = new CourtServiceFragment();
 
         BottomNavigationView navigationView = findViewById(R.id.bottom_nav);
 
@@ -62,8 +62,8 @@ public class MainActivity extends AppCompatActivity {
                 } else if (itemId == R.id.nav_courts) {
                     loadFragment(courtsFragment);
                     return true;
-                } else if (itemId == R.id.nav_prominent) {
-                    loadFragment(prominentFragment);
+                } else if (itemId == R.id.nav_court_service) {
+                    loadFragment(courtServiceFragment);
                     return true;
                 }
                 return false;
@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
                     navigationView.setSelectedItemId(R.id.nav_map);
                     break;
                 case "prominent":
-                    navigationView.setSelectedItemId(R.id.nav_prominent);
+                    navigationView.setSelectedItemId(R.id.nav_court_service);
                     break;
                 default:
                     navigationView.setSelectedItemId(R.id.nav_map);

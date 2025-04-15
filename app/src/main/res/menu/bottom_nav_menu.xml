@@ -1,4 +1,5 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
     <item
         android:id="@+id/nav_map"
         android:icon="@drawable/map"
@@ -8,7 +9,7 @@
         android:icon="@drawable/list"
         android:title=""/>
     <item
-        android:id="@+id/nav_prominent"
+        android:id="@+id/nav_court_service"
         android:icon="@drawable/hot"
         android:title=""/>
     <item

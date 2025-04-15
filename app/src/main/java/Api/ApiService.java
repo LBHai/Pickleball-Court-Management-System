@@ -19,6 +19,7 @@ import Model.NotificationRequest;
 import Model.NotificationResponse;
 import Model.CreateOrderRegularRequest;
 import Model.Orders;
+import Model.Service;
 import Model.UploadAvatar;
 import Model.User;
 import Model.UpdateMyInfor;
@@ -122,5 +123,7 @@ public interface ApiService {
     );
     @GET("notifications/by-phone")
     Call<NotificationResponse> getNotificationsByPhone(@Query("phone") String phoneNumber);
+    @GET("court/public/getServices")
+    Call<List<Service>> getServices(@Query("courtId") String courtId);
 
 }

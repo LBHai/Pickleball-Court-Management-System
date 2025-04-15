@@ -203,7 +203,7 @@ public class AccountFragment extends Fragment {
     }
 
     private void showStatusFilterDialog() {
-        String[] statuses = {"Đang xử lý", "Đã hoàn thành", "Hủy đặt lịch", "Đặt lịch thành công", "Thay đổi lịch đặt thành công"};
+        String[] statuses = {"Đang xử lý", "Đã hoàn thành", "Hủy đặt lịch", "Đặt lịch thành công", "Thay đổi lịch đặt thành công", "Hủy đặt lịch do quá giờ thanh toán"};
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Chọn trạng thái");
         builder.setSingleChoiceItems(statuses, -1, (dialog, which) -> {

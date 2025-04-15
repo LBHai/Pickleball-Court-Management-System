@@ -43,7 +43,7 @@ public class DetailBookingActivity extends AppCompatActivity {
     private TextView tvAmountPaid, tvPaymentAmount, tvRefundAmount;
     private Button btnCancelBooking, btnChangeBooking;
     private LinearLayout layoutBookingSlots;
-    private String orderId, totalTime, orderStatus, courtId, orderType, paymentStatus; // Thêm paymentStatus làm biến instance
+    private String orderId, totalTime, orderStatus, courtId, orderType, paymentStatus;
     private int totalPrice;
     private ArrayList<Integer> slotPrices;
     private Handler handler = new Handler();
@@ -144,6 +144,7 @@ public class DetailBookingActivity extends AppCompatActivity {
                 int amountPaid = order.getAmountPaid();
                 int paymentAmount = order.getPaymentAmount();
                 int refundAmount = order.getAmountRefund();
+                orderType = order.getOrderType(); // Cập nhật orderType từ dữ liệu API
 
                 runOnUiThread(() -> {
                     tvStadiumName.setText("Tên sân: " + (courtName != null ? courtName : "N/A"));
@@ -193,12 +194,21 @@ public class DetailBookingActivity extends AppCompatActivity {
 
     // Phương thức cập nhật trạng thái nút với điều kiện đã sửa
     private void updateButtonsBasedOnStatus(String status) {
-        if (status == null) return;
-        if ("Hủy đặt lịch".equals(status) ||
-                "Hủy đặt lịch do quá giờ thanh toán".equals(status) ||
-                "Thay đổi lịch đặt".equals(status) || "Thay đổi lịch đặt thành công".equals(status)) {
+        if (status == null || paymentStatus == null || orderType == null) return;
+
+        // Kiểm tra điều kiện cho "Đơn cố định" và paymentStatus = "Đã thanh toán" và orderStatus cụ thể
+        if ("Đơn cố định".equals(orderType) && "Đã thanh toán".equals(paymentStatus) &&
+                ("Đang xử lý".equals(status) || "Đặt lịch thành công".equals(status) || "Đã hoàn thành".equals(status))) {
             btnCancelBooking.setVisibility(View.GONE);
             btnChangeBooking.setVisibility(View.GONE);
+            return;
+        }
+        if ("Hủy đặt lịch".equals(status) ||
+                "Hủy đặt lịch do quá giờ thanh toán".equals(status) ||
+                "Thay đổi lịch đặt".equals(status) || "Thay đổi lịch đặt thành công".equals(status)|| "Đã hoàn thành".equals(status)) {
+            btnCancelBooking.setVisibility(View.GONE);
+            btnChangeBooking.setVisibility(View.GONE);
+
         } else if ("Đang xử lý".equals(status) && ("Chưa thanh toán".equals(paymentStatus) || "Chưa đặt cọc".equals(paymentStatus))) {
             btnChangeBooking.setText("Thanh toán");
             btnChangeBooking.setVisibility(View.VISIBLE);

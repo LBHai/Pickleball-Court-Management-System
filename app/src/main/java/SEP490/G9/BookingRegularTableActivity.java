@@ -48,10 +48,10 @@ public class BookingRegularTableActivity extends AppCompatActivity {
     private ApiService apiService;
     private LinearLayout resultContainer;
     private MaterialCheckBox cbMonday, cbTuesday, cbWednesday, cbThursday, cbFriday, cbSaturday, cbSunday;
-    private Map<String, String> flexibleCourtSlotFixes = new HashMap<>(); // court-date -> alternative court
-    private Map<String, TextView> courtDateReplacementTextViews = new HashMap<>(); // key: court-date
-    private Map<String, String> dateSelectedCourt = new HashMap<>(); // date -> selected alternative court
-    private List<String> selectedCourts = new ArrayList<>();
+    private Map<String, String> flexibleCourtSlotFixes = new HashMap<>(); // date -> alternative court
+    private Map<String, TextView> courtDateReplacementTextViews = new HashMap<>(); // key: court_date
+    private List<String> selectedCourtSlots = new ArrayList<>(); // Courts with alternatives chosen
+    private List<String> selectedCourts = new ArrayList<>(); // Courts selected from available slots
     private MaterialButton btnStartTime, btnEndTime;
     private CheckInvalidSlotsResponse currentResponse;
 
@@ -226,7 +226,7 @@ public class BookingRegularTableActivity extends AppCompatActivity {
         selectedCourts.clear();
         flexibleCourtSlotFixes.clear();
         courtDateReplacementTextViews.clear();
-        dateSelectedCourt.clear();
+        selectedCourtSlots.clear();
 
         if (res.getInvalidCourtSlots().isEmpty()) {
             if (res.getAvailableCourtSlots().isEmpty()) {
@@ -322,7 +322,7 @@ public class BookingRegularTableActivity extends AppCompatActivity {
                 intent.putExtra("endTime", endTime + ":00");
                 intent.putStringArrayListExtra("selectedCourtSlots", new ArrayList<>(selectedCourts));
                 Gson gson = new Gson();
-                String flexibleCourtSlotFixesJson = gson.toJson(new HashMap<String, String>()); // Truyền map rỗng khi không có xung đột
+                String flexibleCourtSlotFixesJson = gson.toJson(new HashMap<String, String>());
                 intent.putExtra("flexibleCourtSlotFixes", flexibleCourtSlotFixesJson);
                 intent.putExtra("orderType", "Đơn cố định");
                 startActivity(intent);
@@ -371,8 +371,8 @@ public class BookingRegularTableActivity extends AppCompatActivity {
                             llCourtDate.addView(tvReplacementLabel);
 
                             TextView tvReplacement = new TextView(this);
-                            if (flexibleCourtSlotFixes.containsKey(courtDateKey)) {
-                                tvReplacement.setText(flexibleCourtSlotFixes.get(courtDateKey));
+                            if (flexibleCourtSlotFixes.containsKey(date)) {
+                                tvReplacement.setText(flexibleCourtSlotFixes.get(date));
                             } else {
                                 tvReplacement.setText("Chưa chọn");
                             }
@@ -462,10 +462,17 @@ public class BookingRegularTableActivity extends AppCompatActivity {
 
             btnBookFixed.setOnClickListener(v -> {
                 Log.d(TAG, "btnBookFixed: Nhấn nút Đặt lịch cố định");
-                // Kiểm tra nếu không có sân nào được chọn và không có sân thay thế
-                if (selectedCourts.isEmpty() && flexibleCourtSlotFixes.isEmpty()) {
+                if (selectedCourts.isEmpty() && selectedCourtSlots.isEmpty()) {
                     Toast.makeText(this, "Vui lòng chọn ít nhất một sân hoặc sân thay thế", Toast.LENGTH_SHORT).show();
                     return;
+                }
+
+                // Kết hợp selectedCourts và selectedCourtSlots
+                List<String> allSelectedCourts = new ArrayList<>(selectedCourts);
+                for (String court : selectedCourtSlots) {
+                    if (!allSelectedCourts.contains(court)) {
+                        allSelectedCourts.add(court);
+                    }
                 }
 
                 Intent intent = new Intent(BookingRegularTableActivity.this, ConfirmActivity.class);
@@ -475,7 +482,7 @@ public class BookingRegularTableActivity extends AppCompatActivity {
                 intent.putExtra("endDate", endDate);
                 intent.putExtra("startTime", startTime + ":00");
                 intent.putExtra("endTime", endTime + ":00");
-                intent.putStringArrayListExtra("selectedCourtSlots", new ArrayList<>(selectedCourts));
+                intent.putStringArrayListExtra("selectedCourtSlots", new ArrayList<>(allSelectedCourts));
                 Gson gson = new Gson();
                 String flexibleCourtSlotFixesJson = gson.toJson(flexibleCourtSlotFixes);
                 intent.putExtra("flexibleCourtSlotFixes", flexibleCourtSlotFixesJson);
@@ -523,11 +530,12 @@ public class BookingRegularTableActivity extends AppCompatActivity {
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(16, 16, 16, 16);
 
-        String selectedCourtForDate = dateSelectedCourt.get(date);
-        String currentSelection = flexibleCourtSlotFixes.get(courtDateKey);
+        String currentSelection = flexibleCourtSlotFixes.get(date);
+        String chosenCourtForDate = flexibleCourtSlotFixes.get(date); // Sân đã được chọn cho ngày này
 
         List<CheckBox> checkBoxes = new ArrayList<>();
 
+        // Thêm tùy chọn "Chưa chọn"
         CheckBox cbNone = new CheckBox(this);
         cbNone.setText("Chưa chọn");
         cbNone.setTextColor(ContextCompat.getColor(this, android.R.color.black));
@@ -536,23 +544,28 @@ public class BookingRegularTableActivity extends AppCompatActivity {
         checkBoxes.add(cbNone);
         layout.addView(cbNone);
 
+        // Thêm các sân khả dụng
         for (String availableCourt : availableCourts) {
             CheckBox cb = new CheckBox(this);
             cb.setText(availableCourt);
             cb.setTextColor(ContextCompat.getColor(this, android.R.color.black));
             cb.setPadding(8, 8, 8, 8);
 
-            if (selectedCourtForDate != null && !availableCourt.equals(selectedCourtForDate)) {
+            if (availableCourt.equals(currentSelection)) {
+                cb.setChecked(true);
+            }
+
+            // Xám đi các sân chưa được chọn nếu đã có sân thay thế cho ngày này
+            if (chosenCourtForDate != null && !availableCourt.equals(chosenCourtForDate)) {
                 cb.setEnabled(false);
                 cb.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray));
-            } else if (availableCourt.equals(currentSelection)) {
-                cb.setChecked(true);
             }
 
             checkBoxes.add(cb);
             layout.addView(cb);
         }
 
+        // Đảm bảo chỉ một checkbox được chọn tại một thời điểm
         for (CheckBox cb : checkBoxes) {
             cb.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if (isChecked) {
@@ -576,25 +589,26 @@ public class BookingRegularTableActivity extends AppCompatActivity {
             }
 
             if (chosenCourt != null) {
-                flexibleCourtSlotFixes.put(courtDateKey, chosenCourt);
-                if (!dateSelectedCourt.containsKey(date)) {
-                    dateSelectedCourt.put(date, chosenCourt);
+                flexibleCourtSlotFixes.put(date, chosenCourt);
+                if (!selectedCourtSlots.contains(court)) {
+                    selectedCourtSlots.add(court);
                 }
                 courtDateReplacementTextViews.get(courtDateKey).setText(chosenCourt);
                 Log.d(TAG, "showAlternativeDialog: Đã chọn sân thay thế: " + chosenCourt + " cho " + court + " - Ngày " + date);
             } else {
-                flexibleCourtSlotFixes.remove(courtDateKey);
-                boolean hasSelectionForDate = false;
+                flexibleCourtSlotFixes.remove(date);
+                courtDateReplacementTextViews.get(courtDateKey).setText("Chưa chọn");
+                // Kiểm tra xem sân này còn ngày nào có thay thế không
+                boolean hasReplacement = false;
                 for (String key : flexibleCourtSlotFixes.keySet()) {
-                    if (key.endsWith("_" + date)) {
-                        hasSelectionForDate = true;
+                    if (courtDateReplacementTextViews.containsKey(court + "_" + key)) {
+                        hasReplacement = true;
                         break;
                     }
                 }
-                if (!hasSelectionForDate) {
-                    dateSelectedCourt.remove(date);
+                if (!hasReplacement) {
+                    selectedCourtSlots.remove(court);
                 }
-                courtDateReplacementTextViews.get(courtDateKey).setText("Chưa chọn");
                 Log.d(TAG, "showAlternativeDialog: Đã bỏ chọn sân thay thế cho " + court + " - Ngày " + date);
             }
         });

@@ -32,7 +32,7 @@ public class CourtDetailPagerAdapter extends FragmentStateAdapter {
                 infoFragment.setArguments(bundle);
                 return infoFragment;
             case 1:
-                // Tạo ServiceFragment và truyền clubId qua Bundle
+                // Tạo CourtServiceFragment và truyền clubId qua Bundle
                 ServiceFragment serviceFragment = new ServiceFragment();
                 Bundle bundle3 = new Bundle();
                 bundle3.putString("club_id", clubId);

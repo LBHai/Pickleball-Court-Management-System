@@ -108,6 +108,7 @@ public class ConfirmActivity extends AppCompatActivity {
         String token = sessionManager.getToken();
         ApiService apiService = RetrofitClient.getApiService(this);
 
+        // Lấy thông tin người dùng (giữ nguyên mã gốc)
         if (token != null && !token.isEmpty()) {
             String authHeader = "Bearer " + token;
             NetworkUtils.callApi(apiService.getMyInfo(authHeader), this, new NetworkUtils.ApiCallback<MyInfoResponse>() {
@@ -135,6 +136,7 @@ public class ConfirmActivity extends AppCompatActivity {
             }
         }
 
+        // Lấy dữ liệu từ Intent
         courtId = intent.getStringExtra("courtId");
         selectedDays = intent.getStringExtra("selectedDays");
         startDate = intent.getStringExtra("startDate");
@@ -151,7 +153,7 @@ public class ConfirmActivity extends AppCompatActivity {
             flexibleCourtSlotFixes = new HashMap<>();
         }
 
-        // Kiểm tra dữ liệu đầu vào: Chỉ cần một trong selectedCourtSlots hoặc flexibleCourtSlotFixes không trống
+        // Kiểm tra dữ liệu đầu vào
         if (courtId == null || courtId.isEmpty() ||
                 selectedDays == null || selectedDays.isEmpty() ||
                 startDate == null || endDate == null ||
@@ -165,14 +167,17 @@ public class ConfirmActivity extends AppCompatActivity {
         String formattedStartTime = startTime.contains(":") && startTime.split(":").length == 2 ? startTime + ":00" : startTime;
         String formattedEndTime = endTime.contains(":") && endTime.split(":").length == 2 ? endTime + ":00" : endTime;
 
+        // Lấy tổng tiền từ API và tính toán tổng tiền dựa trên số lượng sân
         Call<Double> call = apiService.getPaymentValue(courtId, selectedDays, startDate, endDate, formattedStartTime, formattedEndTime);
         call.enqueue(new Callback<Double>() {
             @Override
             public void onResponse(Call<Double> call, Response<Double> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     totalPriceFixedOrder = response.body().intValue();
-                    tvTotalPriceLine.setText(Html.fromHtml("Tổng tiền: <b>" + formatMoney(totalPriceFixedOrder) + "</b>"));
-                    Log.d("ConfirmActivity", "Tổng tiền nhận từ API: " + totalPriceFixedOrder);
+                    int numberOfCourts = selectedCourtSlots.size();
+                    int finalTotalPrice = totalPriceFixedOrder * numberOfCourts;
+                    tvTotalPriceLine.setText(Html.fromHtml("Tổng tiền: <b>" + formatMoney(finalTotalPrice) + "</b>"));
+                    Log.d("ConfirmActivity", "Tổng tiền nhận từ API: " + totalPriceFixedOrder + ", Số sân: " + numberOfCourts + ", Tổng tiền hiển thị: " + finalTotalPrice);
                 } else {
                     Toast.makeText(ConfirmActivity.this, "Lỗi khi lấy tổng tiền", Toast.LENGTH_SHORT).show();
                     tvTotalPriceLine.setText("Tổng tiền: Lỗi");
@@ -192,6 +197,7 @@ public class ConfirmActivity extends AppCompatActivity {
 
         tvDate.setText(" Ngày " + startDate + " đến ngày " + endDate + "\n Thời gian: " + startTime + " - " + endTime + "\n Trong: " + selectedDays);
 
+        // Hiển thị danh sách sân đã chọn và thay thế
         layoutConfirmOrders.removeAllViews();
         if (selectedCourtSlots != null) {
             for (String courtSlot : selectedCourtSlots) {
@@ -203,15 +209,16 @@ public class ConfirmActivity extends AppCompatActivity {
             }
         }
         for (Map.Entry<String, String> entry : flexibleCourtSlotFixes.entrySet()) {
-            String[] parts = entry.getKey().split("_");
-            String date = parts[1]; // Lấy ngày từ key (court_date)
+            String date = entry.getKey();
+            String alternativeCourt = entry.getValue();
             TextView tvReplacement = new TextView(this);
-            tvReplacement.setText("Ngày " + date + ": Thay thế bằng " + entry.getValue());
+            tvReplacement.setText("Ngày " + date + ": Thay thế bằng " + alternativeCourt);
             tvReplacement.setTextColor(getResources().getColor(android.R.color.white));
             tvReplacement.setTextSize(14);
             layoutConfirmOrders.addView(tvReplacement);
         }
 
+        // Sự kiện nút thanh toán và đặt cọc
         btnPayment.setOnClickListener(v -> {
             String phone = etPhone.getText().toString().trim();
             if (!validateInput(phone)) return;
@@ -262,7 +269,11 @@ public class ConfirmActivity extends AppCompatActivity {
         req.setSelectedDays(selectedDays);
         req.setSelectedCourtSlots(selectedCourtSlots != null ? selectedCourtSlots : new ArrayList<>());
         req.setFlexibleCourtSlotFixes(flexibleCourtSlotFixes);
-
+        // Tính lại finalTotalPrice dựa trên totalPriceFixedOrder và số lượng sân
+        int numberOfCourts = selectedCourtSlots != null ? selectedCourtSlots.size() : 0;
+        int finalTotalPrice = totalPriceFixedOrder * numberOfCourts;
+        Log.d("ConfirmActivity", "Tổng tiền nhận từ API: " + totalPriceFixedOrder + ", Số sân: " + numberOfCourts + ", Tổng tiền hiển thị: " + finalTotalPrice);
+        Log.d("ConfirmActivity", "Dữ liệu đơn cố định: " + new Gson().toJson(req));
         ApiService api = RetrofitClient.getApiService(this);
         Call<CreateOrderResponse> call = api.createFixedOrder(req);
         call.enqueue(new Callback<CreateOrderResponse>() {
@@ -273,10 +284,10 @@ public class ConfirmActivity extends AppCompatActivity {
                     Intent i = new Intent(ConfirmActivity.this, QRCodeActivity.class);
                     i.putExtra("orderType", "Đơn cố định");
                     i.putExtra("orderId", r.getId());
-                    i.putExtra("totalPriceFixedOrder", totalPriceFixedOrder);
+                    i.putExtra("totalPriceFixedOrder", finalTotalPrice); // Sử dụng finalTotalPrice
                     i.putExtra("qrCodeData", r.getQrcode());
                     i.putExtra("paymentTimeout", r.getPaymentTimeout());
-                    i.putExtra("overallTotalPrice", r.getTotalAmount());
+                    i.putExtra("overallTotalPrice", finalTotalPrice); // Cập nhật giá trị tổng
                     i.putExtra("depositAmount", r.getDepositAmount());
                     i.putExtra("isDeposit", isDeposit);
                     i.putExtra("courtId", courtId);
