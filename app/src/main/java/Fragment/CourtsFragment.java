@@ -73,7 +73,6 @@ public class CourtsFragment extends Fragment {
                     setupRecyclerView(courtsList);
                 } else {
                     Log.e("API_ERROR", "Response body null hoặc lỗi: " + response.errorBody());
-                    Toast.makeText(getContext(), "Lỗi API: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -93,6 +92,7 @@ public class CourtsFragment extends Fragment {
             bundle.putString("club_name", club.getName());
             bundle.putString("backgroundUrl", club.getBackgroundUrl() != null ? club.getBackgroundUrl() : "");
             bundle.putString("address", club.getAddress());
+            bundle.putString("tvPhone", club.getPhone());
             clubDetailFragment.setArguments(bundle);
 
             getParentFragmentManager().beginTransaction()

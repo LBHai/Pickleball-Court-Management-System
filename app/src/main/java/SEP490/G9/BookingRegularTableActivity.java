@@ -40,7 +40,7 @@ import retrofit2.Response;
 
 public class BookingRegularTableActivity extends AppCompatActivity {
     private static final String TAG = "BookingRegularTableActivity";
-    private String courtId;
+    private String courtId,tvPhone;
     private String startDate, endDate, startTime, endTime;
     private final Calendar calendar = Calendar.getInstance();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -64,6 +64,8 @@ public class BookingRegularTableActivity extends AppCompatActivity {
         apiService = RetrofitClient.getApiService(this);
 
         courtId = getIntent().getStringExtra("club_id");
+        tvPhone = getIntent().getStringExtra("tvPhone");
+
         if (courtId == null) {
             Log.e(TAG, "onCreate: Không có club_id trong Intent");
             Toast.makeText(this, "Không có club_id", Toast.LENGTH_SHORT).show();
@@ -477,6 +479,8 @@ public class BookingRegularTableActivity extends AppCompatActivity {
 
                 Intent intent = new Intent(BookingRegularTableActivity.this, ConfirmActivity.class);
                 intent.putExtra("courtId", courtId);
+                intent.putExtra("tvPhone", tvPhone);
+
                 intent.putExtra("selectedDays", String.join(",", getSelectedDays()));
                 intent.putExtra("startDate", startDate);
                 intent.putExtra("endDate", endDate);

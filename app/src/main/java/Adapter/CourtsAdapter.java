@@ -5,13 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -22,17 +22,19 @@ import com.bumptech.glide.Glide;
 import java.util.ArrayList;
 import java.util.List;
 
+import Holder.CourtViewHolder;
 import Model.Courts;
 import SEP490.G9.BookingRegularTableActivity;
 import SEP490.G9.BookingTableActivity;
 import SEP490.G9.R;
 
-public class CourtsAdapter extends RecyclerView.Adapter<CourtsAdapter.CourtViewHolder> {
+public class CourtsAdapter extends RecyclerView.Adapter<CourtViewHolder> {
 
     private Context context;
     private List<Courts> courtsList;
     private OnCourtClickListener listener;
 
+    // Interface callback truyền toàn bộ đối tượng Courts (bao gồm phone)
     public interface OnCourtClickListener {
         void onCourtClick(Courts court);
     }
@@ -54,36 +56,43 @@ public class CourtsAdapter extends RecyclerView.Adapter<CourtsAdapter.CourtViewH
     public void onBindViewHolder(@NonNull CourtViewHolder holder, int position) {
         Courts court = courtsList.get(position);
 
-        // Hiển thị thông tin CLB
-        holder.tvClubName.setText(court.getName());
-        holder.tvAddress.setText(court.getAddress());
-        holder.tvOpenTime.setText(court.getOpenTime());
-        holder.tvPhone.setText(court.getPhone());
+        // Hiển thị thông tin câu lạc bộ
+        holder.getTvClubName().setText(court.getName());
+        holder.getTvAddress().setText(court.getAddress());
+        holder.getTvOpenTime().setText(court.getOpenTime());
+        holder.getTvPhone().setText(court.getPhone());
 
         // Tải ảnh logo từ URL bằng Glide
-        String logoUrl = court.getLogoUrl(); // Giả định Courts có thuộc tính logoUrl
+        String logoUrl = court.getLogoUrl();
         if (logoUrl != null && !logoUrl.isEmpty()) {
             Glide.with(context)
                     .load(logoUrl)
                     .placeholder(R.drawable.logo)
                     .error(R.drawable.logo)
-                    .into(holder.imgClubLogo);
+                    .into(holder.getImgClubLogo());
         } else {
-            holder.imgClubLogo.setImageResource(R.drawable.logo);
+            holder.getImgClubLogo().setImageResource(R.drawable.logo);
         }
 
-        // Xử lý sự kiện nhấn vào item
+        // Khi click vào item: gọi callback và truyền đối tượng court (bao gồm số điện thoại)
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
+                Log.d("CourtAdapter", "Item clicked, phone: " + court.getPhone());
                 listener.onCourtClick(court);
             }
         });
 
-        // Xử lý nút Book hiển thị Dialog
-        holder.btnBook.setOnClickListener(v -> {
-            String clubId = court.getId(); // Giả định Courts có phương thức getId()
-            showBookingDialog(context, clubId);
-        });
+        // Xử lý nút Book trong item: hiển thị dialog với club id và số điện thoại
+        Button btnBook = holder.itemView.findViewById(R.id.btnBook);
+        if (btnBook != null) {
+            btnBook.setOnClickListener(v -> {
+                String clubId = court.getId();
+                // Nếu phone null thì gán chuỗi rỗng
+                String phone = court.getPhone() != null ? court.getPhone() : "";
+                Log.d("CourtAdapter", "Book button clicked, phone: " + phone);
+                showBookingDialog(context, clubId, phone);
+            });
+        }
     }
 
     @Override
@@ -96,7 +105,8 @@ public class CourtsAdapter extends RecyclerView.Adapter<CourtsAdapter.CourtViewH
         notifyDataSetChanged();
     }
 
-    private void showBookingDialog(Context context, String clubId) {
+    // Hàm hiển thị dialog đặt sân kèm số điện thoại
+    private void showBookingDialog(Context context, String clubId, String phone) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         LayoutInflater inflater = LayoutInflater.from(context);
         View dialogView = inflater.inflate(R.layout.dialog_booking, null);
@@ -108,7 +118,7 @@ public class CourtsAdapter extends RecyclerView.Adapter<CourtsAdapter.CourtViewH
         }
         dialog.show();
 
-        // Lấy các thành phần trong dialog
+        // Ánh xạ các thành phần trong dialog
         ImageView imgClose = dialogView.findViewById(R.id.imgClose);
         CardView cardHangNgay = dialogView.findViewById(R.id.cardHangNgay);
         CardView cardCoDinh = dialogView.findViewById(R.id.cardCoDinh);
@@ -117,49 +127,29 @@ public class CourtsAdapter extends RecyclerView.Adapter<CourtsAdapter.CourtViewH
 
         imgClose.setOnClickListener(v -> dialog.dismiss());
 
-        // Listener cho BookingTableActivity
+        // Listener cho BookingTableActivity (đặt sân trực quan)
         View.OnClickListener bookingTableClick = v -> {
             dialog.dismiss();
             Intent intent = new Intent(context, BookingTableActivity.class);
             intent.putExtra("club_id", clubId);
             intent.putExtra("booking_type", "truc_quan");
+            intent.putExtra("tvPhone", phone);
             context.startActivity(intent);
         };
 
-        // Listener cho BookingRegularTableActivity
+        // Listener cho BookingRegularTableActivity (đặt sân xe về)
         View.OnClickListener bookingRegularClick = v -> {
             dialog.dismiss();
             Intent intent = new Intent(context, BookingRegularTableActivity.class);
             intent.putExtra("club_id", clubId);
             intent.putExtra("booking_type", "xe_ve");
+            intent.putExtra("tvPhone", phone);
             context.startActivity(intent);
         };
 
-        // Áp dụng listener cho card và nút tương ứng
         cardHangNgay.setOnClickListener(bookingTableClick);
         btnBook.setOnClickListener(bookingTableClick);
-
         cardCoDinh.setOnClickListener(bookingRegularClick);
         btnBookRegular.setOnClickListener(bookingRegularClick);
-    }
-
-    static class CourtViewHolder extends RecyclerView.ViewHolder {
-        ImageView imgClubLogo, imgHeart, btnMap, imgDongho, imgPhone;
-        TextView tvClubName, tvAddress, tvOpenTime, tvPhone;
-        Button btnBook;
-
-        CourtViewHolder(@NonNull View itemView) {
-            super(itemView);
-            imgClubLogo = itemView.findViewById(R.id.imgClubLogo);
-            imgHeart = itemView.findViewById(R.id.imgHeart);
-            btnMap = itemView.findViewById(R.id.btnMap);
-            imgDongho = itemView.findViewById(R.id.imgDongho);
-            imgPhone = itemView.findViewById(R.id.imgPhone);
-            tvClubName = itemView.findViewById(R.id.tvClubName);
-            tvAddress = itemView.findViewById(R.id.tvAddress);
-            tvOpenTime = itemView.findViewById(R.id.tvOpenTime);
-            tvPhone = itemView.findViewById(R.id.tvPhone);
-            btnBook = itemView.findViewById(R.id.btnBook);
-        }
     }
 }

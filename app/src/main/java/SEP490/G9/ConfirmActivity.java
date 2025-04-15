@@ -54,7 +54,7 @@ import retrofit2.Response;
 
 public class ConfirmActivity extends AppCompatActivity {
 
-    private TextView tvHeader, tvStadiumName, tvAddress, tvDate, tvTotalPriceLine, tvTotalTimeLine;
+    private TextView tvHeader, tvStadiumName, tvAddress, tvDate, tvTotalPriceLine, tvTotalTimeLine, tvContact;
     private LinearLayout layoutConfirmOrders;
     private EditText etName, etPhone, etNote;
     private Button btnPayment, btnDeposit;
@@ -91,17 +91,28 @@ public class ConfirmActivity extends AppCompatActivity {
         btnPayment = findViewById(R.id.btnPayment);
         btnDeposit = findViewById(R.id.btnDeposit);
         btnBack = findViewById(R.id.btnBack);
-
+        tvContact = findViewById(R.id.tvContact);
         sessionManager = new SessionManager(this);
 
         Intent intent = getIntent();
         String orderType = intent.getStringExtra("orderType");
-
+        String tvPhoneFromIntent = intent.getStringExtra("tvPhone");
+        if (tvPhoneFromIntent != null) {
+            tvContact.setText("Liên hệ"+tvPhoneFromIntent);
+        }
         if ("Đơn cố định".equals(orderType)) {
             handleFixedOrder(intent);
         } else {
             handleRegularOrder(intent);
         }
+        if (intent != null) {
+            String receivedPhone = intent.getStringExtra("tvPhone");
+            if (receivedPhone != null && !receivedPhone.isEmpty()) {
+                tvContact.setText("Liên hệ: " + receivedPhone);
+            }
+            Log.d("tvContact",tvPhoneFromIntent);
+        }
+
     }
 
     private void handleFixedOrder(Intent intent) {

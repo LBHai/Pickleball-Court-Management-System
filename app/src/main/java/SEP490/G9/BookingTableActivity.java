@@ -56,7 +56,7 @@ public class BookingTableActivity extends AppCompatActivity {
     private SimpleDateFormat sdfFull = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
 
     private String selectedDate = "";
-    private String courtId;
+    private String courtId,tvPhone;
 
     private Map<String, List<CourtSlot>> courtsByDate = new HashMap<>();
     private Map<String, Map<String, ConfirmOrder>> selectedOrdersByDate = new HashMap<>();
@@ -85,6 +85,8 @@ public class BookingTableActivity extends AppCompatActivity {
 
         // Lấy courtId từ Intent
         courtId = getIntent().getStringExtra("club_id");
+        tvPhone = getIntent().getStringExtra("tvPhone");
+
         if (courtId == null) {
             Toast.makeText(this, "Không có club_id", Toast.LENGTH_SHORT).show();
             finish();
@@ -486,6 +488,8 @@ public class BookingTableActivity extends AppCompatActivity {
         Gson gson = new Gson();
         String confirmOrdersJson = gson.toJson(confirmOrders);
         Intent intent = new Intent(BookingTableActivity.this, ConfirmActivity.class);
+        intent.putExtra("tvPhone", tvPhone);
+
         intent.putExtra("confirmOrdersJson", confirmOrdersJson);
         intent.putExtra("club_id", courtId);
         intent.putExtra("selectedDate", selectedDate);
