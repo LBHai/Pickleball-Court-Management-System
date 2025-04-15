@@ -58,7 +58,7 @@ public class CourtsAdapter extends RecyclerView.Adapter<CourtViewHolder> {
 
         // Hiển thị thông tin câu lạc bộ
         holder.getTvClubName().setText(court.getName());
-        holder.getTvAddress().setText(court.getAddress());
+        holder.getTvAddress().setText("Địa chỉ: " + court.getAddress());
         holder.getTvOpenTime().setText(court.getOpenTime());
         holder.getTvPhone().setText(court.getPhone());
 
