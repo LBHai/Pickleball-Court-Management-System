@@ -1,128 +1,293 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/green"
+    android:background="@android:color/white"
     tools:context="Fragment.CourtsFragment">
 
-    <!-- Status Bar Info -->
-    <TextView
-        android:id="@+id/tvDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:text="Thứ bảy, 12/04/2025"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Notification icons -->
-    <ImageView
-        android:id="@+id/imgNotification"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginEnd="16dp"
-        android:src="@drawable/notification"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/tvDate"
-        app:layout_constraintBottom_toBottomOf="@id/tvDate"
-        android:contentDescription="Notifications" />
-
-    <ImageView
-        android:id="@+id/imgFlag"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginEnd="16dp"
-        android:src="@drawable/vn_flag"
-        app:layout_constraintEnd_toStartOf="@id/imgNotification"
-        app:layout_constraintTop_toTopOf="@id/tvDate"
-        app:layout_constraintBottom_toBottomOf="@id/tvDate"
-        android:contentDescription="Language" />
-
-    <!-- Search Bar -->
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardSearch"
+    <!-- Header Section - Có gradient background -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/topLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        app:cardCornerRadius="30dp"
-        app:cardElevation="4dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvDate">
+        android:layout_height="130dp"
+        android:background="@drawable/header_gradient_bg"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="8dp">
+        <!-- User Avatar -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardUserAvatar"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="26dp"
+            app:cardElevation="2dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
                 android:id="@+id/imgUserAvatar"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginStart="8dp"
-                android:src="@drawable/avatar"
-                android:contentDescription="User Avatar" />
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="User Avatar"
+                android:scaleType="centerCrop"
+                android:src="@drawable/avatar" />
+        </androidx.cardview.widget.CardView>
+
+        <!-- User Info Layout -->
+        <LinearLayout
+            android:id="@+id/userInfoLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:orientation="vertical"
+            app:layout_constraintStart_toEndOf="@id/cardUserAvatar"
+            app:layout_constraintTop_toTopOf="@id/cardUserAvatar">
 
             <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_weight="1"
-                android:text="Tìm kiếm"
-                android:textColor="#ADADAD"
-                android:textSize="16sp" />
+                android:id="@+id/tvDate"
+                android:layout_width="match_parent"
+                android:layout_height="25dp"
+                android:alpha="0.9"
+                android:text="Date now"
+                android:textColor="@android:color/white"
+                android:textSize="14sp" />
 
-            <ImageView
-                android:id="@+id/imgSearch"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginEnd="8dp"
-                android:src="@drawable/search"
-                android:contentDescription="Search" />
+            <TextView
+                android:id="@+id/tvUserName"
+                android:layout_width="match_parent"
+                android:layout_height="25dp"
+                android:layout_marginTop="4dp"
+                android:text="UserName"
+                android:textColor="#F8E16C"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Notification Icons Container - Đặt luôn hiển thị -->
+        <LinearLayout
+            android:id="@+id/notificationContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:orientation="horizontal"
+            android:elevation="10dp"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/topLayout">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginEnd="12dp"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#33FFFFFF">
+
+                <ImageView
+                    android:id="@+id/imgFlag"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="Language"
+                    android:src="@drawable/vn_flag" />
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#33FFFFFF">
+
+                <ImageView
+                    android:id="@+id/imgNotification"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="Notifications"
+                    android:src="@drawable/notification"
+                    android:tint="@android:color/white"
+                    />
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
+
+        <!-- Expanded Search Bar (cardSearch) -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardSearch"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginBottom="5dp"
+            app:cardCornerRadius="28dp"
+            app:cardElevation="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/favoriteContainer"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+
+                <ImageView
+                    android:id="@+id/imgAvtarIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Search Icon"
+                    android:src="@drawable/avatar" />
+
+                <EditText
+                    android:id="@+id/edtSearch"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:maxLines="1"
+                    android:hint="@string/search"
+                    android:background="@color/white"
+                    android:textSize="16sp" />
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="30dp"
+                    android:background="#EEEEEE" />
+
+                <ImageView
+                    android:id="@+id/imgSearch"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:contentDescription="Search"
+                    android:padding="5dp"
+                    android:layout_marginRight="-10dp"
+                    android:src="@drawable/search" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Container cho favorite ở trạng thái expanded -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/favoriteContainer"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="16dp"
+            app:cardCornerRadius="23dp"
+            app:cardElevation="6dp"
+            app:layout_constraintBottom_toBottomOf="@id/cardSearch"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/cardSearch">
 
             <ImageView
                 android:id="@+id/imgFavorite"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_marginEnd="8dp"
-                android:src="@mipmap/ic_heart"
-                android:contentDescription="Favorites" />
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
+                android:layout_gravity="center"
+                android:contentDescription="Favorites"
+                android:src="@drawable/ic_heart_filled" />
+        </androidx.cardview.widget.CardView>
 
-    <!-- Court Listings in a RecyclerView -->
+        <!-- Collapsed Search Bar (cardSearchCompact) - đặt dưới notificationContainer -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardSearchCompact"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="16dp"
+            android:visibility="gone"
+            app:cardCornerRadius="28dp"
+            app:cardElevation="5dp"
+            app:layout_constraintTop_toBottomOf="@+id/notificationContainer"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+
+                <ImageView
+                    android:id="@+id/imgAvtarIconCompact"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Search Icon"
+                    android:src="@drawable/avatar" />
+
+                <TextView
+                    android:id="@+id/tvSearchHintCompact"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:text="@string/search"
+                    android:textSize="16sp" />
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="30dp"
+                    android:background="#EEEEEE"
+                    android:layout_marginEnd="8dp" />
+
+                <ImageView
+                    android:id="@+id/imgSearchCompact"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:contentDescription="Search"
+                    android:padding="5dp"
+                    android:src="@drawable/search" />
+
+                <ImageView
+                    android:id="@+id/imgFavoriteCompact"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:contentDescription="Favorites"
+                    android:padding="5dp"
+                    android:layout_marginStart="8dp"
+                    android:src="@drawable/ic_heart_outline" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rcvClubs"
-        android:background="@color/white"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
+        android:background="@android:color/white"
+        android:clipToPadding="false"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="16dp"
+        app:layout_constraintTop_toBottomOf="@+id/topLayout"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cardSearch"
+        app:layout_constraintEnd_toEndOf="parent"
         tools:listitem="@layout/item_court" />
 
-    <!--    &lt;!&ndash; Floating action button to scroll to top &ndash;&gt;-->
-    <!--    <com.google.android.material.floatingactionbutton.FloatingActionButton-->
-    <!--        android:id="@+id/fabScrollUp"-->
-    <!--        android:layout_width="wrap_content"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_marginEnd="16dp"-->
-    <!--        android:layout_marginBottom="16dp"-->
-    <!--        android:src="@drawable/ic_arrow_up"-->
-    <!--        app:backgroundTint="@android:color/white"-->
-    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
-    <!--        app:layout_constraintEnd_toEndOf="parent"-->
-    <!--        app:tint="#1A8D5B" />-->
+    <!-- Floating Action Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabScrollUp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:src="@drawable/arrow_up"
+        android:visibility="gone"
+        app:backgroundTint="@color/green"
+        app:borderWidth="0dp"
+        app:elevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="@android:color/white" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

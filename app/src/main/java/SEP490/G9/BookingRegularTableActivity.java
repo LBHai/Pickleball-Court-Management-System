@@ -12,7 +12,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
@@ -40,7 +39,7 @@ import retrofit2.Response;
 
 public class BookingRegularTableActivity extends AppCompatActivity {
     private static final String TAG = "BookingRegularTableActivity";
-    private String courtId,tvPhone;
+    private String courtId, tvPhone;
     private String startDate, endDate, startTime, endTime;
     private final Calendar calendar = Calendar.getInstance();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -48,17 +47,16 @@ public class BookingRegularTableActivity extends AppCompatActivity {
     private ApiService apiService;
     private LinearLayout resultContainer;
     private MaterialCheckBox cbMonday, cbTuesday, cbWednesday, cbThursday, cbFriday, cbSaturday, cbSunday;
-    private Map<String, String> flexibleCourtSlotFixes = new HashMap<>(); // date -> alternative court
-    private Map<String, TextView> courtDateReplacementTextViews = new HashMap<>(); // key: court_date
-    private List<String> selectedCourtSlots = new ArrayList<>(); // Courts with alternatives chosen
-    private List<String> selectedCourts = new ArrayList<>(); // Courts selected from available slots
+    private Map<String, String> flexibleCourtSlotFixes = new HashMap<>();
+    private Map<String, TextView> courtDateReplacementTextViews = new HashMap<>();
+    private List<String> selectedCourtSlots = new ArrayList<>();
+    private List<String> selectedCourts = new ArrayList<>();
     private MaterialButton btnStartTime, btnEndTime;
     private CheckInvalidSlotsResponse currentResponse;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_booking_regular_table);
 
         apiService = RetrofitClient.getApiService(this);
@@ -72,9 +70,7 @@ public class BookingRegularTableActivity extends AppCompatActivity {
             finish();
             return;
         }
-        Log.d(TAG, "onCreate: Nhận được club_id = " + courtId);
 
-        // Khởi tạo các thành phần UI
         cbMonday = findViewById(R.id.cbMonday);
         cbTuesday = findViewById(R.id.cbTuesday);
         cbWednesday = findViewById(R.id.cbWednesday);
@@ -90,16 +86,13 @@ public class BookingRegularTableActivity extends AppCompatActivity {
         MaterialButton btnCheckAvailability = findViewById(R.id.btnCheckAvailability);
         resultContainer = findViewById(R.id.resultContainer);
 
-        // Sự kiện nhấn nút chọn ngày bắt đầu
         btnStartDate.setOnClickListener(v -> {
-            Log.d(TAG, "btnStartDate: Mở DatePickerDialog");
             DatePickerDialog datePickerDialog = new DatePickerDialog(
                     this,
                     (view, year, month, dayOfMonth) -> {
                         calendar.set(year, month, dayOfMonth);
                         startDate = dateFormat.format(calendar.getTime());
                         btnStartDate.setText("Ngày bắt đầu: " + startDate);
-                        Log.d(TAG, "btnStartDate: Đã chọn ngày bắt đầu = " + startDate);
                     },
                     calendar.get(Calendar.YEAR),
                     calendar.get(Calendar.MONTH),
@@ -108,16 +101,13 @@ public class BookingRegularTableActivity extends AppCompatActivity {
             datePickerDialog.show();
         });
 
-        // Sự kiện nhấn nút chọn ngày kết thúc
         btnEndDate.setOnClickListener(v -> {
-            Log.d(TAG, "btnEndDate: Mở DatePickerDialog");
             DatePickerDialog datePickerDialog = new DatePickerDialog(
                     this,
                     (view, year, month, dayOfMonth) -> {
                         calendar.set(year, month, dayOfMonth);
                         endDate = dateFormat.format(calendar.getTime());
                         btnEndDate.setText("Ngày kết thúc: " + endDate);
-                        Log.d(TAG, "btnEndDate: Đã chọn ngày kết thúc = " + endDate);
                     },
                     calendar.get(Calendar.YEAR),
                     calendar.get(Calendar.MONTH),
@@ -127,13 +117,11 @@ public class BookingRegularTableActivity extends AppCompatActivity {
         });
 
         btnStartTime.setOnClickListener(v -> {
-            Log.d(TAG, "btnStartTime: Mở TimePickerDialog");
             TimePickerDialog dialog = new TimePickerDialog(
                     BookingRegularTableActivity.this,
                     selectedTime -> {
                         startTime = selectedTime;
                         btnStartTime.setText("Giờ bắt đầu: " + startTime);
-                        Log.d(TAG, "Selected start time: " + startTime);
                     },
                     startTime,
                     true
@@ -142,13 +130,11 @@ public class BookingRegularTableActivity extends AppCompatActivity {
         });
 
         btnEndTime.setOnClickListener(v -> {
-            Log.d(TAG, "btnEndTime: Mở TimePickerDialog");
             TimePickerDialog dialog = new TimePickerDialog(
                     BookingRegularTableActivity.this,
                     selectedTime -> {
                         endTime = selectedTime;
                         btnEndTime.setText("Giờ kết thúc: " + endTime);
-                        Log.d(TAG, "Selected end time: " + endTime);
                     },
                     endTime,
                     false
@@ -156,19 +142,14 @@ public class BookingRegularTableActivity extends AppCompatActivity {
             dialog.show();
         });
 
-        btnCheckAvailability.setOnClickListener(v -> {
-            Log.d(TAG, "btnCheckAvailability: Nhấn nút kiểm tra lịch trống");
-            checkAvailability();
-        });
+        btnCheckAvailability.setOnClickListener(v -> checkAvailability());
     }
 
     private void checkAvailability() {
         List<String> selectedDaysEnglish = getSelectedDays();
         String daysOfWeek = String.join(", ", selectedDaysEnglish);
-        Log.d(TAG, "checkAvailability: Ngày trong tuần đã chọn = " + daysOfWeek);
 
         if (daysOfWeek.isEmpty() || startDate == null || endDate == null || startTime == null || endTime == null) {
-            Log.w(TAG, "checkAvailability: Thiếu thông tin, không thể kiểm tra");
             Toast.makeText(this, "Vui lòng chọn đầy đủ thông tin", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -177,52 +158,35 @@ public class BookingRegularTableActivity extends AppCompatActivity {
             Date start = timeFormat.parse(startTime);
             Date end = timeFormat.parse(endTime);
             if (start.compareTo(end) >= 0) {
-                Toast.makeText(this, "Giờ kết thúc phải lớn hơn giờ bắt đầu, vui lòng chọn lại!!!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Giờ kết thúc phải lớn hơn giờ bắt đầu!", Toast.LENGTH_SHORT).show();
                 return;
             }
         } catch (Exception e) {
-            Log.e(TAG, "checkAvailability: Lỗi khi so sánh thời gian", e);
             Toast.makeText(this, "Lỗi định dạng thời gian", Toast.LENGTH_SHORT).show();
             return;
         }
 
         CheckInvalidSlotsRequest request = new CheckInvalidSlotsRequest(courtId, daysOfWeek, startDate, endDate, startTime, endTime);
-
-        Gson gson = new Gson();
-        String requestJson = gson.toJson(request);
-        Log.d(TAG, "checkAvailability: Gửi yêu cầu API với dữ liệu JSON: " + requestJson);
-
         Call<CheckInvalidSlotsResponse> call = apiService.checkInvalidSlots(request);
         call.enqueue(new Callback<CheckInvalidSlotsResponse>() {
             @Override
             public void onResponse(Call<CheckInvalidSlotsResponse> call, Response<CheckInvalidSlotsResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Log.d(TAG, "onResponse: Nhận phản hồi thành công từ API");
                     currentResponse = response.body();
                     handleCheckInvalidSlotsResponse(response.body());
                 } else {
-                    Log.e(TAG, "onResponse: Phản hồi không thành công, mã lỗi = " + response.code() + ", message = " + response.message());
-                    if (response.errorBody() != null) {
-                        try {
-                            Log.e(TAG, "onResponse: Error body = " + response.errorBody().string());
-                        } catch (Exception e) {
-                            Log.e(TAG, "onResponse: Không thể đọc error body", e);
-                        }
-                    }
                     Toast.makeText(BookingRegularTableActivity.this, "Lỗi khi kiểm tra lịch trống: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<CheckInvalidSlotsResponse> call, Throwable t) {
-                Log.e(TAG, "onFailure: Lỗi mạng khi gọi API, chi tiết: " + t.getMessage(), t);
                 Toast.makeText(BookingRegularTableActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void handleCheckInvalidSlotsResponse(CheckInvalidSlotsResponse res) {
-        Log.d(TAG, "handleCheckInvalidSlotsResponse: Xử lý phản hồi từ API");
         resultContainer.removeAllViews();
         resultContainer.setVisibility(View.VISIBLE);
         selectedCourts.clear();
@@ -232,12 +196,10 @@ public class BookingRegularTableActivity extends AppCompatActivity {
 
         if (res.getInvalidCourtSlots().isEmpty()) {
             if (res.getAvailableCourtSlots().isEmpty()) {
-                Log.w(TAG, "handleCheckInvalidSlotsResponse: Không có sân nào khả dụng");
-                Toast.makeText(this, "Không có sân nào khả dụng cho khoảng thời gian đã chọn", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Không có sân nào khả dụng", Toast.LENGTH_LONG).show();
                 resultContainer.setVisibility(View.GONE);
                 return;
             }
-            Log.d(TAG, "handleCheckInvalidSlotsResponse: Không có xung đột, hiển thị tùy chọn đặt lịch cố định");
 
             LinearLayout headerLayout = new LinearLayout(this);
             headerLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -287,11 +249,9 @@ public class BookingRegularTableActivity extends AppCompatActivity {
                     if (selectedCourts.contains(selectedCourt)) {
                         selectedCourts.remove(selectedCourt);
                         cv.setCardBackgroundColor(ContextCompat.getColor(this, R.color.light_blue));
-                        Log.d(TAG, "CardView clicked: Bỏ chọn sân " + selectedCourt);
                     } else {
                         selectedCourts.add(selectedCourt);
                         cv.setCardBackgroundColor(ContextCompat.getColor(this, R.color.light_green));
-                        Log.d(TAG, "CardView clicked: Chọn sân " + selectedCourt);
                     }
                 });
 
@@ -309,7 +269,6 @@ public class BookingRegularTableActivity extends AppCompatActivity {
             resultContainer.addView(btnBookFixed);
 
             btnBookFixed.setOnClickListener(v -> {
-                Log.d(TAG, "btnBookFixed: Nhấn nút Đặt lịch cố định");
                 if (selectedCourts.isEmpty()) {
                     Toast.makeText(this, "Vui lòng chọn ít nhất một sân", Toast.LENGTH_SHORT).show();
                     return;
@@ -320,9 +279,10 @@ public class BookingRegularTableActivity extends AppCompatActivity {
                 intent.putExtra("selectedDays", String.join(",", getSelectedDays()));
                 intent.putExtra("startDate", startDate);
                 intent.putExtra("endDate", endDate);
-                intent.putExtra("startTime", startTime + ":00");
-                intent.putExtra("endTime", endTime + ":00");
+                intent.putExtra("startTime", startTime);
+                intent.putExtra("endTime", endTime);
                 intent.putStringArrayListExtra("selectedCourtSlots", new ArrayList<>(selectedCourts));
+                intent.putExtra("tvPhone", tvPhone);
                 Gson gson = new Gson();
                 String flexibleCourtSlotFixesJson = gson.toJson(new HashMap<String, String>());
                 intent.putExtra("flexibleCourtSlotFixes", flexibleCourtSlotFixesJson);
@@ -330,8 +290,6 @@ public class BookingRegularTableActivity extends AppCompatActivity {
                 startActivity(intent);
             });
         } else {
-            Log.d(TAG, "handleCheckInvalidSlotsResponse: Có xung đột, hiển thị tùy chọn đặt lịch cố định");
-
             TextView tvConflictingCourts = new TextView(this);
             tvConflictingCourts.setText("Sân đã được đặt:");
             tvConflictingCourts.setTextSize(20);
@@ -441,11 +399,9 @@ public class BookingRegularTableActivity extends AppCompatActivity {
                     if (selectedCourts.contains(selectedCourt)) {
                         selectedCourts.remove(selectedCourt);
                         cv.setCardBackgroundColor(ContextCompat.getColor(this, R.color.light_blue));
-                        Log.d(TAG, "CardView clicked: Bỏ chọn sân " + selectedCourt);
                     } else {
                         selectedCourts.add(selectedCourt);
                         cv.setCardBackgroundColor(ContextCompat.getColor(this, R.color.light_green));
-                        Log.d(TAG, "CardView clicked: Chọn sân " + selectedCourt);
                     }
                 });
 
@@ -454,7 +410,7 @@ public class BookingRegularTableActivity extends AppCompatActivity {
             resultContainer.addView(llCourts);
 
             MaterialButton btnBookFixed = new MaterialButton(this);
-            btnBookFixed.setText("Đặt lịch cố định");
+            btnBookFixed.setText("Đặt lịch tối ưu");
             btnBookFixed.setTextSize(18);
             btnBookFixed.setBackgroundTintList(ContextCompat.getColorStateList(this, android.R.color.holo_orange_dark));
             btnBookFixed.setTextColor(ContextCompat.getColor(this, android.R.color.white));
@@ -463,13 +419,11 @@ public class BookingRegularTableActivity extends AppCompatActivity {
             resultContainer.addView(btnBookFixed);
 
             btnBookFixed.setOnClickListener(v -> {
-                Log.d(TAG, "btnBookFixed: Nhấn nút Đặt lịch cố định");
                 if (selectedCourts.isEmpty() && selectedCourtSlots.isEmpty()) {
                     Toast.makeText(this, "Vui lòng chọn ít nhất một sân hoặc sân thay thế", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                // Kết hợp selectedCourts và selectedCourtSlots
                 List<String> allSelectedCourts = new ArrayList<>(selectedCourts);
                 for (String court : selectedCourtSlots) {
                     if (!allSelectedCourts.contains(court)) {
@@ -480,12 +434,11 @@ public class BookingRegularTableActivity extends AppCompatActivity {
                 Intent intent = new Intent(BookingRegularTableActivity.this, ConfirmActivity.class);
                 intent.putExtra("courtId", courtId);
                 intent.putExtra("tvPhone", tvPhone);
-
                 intent.putExtra("selectedDays", String.join(",", getSelectedDays()));
                 intent.putExtra("startDate", startDate);
                 intent.putExtra("endDate", endDate);
-                intent.putExtra("startTime", startTime + ":00");
-                intent.putExtra("endTime", endTime + ":00");
+                intent.putExtra("startTime", startTime);
+                intent.putExtra("endTime", endTime);
                 intent.putStringArrayListExtra("selectedCourtSlots", new ArrayList<>(allSelectedCourts));
                 Gson gson = new Gson();
                 String flexibleCourtSlotFixesJson = gson.toJson(flexibleCourtSlotFixes);
@@ -506,19 +459,9 @@ public class BookingRegularTableActivity extends AppCompatActivity {
             if (res.getAvailableCourtSlots().contains(court)) {
                 availableCourtsForDate.add(court);
             } else if (res.getInvalidCourtSlots().containsKey(court)) {
-                Object bookedDatesObj = res.getInvalidCourtSlots().get(court);
-                if (bookedDatesObj instanceof List<?>) {
-                    List<?> bookedDatesList = (List<?>) bookedDatesObj;
-                    if (bookedDatesList.isEmpty() || bookedDatesList.get(0) instanceof String) {
-                        List<String> bookedDates = (List<String>) bookedDatesList;
-                        if (!bookedDates.contains(date)) {
-                            availableCourtsForDate.add(court);
-                        }
-                    } else {
-                        Log.e(TAG, "Danh sách bookedDates không chứa String cho sân " + court);
-                    }
-                } else {
-                    Log.e(TAG, "bookedDates không phải là List cho sân " + court);
+                List<String> bookedDates = (List<String>) res.getInvalidCourtSlots().get(court);
+                if (!bookedDates.contains(date)) {
+                    availableCourtsForDate.add(court);
                 }
             }
         }
@@ -526,7 +469,6 @@ public class BookingRegularTableActivity extends AppCompatActivity {
     }
 
     private void showAlternativeDialog(String court, String date, List<String> availableCourts, String courtDateKey) {
-        Log.d(TAG, "showAlternativeDialog: Mở dialog thay thế cho sân " + court + " vào ngày " + date);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Chọn sân thay thế cho " + court + " - Ngày " + date);
 
@@ -535,11 +477,8 @@ public class BookingRegularTableActivity extends AppCompatActivity {
         layout.setPadding(16, 16, 16, 16);
 
         String currentSelection = flexibleCourtSlotFixes.get(date);
-        String chosenCourtForDate = flexibleCourtSlotFixes.get(date); // Sân đã được chọn cho ngày này
-
         List<CheckBox> checkBoxes = new ArrayList<>();
 
-        // Thêm tùy chọn "Chưa chọn"
         CheckBox cbNone = new CheckBox(this);
         cbNone.setText("Chưa chọn");
         cbNone.setTextColor(ContextCompat.getColor(this, android.R.color.black));
@@ -548,28 +487,16 @@ public class BookingRegularTableActivity extends AppCompatActivity {
         checkBoxes.add(cbNone);
         layout.addView(cbNone);
 
-        // Thêm các sân khả dụng
         for (String availableCourt : availableCourts) {
             CheckBox cb = new CheckBox(this);
             cb.setText(availableCourt);
             cb.setTextColor(ContextCompat.getColor(this, android.R.color.black));
             cb.setPadding(8, 8, 8, 8);
-
-            if (availableCourt.equals(currentSelection)) {
-                cb.setChecked(true);
-            }
-
-            // Xám đi các sân chưa được chọn nếu đã có sân thay thế cho ngày này
-            if (chosenCourtForDate != null && !availableCourt.equals(chosenCourtForDate)) {
-                cb.setEnabled(false);
-                cb.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray));
-            }
-
+            cb.setChecked(availableCourt.equals(currentSelection));
             checkBoxes.add(cb);
             layout.addView(cb);
         }
 
-        // Đảm bảo chỉ một checkbox được chọn tại một thời điểm
         for (CheckBox cb : checkBoxes) {
             cb.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if (isChecked) {
@@ -598,11 +525,9 @@ public class BookingRegularTableActivity extends AppCompatActivity {
                     selectedCourtSlots.add(court);
                 }
                 courtDateReplacementTextViews.get(courtDateKey).setText(chosenCourt);
-                Log.d(TAG, "showAlternativeDialog: Đã chọn sân thay thế: " + chosenCourt + " cho " + court + " - Ngày " + date);
             } else {
                 flexibleCourtSlotFixes.remove(date);
                 courtDateReplacementTextViews.get(courtDateKey).setText("Chưa chọn");
-                // Kiểm tra xem sân này còn ngày nào có thay thế không
                 boolean hasReplacement = false;
                 for (String key : flexibleCourtSlotFixes.keySet()) {
                     if (courtDateReplacementTextViews.containsKey(court + "_" + key)) {
@@ -613,7 +538,6 @@ public class BookingRegularTableActivity extends AppCompatActivity {
                 if (!hasReplacement) {
                     selectedCourtSlots.remove(court);
                 }
-                Log.d(TAG, "showAlternativeDialog: Đã bỏ chọn sân thay thế cho " + court + " - Ngày " + date);
             }
         });
         builder.setNegativeButton("Hủy", null);
@@ -629,7 +553,6 @@ public class BookingRegularTableActivity extends AppCompatActivity {
         if (cbFriday.isChecked()) selectedDaysEnglish.add("FRIDAY");
         if (cbSaturday.isChecked()) selectedDaysEnglish.add("SATURDAY");
         if (cbSunday.isChecked()) selectedDaysEnglish.add("SUNDAY");
-        Log.d(TAG, "getSelectedDays: Ngày đã chọn = " + selectedDaysEnglish);
         return selectedDaysEnglish;
     }
 }

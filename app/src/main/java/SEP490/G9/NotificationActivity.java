@@ -1,8 +1,9 @@
-// NotificationActivity.java
 package SEP490.G9;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,7 +17,7 @@ import java.util.Set;
 import Adapter.NotificationAdapter;
 import Api.ApiService;
 import Api.RetrofitClient;
-import Model.Notification;
+import Model.NotificationItem;
 import Model.NotificationResponse;
 import Session.SessionManager;
 import retrofit2.Call;
@@ -26,7 +27,7 @@ import retrofit2.Response;
 public class NotificationActivity extends AppCompatActivity implements NotificationAdapter.OnNotificationItemClickListener {
 
     private RecyclerView rvNotifications;
-    private ArrayList<Notification> notificationList;
+    private ArrayList<NotificationItem> notificationList;
     private NotificationAdapter notificationAdapter;
     private SessionManager sessionManager;
     private SharedPreferences sharedPreferences;
@@ -58,42 +59,49 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
         sessionManager = new SessionManager(this);
         String userId = sessionManager.getUserId();
         String phoneNumber = sessionManager.getPhoneNumber();
-
+        Log.d("NotificationActivity", "userId = " + userId + ", phoneNumber = " + phoneNumber);
         if (userId != null && !userId.isEmpty()) {
-            // Nếu có userId, lấy thông báo bằng userId
+            // Nếu có userId, lấy thông báo theo userId
             getNotificationsByUserId(userId);
         } else if (phoneNumber != null && !phoneNumber.isEmpty()) {
-            // Nếu không có userId nhưng có phoneNumber, lấy thông báo bằng phoneNumber
+            // Nếu không có userId nhưng có phone, lấy thông báo theo phone
             getNotificationsByPhone(phoneNumber);
         } else {
-            // Nếu không có cả userId và phoneNumber
             Toast.makeText(this, "Không có thông tin người dùng", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Xử lý vuốt để xóa một thông báo
+
+
+        // Xử lý vuốt để xóa thông báo
         ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0,
                 ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
-            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
+                                  RecyclerView.ViewHolder target) {
                 return false;
             }
-
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
-                Notification notification = notificationList.get(position);
+                NotificationItem notification = notificationList.get(position);
                 onCloseClick(notification);
             }
         };
-
         new ItemTouchHelper(simpleItemTouchCallback).attachToRecyclerView(rvNotifications);
 
         // Nút quay lại
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
-        // Xử lý sự kiện khi bấm "Xóa tất cả"
+        // Xử lý nút "Xóa tất cả"
         btnClearAll.setOnClickListener(v -> clearAllNotifications());
+        Intent intent = getIntent();
+        String orderId = intent.getStringExtra("orderId");
+        String totalTime = intent.getStringExtra("totalTime");
+        int totalPrice = intent.getIntExtra("totalPrice", 0);
+        String orderStatus = intent.getStringExtra("orderStatus");
+        String courtId = intent.getStringExtra("courtId");
+        String orderType = intent.getStringExtra("orderType");
     }
 
     private void getNotificationsByUserId(String userId) {
@@ -103,7 +111,6 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
             public void onResponse(Call<NotificationResponse> call, Response<NotificationResponse> response) {
                 handleNotificationResponse(response);
             }
-
             @Override
             public void onFailure(Call<NotificationResponse> call, Throwable t) {
                 Toast.makeText(NotificationActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
@@ -118,7 +125,6 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
             public void onResponse(Call<NotificationResponse> call, Response<NotificationResponse> response) {
                 handleNotificationResponse(response);
             }
-
             @Override
             public void onFailure(Call<NotificationResponse> call, Throwable t) {
                 Toast.makeText(NotificationActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
@@ -128,10 +134,11 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
 
     private void handleNotificationResponse(Response<NotificationResponse> response) {
         if (response.isSuccessful() && response.body() != null) {
-            List<Notification> allNotifications = response.body().getNotifications();
+            List<NotificationItem> allNotifications = response.body().getNotifications();
+            // Cập nhật danh sách đã xóa từ SharedPreferences
             deletedNotificationIds = new HashSet<>(sharedPreferences.getStringSet("deletedIds", new HashSet<>()));
             notificationList.clear();
-            for (Notification notification : allNotifications) {
+            for (NotificationItem notification : allNotifications) {
                 if (!deletedNotificationIds.contains(notification.getId())) {
                     notificationList.add(notification);
                 }
@@ -143,7 +150,7 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
     }
 
     @Override
-    public void onCloseClick(Notification notification) {
+    public void onCloseClick(NotificationItem notification) {
         deletedNotificationIds.add(notification.getId());
         sharedPreferences.edit().putStringSet("deletedIds", deletedNotificationIds).commit();
         notificationList.remove(notification);
@@ -153,7 +160,7 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
 
     private void clearAllNotifications() {
         Set<String> idsToDelete = new HashSet<>();
-        for (Notification notification : notificationList) {
+        for (NotificationItem notification : notificationList) {
             idsToDelete.add(notification.getId());
         }
         deletedNotificationIds = new HashSet<>(sharedPreferences.getStringSet("deletedIds", new HashSet<>()));
@@ -164,7 +171,65 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
     }
 
     @Override
-    public void onItemClick(Notification notification) {
-        Toast.makeText(this, "Bạn đã chọn thông báo: " + notification.getTitle(), Toast.LENGTH_SHORT).show();
+    public void onItemClick(NotificationItem notification) {
+        // Nếu thông báo chưa "read", gọi API đánh dấu đã đọc
+        if (!"read".equalsIgnoreCase(notification.getStatus())) {
+            markNotificationAsRead(notification);
+        } else {
+            openNotificationDetail(notification);
+        }
     }
+
+    /**
+     * Gọi API để đánh dấu thông báo với ID tương ứng là "read".
+     */
+    private void markNotificationAsRead(NotificationItem notification) {
+        ApiService apiService = RetrofitClient.getApiService(NotificationActivity.this);
+        apiService.markAsRead(notification.getId()).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    // Cập nhật trạng thái thông báo cục bộ
+                    notification.setStatus("read");
+
+                    // Cập nhật lại giao diện cho item này. Nếu biết vị trí của item, bạn có thể dùng:
+                    int index = notificationList.indexOf(notification);
+                    if (index != -1) {
+                        notificationAdapter.notifyItemChanged(index);
+                    } else {
+                        // Nếu không biết vị trí, có thể cập nhật toàn bộ danh sách
+                        notificationAdapter.notifyDataSetChanged();
+                    }
+
+                    // (Tùy chọn) Cập nhật số thông báo chưa đọc, ví dụ: giảm số hiển thị trên badge
+
+                    // Sau đó mở màn hình chi tiết
+                    openNotificationDetail(notification);
+                } else {
+                    Toast.makeText(NotificationActivity.this, "Không thể đánh dấu đã đọc", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(NotificationActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    /**
+     * Mở màn hình DetailBookingActivity với thông tin của thông báo được chọn.
+     */
+    private void openNotificationDetail(NotificationItem notification) {
+        Intent intent = new Intent(NotificationActivity.this, DetailBookingActivity.class);
+        // Giả sử bạn có orderId trong notificationData hoặc bất kỳ field nào của notification:
+        String orderId = notification.getId(); // Hoặc notification.getNotificationData().getOrderId();
+        intent.putExtra("orderId", orderId);
+        intent.putExtra("notificationTitle", notification.getTitle());
+        intent.putExtra("notificationDescription", notification.getDescription());
+        intent.putExtra("notificationTime", notification.getCreateAt());
+        intent.putExtra("notificationStatus", notification.getStatus());
+        startActivity(intent);
+    }
+
 }

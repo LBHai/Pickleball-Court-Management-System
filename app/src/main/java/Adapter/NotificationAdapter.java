@@ -1,8 +1,6 @@
 package Adapter;
 
 import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,24 +12,24 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import Holder.DataHolder;
-import Model.Notification;
-import Model.NotificationData;
-import SEP490.G9.DetailBookingActivity;
+import Model.NotificationItem;
 import SEP490.G9.R;
 
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.ViewHolder> {
 
     private Context context;
-    private List<Notification> notificationList;
+    private List<NotificationItem> notificationList;
     private OnNotificationItemClickListener listener;
 
     public interface OnNotificationItemClickListener {
-        void onCloseClick(Notification notification);
-        void onItemClick(Notification notification);
+        // Callback khi click vào toàn bộ item (để Activity xử lý gọi API và chuyển màn hình)
+        void onItemClick(NotificationItem notification);
+        // Callback khi click nút đóng (xóa thông báo khỏi danh sách)
+        void onCloseClick(NotificationItem notification);
     }
 
-    public NotificationAdapter(Context context, List<Notification> notificationList, OnNotificationItemClickListener listener) {
+    public NotificationAdapter(Context context, List<NotificationItem> notificationList,
+                               OnNotificationItemClickListener listener) {
         this.context = context;
         this.notificationList = notificationList;
         this.listener = listener;
@@ -46,11 +44,11 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
     @Override
     public void onBindViewHolder(@NonNull NotificationAdapter.ViewHolder holder, int position) {
-        Notification notification = notificationList.get(position);
+        NotificationItem notification = notificationList.get(position);
         holder.tvTitle.setText(notification.getTitle());
         holder.tvDescription.setText(notification.getDescription());
 
-        // Định dạng thời gian từ createAt
+        // Định dạng thời gian từ trường createAt
         String timeString = notification.getCreateAt();
         try {
             SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault());
@@ -61,7 +59,17 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         } catch (ParseException e) {
             holder.tvTime.setText(timeString);
         }
+
+        // Kiểm tra trạng thái thông báo để cập nhật giao diện
+        if ("read".equalsIgnoreCase(notification.getStatus())) {
+            // Nếu đã đọc, làm mờ item (giảm độ mờ về 50%)
+            holder.itemView.setAlpha(0.5f);
+        } else {
+            // Nếu chưa đọc, hiển thị bình thường (độ mờ 100%)
+            holder.itemView.setAlpha(1f);
+        }
     }
+
 
     @Override
     public int getItemCount() {
@@ -69,7 +77,10 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
+
         TextView tvTitle, tvDescription, tvTime;
+        // Nếu có nút đóng (x) để xóa thông báo, bạn có thể khai báo và xử lý ở đây
+        // ImageButton btnClose;
 
         public ViewHolder(@NonNull View itemView, OnNotificationItemClickListener listener) {
             super(itemView);
@@ -79,41 +90,18 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
             // Xử lý click vào toàn bộ item
             itemView.setOnClickListener(v -> {
-                Notification notification = notificationList.get(getAdapterPosition());
+                NotificationItem notification = notificationList.get(getAdapterPosition());
                 listener.onItemClick(notification);
-
-                // Tạo Intent chuyển sang DetailBookingActivity
-                Intent intent = new Intent(context, DetailBookingActivity.class);
-
-                // Truyền thông tin cơ bản của thông báo
-                intent.putExtra("notificationId", notification.getId());
-                intent.putExtra("notificationTitle", notification.getTitle());
-                intent.putExtra("notificationDescription", notification.getDescription());
-                intent.putExtra("notificationTime", notification.getCreateAt());
-                intent.putExtra("notificationStatus", notification.getStatus());
-
-                // Nếu có thông tin đặt lịch trong NotificationData thì truyền thêm các thông tin chi tiết
-                NotificationData data = notification.getNotificationData();
-                if (data != null) {
-                    intent.putExtra("dateBooking", data.getDateBooking());
-                    intent.putExtra("orderId", data.getOrderId());
-                    if (data.getTotalTime() != null && !data.getTotalTime().isEmpty()) {
-                        intent.putExtra("totalTime", data.getTotalTime());
-                    } else {
-                        intent.putExtra("totalTime", DataHolder.getInstance().getTotalTime());
-                    }
-                    intent.putExtra("totalPrice", data.getTotalPrice());
-                    intent.putExtra("orderStatus", data.getOrderStatus());
-                    intent.putExtra("courtId", data.getCourtId());
-                    if (data.getSlotPrices() != null) {
-                        intent.putIntegerArrayListExtra("slotPrices", data.getSlotPrices());
-                    }
-                } else {
-                    intent.putExtra("totalTime", DataHolder.getInstance().getTotalTime());
-                }
-
-                context.startActivity(intent);
             });
+
+            // Nếu bạn có nút đóng để xóa thông báo thì uncomment đoạn dưới
+            /*
+            btnClose = itemView.findViewById(R.id.btnClose);
+            btnClose.setOnClickListener(v -> {
+                NotificationItem notification = notificationList.get(getAdapterPosition());
+                listener.onCloseClick(notification);
+            });
+            */
         }
     }
 }

@@ -98,5 +98,6 @@
     <string name="new_password">New Password</string>
     <string name="re_enter_new_password">Re-enter new password</string>
     <string name="day">Day</string>
+    <string name="search">Search</string>
 
 </resources>

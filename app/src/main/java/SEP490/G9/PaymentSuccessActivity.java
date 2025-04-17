@@ -16,9 +16,9 @@ public class PaymentSuccessActivity extends AppCompatActivity {
     private TextView tvTitle, tvSubTitle;
     private Button btnXemLichDatChiTiet, btnQuayVe;
     private ImageButton btnBack;
-    private String orderId, totalTime, selectedDate,courtId;
+    private String orderId, totalTime, selectedDate, courtId, orderType;
     private int totalPrice;
-    private ArrayList<Integer> slotPrices; // Sửa từ IntegerArrayList -> ArrayList<Integer>
+    private ArrayList<Integer> slotPrices;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,13 +34,13 @@ public class PaymentSuccessActivity extends AppCompatActivity {
 
         // Nhận dữ liệu từ Intent
         Intent intent = getIntent();
-        if(intent != null){
+        if (intent != null) {
             orderId = intent.getStringExtra("orderId");
             totalTime = intent.getStringExtra("totalTime");
             selectedDate = intent.getStringExtra("selectedDate");
             totalPrice = intent.getIntExtra("totalPrice", 0);
             courtId = intent.getStringExtra("courtId");
-
+            orderType = intent.getStringExtra("orderType");
         }
         slotPrices = getIntent().getIntegerArrayListExtra("slotPrices");
 
@@ -81,12 +81,19 @@ public class PaymentSuccessActivity extends AppCompatActivity {
                 detailIntent.putExtra("selectedDate", selectedDate);
                 detailIntent.putExtra("totalPrice", totalPrice);
                 detailIntent.putExtra("courtId", courtId);
-                detailIntent.putIntegerArrayListExtra("slotPrices", getIntent().getIntegerArrayListExtra("slotPrices")); // Truyền tiếp slotPrices
+                detailIntent.putExtra("orderType", orderType);
+                detailIntent.putExtra("serviceDetailsJson", getIntent().getStringExtra("serviceDetailsJson"));
+                detailIntent.putIntegerArrayListExtra("slotPrices", getIntent().getIntegerArrayListExtra("slotPrices"));
+                detailIntent.putExtra("customerName", getIntent().getStringExtra("customerName"));  // Truyền tiếp
+                detailIntent.putExtra("phoneNumber", getIntent().getStringExtra("phoneNumber"));    // Truyền tiếp
+                detailIntent.putExtra("note", getIntent().getStringExtra("note"));                  // Truyền tiếp
+                Log.d("Paymentsuscess", "totalTime truyen di: " + totalTime);
                 Log.d("Paymentsuscess", "slotPrices truyen di: " + slotPrices);
                 startActivity(detailIntent);
                 finish();
             }
         });
+
         btnBack.setOnClickListener(v -> goBackToMainActivity());
 
         // Xử lý nút Quay về: quay trở lại MainActivity
@@ -98,13 +105,14 @@ public class PaymentSuccessActivity extends AppCompatActivity {
                 finish();
             }
         });
-
     }
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         goBackToMainActivity();
     }
+
     private void goBackToMainActivity() {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

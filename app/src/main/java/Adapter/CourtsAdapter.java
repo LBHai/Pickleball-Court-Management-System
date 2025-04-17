@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +28,9 @@ import Holder.CourtViewHolder;
 import Model.Courts;
 import SEP490.G9.BookingRegularTableActivity;
 import SEP490.G9.BookingTableActivity;
+import SEP490.G9.DebouncedOnClickListener;
 import SEP490.G9.R;
+import Session.SessionManager;
 
 public class CourtsAdapter extends RecyclerView.Adapter<CourtViewHolder> {
 
@@ -34,7 +38,8 @@ public class CourtsAdapter extends RecyclerView.Adapter<CourtViewHolder> {
     private List<Courts> courtsList;
     private OnCourtClickListener listener;
 
-    // Interface callback truyền toàn bộ đối tượng Courts (bao gồm phone)
+
+    // Interface callback truyền đối tượng Courts khi click vào item
     public interface OnCourtClickListener {
         void onCourtClick(Courts court);
     }
@@ -74,7 +79,7 @@ public class CourtsAdapter extends RecyclerView.Adapter<CourtViewHolder> {
             holder.getImgClubLogo().setImageResource(R.drawable.logo);
         }
 
-        // Khi click vào item: gọi callback và truyền đối tượng court (bao gồm số điện thoại)
+        // Callback khi click vào item
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 Log.d("CourtAdapter", "Item clicked, phone: " + court.getPhone());
@@ -82,17 +87,65 @@ public class CourtsAdapter extends RecyclerView.Adapter<CourtViewHolder> {
             }
         });
 
-        // Xử lý nút Book trong item: hiển thị dialog với club id và số điện thoại
+        // Xử lý nút Book trong item: hiển thị dialog đặt sân kèm số điện thoại
         Button btnBook = holder.itemView.findViewById(R.id.btnBook);
+        btnBook.setOnClickListener(new DebouncedOnClickListener(100) { // 1000ms = 1 giây
+            @Override
+            public void onDebouncedClick(View v) {
+                // Xử lý đặt lịch ở đây
+                showBookingDialog(context, court.getId(), court.getPhone());
+            }
+        });
+
+
         if (btnBook != null) {
+
             btnBook.setOnClickListener(v -> {
                 String clubId = court.getId();
-                // Nếu phone null thì gán chuỗi rỗng
                 String phone = court.getPhone() != null ? court.getPhone() : "";
                 Log.d("CourtAdapter", "Book button clicked, phone: " + phone);
                 showBookingDialog(context, clubId, phone);
             });
         }
+        SessionManager sessionManager = new SessionManager(context);
+        boolean isFavorite = sessionManager.isCourtFavorite(court.getId());
+        if (isFavorite) {
+            holder.getImgHeart().setImageResource(R.drawable.ic_heart_filled); // Tim đỏ
+        } else {
+            holder.getImgHeart().setImageResource(R.drawable.ic_heart_outline); // Tim trắng
+        }
+
+        // Xử lý sự kiện click vào trái tim
+        holder.getImgHeart().setOnClickListener(v -> {
+            if (sessionManager.isCourtFavorite(court.getId())) {
+                sessionManager.removeFavoriteCourt(court.getId());
+                holder.getImgHeart().setImageResource(R.drawable.ic_heart_outline); // Tim trắng
+            } else {
+                sessionManager.addFavoriteCourt(court.getId());
+                holder.getImgHeart().setImageResource(R.drawable.ic_heart_filled); // Tim đỏ
+            }
+            // Nếu muốn cập nhật lại toàn bộ danh sách (nếu có filter), gọi notifyDataSetChanged()
+            // notifyDataSetChanged();
+        });
+        holder.getBtnMap().setOnClickListener(v -> {
+            // Lấy thông tin địa chỉ hoặc tọa độ của sân
+            String address = court.getAddress();
+            String uri = "geo:0,0?q=" + Uri.encode(address);
+
+            Intent intent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(uri));
+            intent.setPackage("com.google.android.apps.maps");
+
+            // Kiểm tra Google Maps đã cài chưa
+            if (intent.resolveActivity(context.getPackageManager()) != null) {
+                context.startActivity(intent);
+            } else {
+                // Nếu chưa có Google Maps, có thể mở trên trình duyệt
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                        android.net.Uri.parse("https://www.google.com/maps/search/?api=1&query=" + Uri.encode(address)));
+                context.startActivity(browserIntent);
+            }
+        });
+
     }
 
     @Override
@@ -100,6 +153,7 @@ public class CourtsAdapter extends RecyclerView.Adapter<CourtViewHolder> {
         return courtsList.size();
     }
 
+    // Hàm cập nhật danh sách mới (sau khi tìm kiếm)
     public void updateList(List<Courts> newList) {
         this.courtsList = newList != null ? newList : new ArrayList<>();
         notifyDataSetChanged();
@@ -152,4 +206,5 @@ public class CourtsAdapter extends RecyclerView.Adapter<CourtViewHolder> {
         cardCoDinh.setOnClickListener(bookingRegularClick);
         btnBookRegular.setOnClickListener(bookingRegularClick);
     }
+
 }

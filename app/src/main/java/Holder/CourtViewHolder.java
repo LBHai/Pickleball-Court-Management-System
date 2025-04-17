@@ -18,7 +18,7 @@ import SEP490.G9.R;
 public class CourtViewHolder extends RecyclerView.ViewHolder {
     private ViewPager2 viewPager;
     private LinearLayout layoutIndicators;
-    private ImageView imgClubLogo, btnMap;
+    private ImageView imgClubLogo, btnMap,imgHeart;
     private TextView tvClubName, tvAddress, tvOpenTime, tvPhone;
     private Button btnService;
     private CardView btnShare;
@@ -38,8 +38,7 @@ public class CourtViewHolder extends RecyclerView.ViewHolder {
         tvOpenTime = itemView.findViewById(R.id.tvOpenTime);
         tvPhone = itemView.findViewById(R.id.tvPhone);
         btnService = itemView.findViewById(R.id.btnService);
-        btnShare = itemView.findViewById(R.id.btnShare);
-
+        imgHeart = itemView.findViewById(R.id.imgHeart);
         // Khởi tạo Handler dùng Looper của thread chính
         sliderHandler = new Handler(Looper.getMainLooper());
     }
@@ -76,14 +75,12 @@ public class CourtViewHolder extends RecyclerView.ViewHolder {
     public TextView getTvPhone() {
         return tvPhone;
     }
+    public ImageView getImgHeart() { return imgHeart; }
 
     public Button getBtnService() {
         return btnService;
     }
 
-    public CardView getBtnShare() {
-        return btnShare;
-    }
 
     // Lưu lại handler và runnable để quản lý auto-slide
     public void setSliderHandler(Handler handler, Runnable runnable) {

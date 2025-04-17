@@ -12,15 +12,14 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import Api.NetworkUtils;
-import Api.RetrofitClient;
-import Holder.DataHolder;
-import Model.OrderDetail;
-import Model.Orders;
-import retrofit2.Call;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -31,9 +30,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import Api.NetworkUtils;
+import Api.RetrofitClient;
+import Holder.DataHolder;
+import Holder.OrderServiceHolder;
+import Model.OrderDetail;
+import Model.Orders;
+import Model.ServiceDetail;
+import retrofit2.Call;
+
 public class DetailBookingActivity extends AppCompatActivity {
 
-    // Các biến lớp
     private ImageButton btnBack;
     private TextView tvTitleMain;
     private TextView tvTabBookingInfo, tvTabServiceDetail;
@@ -54,7 +61,7 @@ public class DetailBookingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_booking);
 
-        // Khởi tạo các view
+        // Khởi tạo UI
         btnBack = findViewById(R.id.btnBack);
         tvTitleMain = findViewById(R.id.tvTitleMain);
         tvTabBookingInfo = findViewById(R.id.tvTabBookingInfo);
@@ -78,52 +85,113 @@ public class DetailBookingActivity extends AppCompatActivity {
         btnChangeBooking = findViewById(R.id.btnChangeBooking);
         layoutBookingSlots = findViewById(R.id.layoutBookingSlots);
 
-        // Sự kiện nút hủy
+        // Thiết lập sự kiện
         btnCancelBooking.setOnClickListener(v -> {
             new AlertDialog.Builder(this)
                     .setTitle("Xác nhận")
-                    .setMessage("Bạn có chắc chắn là muốn hủy đặt lịch không?")
+                    .setMessage("Bạn có chắc chắn là muốn hủy đặt dịch vụ không?")
                     .setPositiveButton("Có", (dialog, which) -> cancelOrder(orderId))
                     .setNegativeButton("Không", null)
                     .show();
         });
 
         btnBack.setOnClickListener(v -> goBackToMainActivity());
+
+        // Lấy dữ liệu từ Intent
         orderId = getIntent().getStringExtra("orderId");
         totalTime = getIntent().getStringExtra("totalTime");
         totalPrice = getIntent().getIntExtra("totalPrice", 0);
         orderStatus = getIntent().getStringExtra("orderStatus");
         courtId = getIntent().getStringExtra("courtId");
         orderType = getIntent().getStringExtra("orderType");
-        slotPrices = DataHolder.getInstance().getSlotPrices();
+        slotPrices = getIntent().getIntegerArrayListExtra("slotPrices");
 
+        // Xác thực orderId
         if (orderId == null || orderId.isEmpty()) {
+            Log.e("DetailBookingActivity", "orderId is null or empty");
             Toast.makeText(this, "Không có orderId", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        tvTotalTime.setText("Tổng thời gian: " + (totalTime != null ? totalTime : "N/A"));
-        tvTotalPrice.setText("Tổng tiền: " + formatMoney(totalPrice));
+        // Xử lý đơn dịch vụ
+        if ("Đơn dịch vụ".equals(orderType)) {
+            tvTotalTime.setVisibility(View.GONE);
+            tvRefundAmount.setVisibility(View.GONE);
+            layoutBookingSlots.setVisibility(View.VISIBLE);
+            btnCancelBooking.setText("Hủy đặt dịch vụ");
+            btnChangeBooking.setText("Thanh toán");
+            btnCancelBooking.setVisibility(View.VISIBLE);
+            btnChangeBooking.setVisibility(View.VISIBLE);
+            btnChangeBooking.setOnClickListener(v -> handlePaymentForServiceOrder(orderId));
 
-        updateButtonsBasedOnStatus(orderStatus);
+            String customerName = getIntent().getStringExtra("customerName");
+            String phoneNumber = getIntent().getStringExtra("phoneNumber");
+            String note = getIntent().getStringExtra("note");
+            tvName.setText("Khách Hàng: " + (customerName != null ? customerName : "N/A"));
+            tvPhonenumber.setText("SDT: " + (phoneNumber != null ? phoneNumber : "N/A"));
+            tvNote.setText("Khách hàng ghi chú: " + (note == null || note.isEmpty() ? "Không có" : note));
+
+            String serviceDetailsJson = getIntent().getStringExtra("serviceDetailsJson");
+            if (serviceDetailsJson == null || serviceDetailsJson.isEmpty()) {
+                serviceDetailsJson = OrderServiceHolder.getInstance().getServiceDetailsJson(orderId);
+            }
+            displayServiceDetails(serviceDetailsJson);
+        } else {
+            tvTotalTime.setText("Tổng thời gian: " + (totalTime != null ? totalTime : "N/A"));
+            tvTotalPrice.setText("Tổng tiền: " + formatMoney(totalPrice));
+            updateButtonsBasedOnStatus(orderStatus);
+        }
+
+        // Lấy chi tiết đơn hàng
         fetchOrderDetails(orderId);
 
         checkOrderStatusRunnable = new Runnable() {
             @Override
             public void run() {
                 fetchOrderDetails(orderId);
-                handler.postDelayed(this, 10000);
+                handler.postDelayed(this, 10000); // Lập lịch lại sau 10 giây
             }
         };
-        handler.postDelayed(checkOrderStatusRunnable, 10000);
-
+        // Sự kiện tab
         tvTabBookingInfo.setOnClickListener(v -> showBookingInfoTab());
         tvTabServiceDetail.setOnClickListener(v -> showServiceDetailTab());
     }
 
-    // Lấy dữ liệu từ API và cập nhật paymentStatus
-    private void fetchOrderDetails(String orderId) {
+
+
+    private void displayServiceDetails(String serviceDetailsJson) {
+        if (serviceDetailsJson != null && !serviceDetailsJson.isEmpty()) {
+            Gson gson = new Gson();
+            List<ServiceDetail> serviceDetails = gson.fromJson(serviceDetailsJson, new TypeToken<List<ServiceDetail>>(){}.getType());
+            layoutBookingSlots.removeAllViews();
+            for (ServiceDetail detail : serviceDetails) {
+                TextView tvService = new TextView(this);
+                tvService.setText(detail.getCourtServiceName() + " x" + detail.getQuantity() + " : " + formatMoney((int) (detail.getPrice() * detail.getQuantity())));
+                tvService.setTextColor(Color.WHITE);
+                tvService.setTextSize(14);
+                layoutBookingSlots.addView(tvService);
+            }
+        } else {
+            TextView tvNoService = new TextView(this);
+            tvNoService.setText("Không có thông tin dịch vụ");
+            tvNoService.setTextColor(Color.WHITE);
+            tvNoService.setTextSize(14);
+            layoutBookingSlots.addView(tvNoService);
+        }
+    }
+
+    /**
+     * Handles payment processing for a service order.
+     * @param orderId The ID of the order to process payment for.
+     */
+    private void handlePaymentForServiceOrder(String orderId) {
+        String serviceDetailsJson = getIntent().getStringExtra("serviceDetailsJson");
+        if (serviceDetailsJson == null || serviceDetailsJson.isEmpty()) {
+            serviceDetailsJson = OrderServiceHolder.getInstance().getServiceDetailsJson(orderId);
+        }
+        final String finalServiceDetailsJson = serviceDetailsJson; // Ensure final for lambda use
+
         Call<Orders> call = RetrofitClient.getApiService(this).getOrderById(orderId);
         NetworkUtils.callApi(call, this, new NetworkUtils.ApiCallback<Orders>() {
             @Override
@@ -136,15 +204,14 @@ public class DetailBookingActivity extends AppCompatActivity {
 
                 String courtName = order.getCourtName();
                 String address = order.getAddress();
-                paymentStatus = order.getPaymentStatus(); // Gán giá trị cho biến instance
+                paymentStatus = order.getPaymentStatus();
                 String customerName = order.getCustomerName();
                 String phoneNumber = order.getPhoneNumber();
                 String note = order.getNote();
                 String updatedOrderStatus = order.getOrderStatus();
                 int amountPaid = order.getAmountPaid();
                 int paymentAmount = order.getPaymentAmount();
-                int refundAmount = order.getAmountRefund();
-                orderType = order.getOrderType(); // Cập nhật orderType từ dữ liệu API
+                orderType = order.getOrderType();
 
                 runOnUiThread(() -> {
                     tvStadiumName.setText("Tên sân: " + (courtName != null ? courtName : "N/A"));
@@ -155,32 +222,15 @@ public class DetailBookingActivity extends AppCompatActivity {
                     tvNote.setText("Khách hàng ghi chú: " + (note == null || note.isEmpty() ? "Không có" : note));
                     tvAmountPaid.setText("Số tiền đã trả: " + formatMoney(amountPaid));
                     tvTotalPrice.setText("Tổng tiền: " + formatMoney(order.getTotalAmount()));
-                    tvTotalTime.setText("Tổng thời gian: " + totalTime);
+                    tvPaymentAmount.setText("Số tiền cần thanh toán: " + formatMoney(paymentAmount));
 
-                    if ("Đã thanh toán".equals(paymentStatus) || "Đã đặt cọc".equals(paymentStatus)) {
-                        if (paymentAmount < 0) {
-                            tvPaymentAmount.setText("Số tiền thừa: " + formatMoney(Math.abs(paymentAmount)));
-                        } else {
-                            tvPaymentAmount.setText("Số tiền cần thanh toán: " + formatMoney(paymentAmount));
-                        }
-                        if (refundAmount > 0) {
-                            tvRefundAmount.setText("Số tiền đã hoàn lại: " + formatMoney(refundAmount));
-                            tvRefundAmount.setVisibility(View.VISIBLE);
-                        } else {
-                            tvRefundAmount.setVisibility(View.GONE);
-                        }
-                    } else {
-                        tvPaymentAmount.setText("Số tiền cần thanh toán: " + formatMoney(paymentAmount));
-                        tvRefundAmount.setVisibility(View.GONE);
-                    }
+                    displayServiceDetails(finalServiceDetailsJson);
 
-                    buildBookingSlotsUI(order);
-                    checkAndHideButtons(order);
-
-                    if (!updatedOrderStatus.equals(orderStatus)) {
-                        orderStatus = updatedOrderStatus;
-                        updateButtonsBasedOnStatus(orderStatus);
-                    }
+                    Intent intent = new Intent(DetailBookingActivity.this, QRCodeActivity.class);
+                    intent.putExtra("orderId", orderId);
+                    intent.putExtra("totalPrice", order.getTotalAmount());
+                    intent.putExtra("courtId", courtId);
+                    startActivity(intent);
                 });
             }
 
@@ -192,91 +242,163 @@ public class DetailBookingActivity extends AppCompatActivity {
         });
     }
 
-    // Phương thức cập nhật trạng thái nút với điều kiện đã sửa
+    /**
+     * Fetches order details from the API and updates the UI.
+     * @param orderId The ID of the order to fetch.
+     */
+    private void fetchOrderDetails(String orderId) {
+        Log.d("DetailBookingActivity", "Calling getOrderById with orderId: " + orderId);
+        Call<Orders> call = RetrofitClient.getApiService(this).getOrderById(orderId);
+        NetworkUtils.callApi(call, this, new NetworkUtils.ApiCallback<Orders>() {
+            @Override
+            public void onSuccess(Orders order) {
+                if (order == null) {
+                    Log.e("DetailBookingActivity", "Order is null from API");
+                    runOnUiThread(() -> Toast.makeText(DetailBookingActivity.this, "Không thể tải dữ liệu đơn hàng", Toast.LENGTH_SHORT).show());
+                    return;
+                }
+
+                String courtName = order.getCourtName();
+                String address = order.getAddress();
+                paymentStatus = order.getPaymentStatus();
+                String customerName = order.getCustomerName();
+                String phoneNumber = order.getPhoneNumber();
+                String note = order.getNote();
+                String updatedOrderStatus = order.getOrderStatus();
+                int amountPaid = order.getAmountPaid();
+                int paymentAmount = order.getPaymentAmount();
+                orderType = order.getOrderType();
+
+                runOnUiThread(() -> {
+                    tvStadiumName.setText("Tên sân: " + (courtName != null ? courtName : "N/A"));
+                    tvAddress.setText("Địa chỉ: " + (address != null ? address : "N/A"));
+                    tvPaymentStatus.setText("Trạng thái thanh toán: " + (paymentStatus != null ? paymentStatus : "N/A"));
+                    tvName.setText("Khách Hàng: " + (customerName != null ? customerName : "N/A"));
+                    tvPhonenumber.setText("SDT: " + (phoneNumber != null ? phoneNumber : "N/A"));
+                    tvNote.setText("Khách hàng ghi chú: " + (note == null || note.isEmpty() ? "Không có" : note));
+                    tvAmountPaid.setText("Số tiền đã trả: " + formatMoney(amountPaid));
+                    tvTotalPrice.setText("Tổng tiền: " + formatMoney(order.getTotalAmount()));
+                    tvPaymentAmount.setText("Số tiền cần thanh toán: " + formatMoney(paymentAmount));
+
+                    if (!"Đơn dịch vụ".equals(orderType)) {
+                        buildBookingSlotsUI(order);
+                    }
+                    checkAndHideButtons(order);
+
+                    if (!updatedOrderStatus.equals(orderStatus)) {
+                        orderStatus = updatedOrderStatus;
+                        if (!"Đơn dịch vụ".equals(orderType)) {
+                            updateButtonsBasedOnStatus(orderStatus);
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                Log.e("DetailBookingActivity", "Lỗi khi lấy dữ liệu: " + errorMessage);
+                runOnUiThread(() -> {
+                    String userMessage = "Lỗi khi lấy dữ liệu đơn hàng. Vui lòng thử lại sau.";
+                    if (errorMessage.contains("500")) {
+                        userMessage += " (Server gặp sự cố)";
+                    }
+                    Toast.makeText(DetailBookingActivity.this, userMessage, Toast.LENGTH_LONG).show();
+                });
+            }
+        });
+    }
+
     private void updateButtonsBasedOnStatus(String status) {
         if (status == null || paymentStatus == null || orderType == null) return;
 
-        // Kiểm tra điều kiện cho "Đơn cố định" và paymentStatus = "Đã thanh toán" và orderStatus cụ thể
-        if ("Đơn cố định".equals(orderType) && "Đã thanh toán".equals(paymentStatus) &&
-                ("Đang xử lý".equals(status) || "Đặt lịch thành công".equals(status) || "Đã hoàn thành".equals(status))) {
-            btnCancelBooking.setVisibility(View.GONE);
-            btnChangeBooking.setVisibility(View.GONE);
-            return;
-        }
-        if ("Hủy đặt lịch".equals(status) ||
-                "Hủy đặt lịch do quá giờ thanh toán".equals(status) ||
-                "Thay đổi lịch đặt".equals(status) || "Thay đổi lịch đặt thành công".equals(status)|| "Đã hoàn thành".equals(status)) {
-            btnCancelBooking.setVisibility(View.GONE);
-            btnChangeBooking.setVisibility(View.GONE);
-
-        } else if ("Đang xử lý".equals(status) && ("Chưa thanh toán".equals(paymentStatus) || "Chưa đặt cọc".equals(paymentStatus))) {
-            btnChangeBooking.setText("Thanh toán");
-            btnChangeBooking.setVisibility(View.VISIBLE);
-            btnCancelBooking.setVisibility(View.VISIBLE);
-            btnChangeBooking.setOnClickListener(v -> {
-                Intent intent = new Intent(DetailBookingActivity.this, QRCodeActivity.class);
-                intent.putExtra("orderId", orderId);
-                intent.putExtra("totalTime", totalTime);
-                intent.putExtra("totalPrice", totalPrice);
-                intent.putExtra("courtId", courtId);
-                intent.putIntegerArrayListExtra("slotPrices", slotPrices);
-                startActivity(intent);
-            });
-        } else if ("Đang xử lý".equals(status)) {
-            btnChangeBooking.setText("Thay đổi lịch đặt");
-            btnChangeBooking.setVisibility(View.VISIBLE);
-            btnCancelBooking.setVisibility(View.VISIBLE);
-            btnChangeBooking.setOnClickListener(v -> {
-                new AlertDialog.Builder(this)
-                        .setTitle("Xác nhận")
-                        .setMessage("Bạn có chắc chắn là muốn thay đổi lịch đặt không?")
-                        .setPositiveButton("Có", (dialog, which) -> {
-                            Intent intent = new Intent(DetailBookingActivity.this, BookingTableActivity.class);
-                            intent.putExtra("orderId", orderId);
-                            intent.putExtra("club_id", courtId);
-                            startActivity(intent);
-                        })
-                        .setNegativeButton("Không", null)
-                        .show();
-            });
-        } else if ("Đặt lịch thành công".equals(status)) {
-            btnChangeBooking.setText("Thay đổi lịch đặt");
-            btnChangeBooking.setVisibility(View.VISIBLE);
-            btnCancelBooking.setVisibility(View.VISIBLE);
-            btnChangeBooking.setOnClickListener(v -> {
-                new AlertDialog.Builder(this)
-                        .setTitle("Xác nhận")
-                        .setMessage("Bạn có chắc chắn là muốn thay đổi lịch đặt không?")
-                        .setPositiveButton("Có", (dialog, which) -> {
-                            Intent intent = new Intent(DetailBookingActivity.this, BookingTableActivity.class);
-                            intent.putExtra("orderId", orderId);
-                            intent.putExtra("club_id", courtId);
-                            startActivity(intent);
-                        })
-                        .setNegativeButton("Không", null)
-                        .show();
-            });
+        if ("Đơn dịch vụ".equals(orderType)) {
+            if ("Hủy đặt lịch".equals(status) || "Hủy đặt lịch do quá giờ thanh toán".equals(status)) {
+                btnCancelBooking.setVisibility(View.GONE);
+                btnChangeBooking.setVisibility(View.GONE);
+            } else {
+                btnCancelBooking.setVisibility(View.VISIBLE);
+                btnChangeBooking.setVisibility(View.VISIBLE);
+            }
         } else {
-            btnChangeBooking.setText("Thay đổi lịch đặt");
-            btnChangeBooking.setVisibility(View.VISIBLE);
-            btnCancelBooking.setVisibility(View.VISIBLE);
-            btnChangeBooking.setOnClickListener(v -> {
-                new AlertDialog.Builder(this)
-                        .setTitle("Xác nhận")
-                        .setMessage("Bạn có chắc chắn là muốn thay đổi lịch đặt không?")
-                        .setPositiveButton("Có", (dialog, which) -> {
-                            Intent intent = new Intent(DetailBookingActivity.this, BookingTableActivity.class);
-                            intent.putExtra("orderId", orderId);
-                            intent.putExtra("club_id", courtId);
-                            startActivity(intent);
-                        })
-                        .setNegativeButton("Không", null)
-                        .show();
-            });
+            if ("Đơn cố định".equals(orderType) && "Đã thanh toán".equals(paymentStatus) &&
+                    ("Đang xử lý".equals(status) || "Đặt lịch thành công".equals(status) || "Đã hoàn thành".equals(status))) {
+                btnCancelBooking.setVisibility(View.GONE);
+                btnChangeBooking.setVisibility(View.GONE);
+                return;
+            }
+            if ("Hủy đặt lịch".equals(status) ||
+                    "Hủy đặt lịch do quá giờ thanh toán".equals(status) ||
+                    "Thay đổi lịch đặt".equals(status) || "Thay đổi lịch đặt thành công".equals(status) || "Đã hoàn thành".equals(status)) {
+                btnCancelBooking.setVisibility(View.GONE);
+                btnChangeBooking.setVisibility(View.GONE);
+            } else if ("Đang xử lý".equals(status) && ("Chưa thanh toán".equals(paymentStatus) || "Chưa đặt cọc".equals(paymentStatus))) {
+                btnChangeBooking.setText("Thanh toán");
+                btnChangeBooking.setVisibility(View.VISIBLE);
+                btnCancelBooking.setVisibility(View.VISIBLE);
+                btnChangeBooking.setOnClickListener(v -> {
+                    Intent intent = new Intent(DetailBookingActivity.this, QRCodeActivity.class);
+                    intent.putExtra("orderId", orderId);
+                    intent.putExtra("totalTime", totalTime);
+                    intent.putExtra("totalPrice", totalPrice);
+                    intent.putExtra("courtId", courtId);
+                    intent.putIntegerArrayListExtra("slotPrices", slotPrices);
+                    startActivity(intent);
+                });
+            } else if ("Đang xử lý".equals(status)) {
+                btnChangeBooking.setText("Thay đổi lịch đặt");
+                btnChangeBooking.setVisibility(View.VISIBLE);
+                btnCancelBooking.setVisibility(View.VISIBLE);
+                btnChangeBooking.setOnClickListener(v -> {
+                    new AlertDialog.Builder(this)
+                            .setTitle("Xác nhận")
+                            .setMessage("Bạn có chắc chắn là muốn thay đổi lịch đặt không?")
+                            .setPositiveButton("Có", (dialog, which) -> {
+                                Intent intent = new Intent(DetailBookingActivity.this, BookingTableActivity.class);
+                                intent.putExtra("orderId", orderId);
+                                intent.putExtra("club_id", courtId);
+                                startActivity(intent);
+                            })
+                            .setNegativeButton("Không", null)
+                            .show();
+                });
+            } else if ("Đặt lịch thành công".equals(status)) {
+                btnChangeBooking.setText("Thay đổi lịch đặt");
+                btnChangeBooking.setVisibility(View.VISIBLE);
+                btnCancelBooking.setVisibility(View.VISIBLE);
+                btnChangeBooking.setOnClickListener(v -> {
+                    new AlertDialog.Builder(this)
+                            .setTitle("Xác nhận")
+                            .setMessage("Bạn có chắc chắn là muốn thay đổi lịch đặt không?")
+                            .setPositiveButton("Có", (dialog, which) -> {
+                                Intent intent = new Intent(DetailBookingActivity.this, BookingTableActivity.class);
+                                intent.putExtra("orderId", orderId);
+                                intent.putExtra("club_id", courtId);
+                                startActivity(intent);
+                            })
+                            .setNegativeButton("Không", null)
+                            .show();
+                });
+            } else {
+                btnChangeBooking.setText("Thay đổi lịch đặt");
+                btnChangeBooking.setVisibility(View.VISIBLE);
+                btnCancelBooking.setVisibility(View.VISIBLE);
+                btnChangeBooking.setOnClickListener(v -> {
+                    new AlertDialog.Builder(this)
+                            .setTitle("Xác nhận")
+                            .setMessage("Bạn có chắc chắn là muốn thay đổi lịch đặt không?")
+                            .setPositiveButton("Có", (dialog, which) -> {
+                                Intent intent = new Intent(DetailBookingActivity.this, BookingTableActivity.class);
+                                intent.putExtra("orderId", orderId);
+                                intent.putExtra("club_id", courtId);
+                                startActivity(intent);
+                            })
+                            .setNegativeButton("Không", null)
+                            .show();
+                });
+            }
         }
     }
 
-    // Các phương thức khác giữ nguyên
     private void buildBookingSlotsUI(Orders order) {
         layoutBookingSlots.removeAllViews();
         if (order == null || order.getOrderDetails() == null || order.getOrderDetails().isEmpty()) {
@@ -365,20 +487,27 @@ public class DetailBookingActivity extends AppCompatActivity {
                         btnCancelBooking.setVisibility(View.GONE);
                         btnChangeBooking.setVisibility(View.GONE);
                         tvPaymentStatus.setText("Trạng thái thanh toán: " + order.getOrderStatus());
-                        Toast.makeText(DetailBookingActivity.this, "Đã hủy đặt lịch", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(DetailBookingActivity.this, "Đã hủy đặt dịch vụ", Toast.LENGTH_SHORT).show();
                     });
                 }
             }
 
             @Override
             public void onError(String errorMessage) {
-                Log.e("DetailBookingActivity", "Lỗi khi hủy đặt lịch: " + errorMessage);
-                runOnUiThread(() -> Toast.makeText(DetailBookingActivity.this, "Lỗi khi hủy đặt lịch", Toast.LENGTH_SHORT).show());
+                Log.e("DetailBookingActivity", "Lỗi khi hủy đặt dịch vụ: " + errorMessage);
+                runOnUiThread(() -> Toast.makeText(DetailBookingActivity.this, "Lỗi khi hủy đặt dịch vụ", Toast.LENGTH_SHORT).show());
             }
         });
     }
 
     private void checkAndHideButtons(Orders order) {
+        if (order == null || order.getOrderDetails() == null || order.getOrderDetails().isEmpty()) {
+            btnCancelBooking.setVisibility(View.GONE);
+            btnChangeBooking.setVisibility(View.GONE);
+            Log.w("DetailBookingActivity", "Order hoặc OrderDetails null hoặc trống");
+            return;
+        }
+
         List<String> bookingDates = new ArrayList<>();
         for (OrderDetail detail : order.getOrderDetails()) {
             if (detail.getBookingDates() != null) {
@@ -386,7 +515,12 @@ public class DetailBookingActivity extends AppCompatActivity {
             }
         }
 
-        if (bookingDates.isEmpty()) return;
+        if (bookingDates.isEmpty()) {
+            btnCancelBooking.setVisibility(View.GONE);
+            btnChangeBooking.setVisibility(View.GONE);
+            Log.w("DetailBookingActivity", "Không có booking dates");
+            return;
+        }
 
         LocalDate currentDate = LocalDate.now();
         List<LocalDate> bookingLocalDates = new ArrayList<>();
@@ -400,7 +534,12 @@ public class DetailBookingActivity extends AppCompatActivity {
             }
         }
 
-        if (bookingLocalDates.isEmpty()) return;
+        if (bookingLocalDates.isEmpty()) {
+            btnCancelBooking.setVisibility(View.GONE);
+            btnChangeBooking.setVisibility(View.GONE);
+            Log.w("DetailBookingActivity", "Không có ngày đặt hợp lệ");
+            return;
+        }
 
         LocalDate minBookingDate = Collections.min(bookingLocalDates);
         if (currentDate.isAfter(minBookingDate)) {
@@ -430,7 +569,8 @@ public class DetailBookingActivity extends AppCompatActivity {
     }
 
     private String formatMoney(int amount) {
-        return new java.text.DecimalFormat("#,###").format(amount) + " ₫";
+        DecimalFormat formatter = new DecimalFormat("#,###");
+        return formatter.format(amount) + " ₫";
     }
 
     private int toMinutes(String time) {

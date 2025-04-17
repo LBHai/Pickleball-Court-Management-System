@@ -2,6 +2,7 @@ package SEP490.G9;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
@@ -16,15 +17,20 @@ import Api.ApiService;
 import Api.NetworkUtils;
 import Api.RetrofitClient;
 import Model.GetToken;
+import Model.MyInfo;
+import Model.MyInfoResponse;
 import Model.User;
 import Session.SessionManager;
 import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText edtUsername, edtPassword;
     private Button btnLogin;
     private SessionManager sessionManager;
+    private String userId = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,11 +81,37 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onSuccess(GetToken data) {
                 try {
+                    // Inside the onSuccess of the token call
                     if (data != null && data.getResult() != null) {
                         if (data.getResult().isAuthenticated()) {
                             String token = data.getResult().getToken();
                             if (token != null && !token.isEmpty()) {
                                 sessionManager.saveToken(token);
+                                ApiService apiService = RetrofitClient.getApiService(LoginActivity.this);
+                                String authHeader = "Bearer " + token;
+                                // Use LoginActivity.this as the context here
+                                NetworkUtils.callApi(apiService.getMyInfo(authHeader), LoginActivity.this, new NetworkUtils.ApiCallback<MyInfoResponse>() {
+                                    @Override
+                                    public void onSuccess(MyInfoResponse r) {
+                                        if (r != null && r.getResult() != null) {
+                                            userId = r.getResult().getId();
+                                            sessionManager.saveUserId(userId);
+                                            Log.d("userId2", userId);
+
+                                            // Sau khi cập nhật userId, chuyển sang MainActivity
+                                            Toast.makeText(LoginActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                            startActivity(intent);
+                                            finish();
+                                        }
+                                    }
+                                    @Override
+                                    public void onError(String e) {
+                                        Toast.makeText(LoginActivity.this, "Lấy thông tin thất bại!", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+
+
                                 Toast.makeText(LoginActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
                                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                 startActivity(intent);
@@ -93,6 +125,7 @@ public class LoginActivity extends AppCompatActivity {
                     } else {
                         Toast.makeText(LoginActivity.this, "Dữ liệu trả về không hợp lệ", Toast.LENGTH_SHORT).show();
                     }
+
                 } catch (Exception e) {
                     Toast.makeText(LoginActivity.this, "Lỗi xử lý dữ liệu", Toast.LENGTH_SHORT).show();
                 }

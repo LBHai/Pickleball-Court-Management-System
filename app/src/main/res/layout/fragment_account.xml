@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/dark_green"
-    tools:context=".Fragment.AccountFragment">
+    tools:context="Fragment.AccountFragment">
 
     <!-- Khu vực Header -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -19,19 +19,37 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <ImageButton
-            android:id="@+id/notification"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_margin="8dp"
-            android:adjustViewBounds="true"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Thông báo"
-            android:scaleType="fitCenter"
-            android:src="@drawable/notification"
+        <!-- Container notification: sử dụng ConstraintLayout thay vì RelativeLayout -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/notificationContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            tools:ignore="TouchTargetSizeCheck" />
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageButton
+                android:id="@+id/notification"
+                android:layout_width="45dp"
+                android:layout_height="50dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Thông báo"
+                android:scaleType="fitCenter"
+                android:src="@drawable/notification"
+                android:tint="@android:color/white"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.nex3z.notificationbadge.NotificationBadge
+                android:id="@+id/badge"
+                android:layout_width="25dp"
+                android:layout_height="27dp"
+                app:layout_constraintEnd_toEndOf="@id/notification"
+                app:layout_constraintTop_toTopOf="@id/notification"
+                app:nbAnimationEnabled="true"
+                app:nbBackground="@drawable/badge_background"
+                app:nbMaxTextLength="5" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <ImageButton
             android:id="@+id/options"
@@ -157,6 +175,7 @@
                 android:textSize="16sp" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/containerTab"

@@ -75,5 +75,6 @@
     <string name="new_password">Mật khẩu mới</string>
     <string name="re_enter_new_password">Nhập lại mật khẩu mới</string>
     <string name="day">Đơn ngày</string>
+    <string name="search">Tìm kiếm</string>
 
 </resources>

@@ -2,6 +2,8 @@
 package Adapter;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -75,7 +77,22 @@ public class CourtsServiceAdapter extends RecyclerView.Adapter<CourtViewHolder> 
 
         // Ví dụ: click cho nút map hoặc book (tùy từng chức năng)
         holder.getBtnMap().setOnClickListener(v -> {
-            // Xử lý khi nhấn nút map
+            // Lấy thông tin địa chỉ hoặc tọa độ của sân
+            String address = court.getAddress();
+            String uri = "geo:0,0?q=" + Uri.encode(address);
+
+            Intent intent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(uri));
+            intent.setPackage("com.google.android.apps.maps");
+
+            // Kiểm tra Google Maps đã cài chưa
+            if (intent.resolveActivity(context.getPackageManager()) != null) {
+                context.startActivity(intent);
+            } else {
+                // Nếu chưa có Google Maps, có thể mở trên trình duyệt
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                        android.net.Uri.parse("https://www.google.com/maps/search/?api=1&query=" + Uri.encode(address)));
+                context.startActivity(browserIntent);
+            }
         });
         holder.getBtnService().setOnClickListener(v -> {
             if (listener != null) {

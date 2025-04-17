@@ -9,7 +9,6 @@
     android:background="#006d38"
     tools:context=".DetailBookingActivity">
 
-    <!-- Nút back -->
     <ImageButton
         android:id="@+id/btnBack"
         android:layout_width="wrap_content"
@@ -23,7 +22,6 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="TouchTargetSizeCheck" />
 
-    <!-- Tiêu đề -->
     <TextView
         android:id="@+id/tvTitleMain"
         android:layout_width="0dp"
@@ -38,7 +36,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Thanh tab -->
     <LinearLayout
         android:id="@+id/tabLayout"
         android:layout_width="0dp"
@@ -73,7 +70,6 @@
             android:textSize="16sp" />
     </LinearLayout>
 
-    <!-- Thanh gạch ngang dưới Tab -->
     <LinearLayout
         android:id="@+id/lineLayout"
         android:layout_width="0dp"
@@ -100,7 +96,6 @@
             android:visibility="invisible" />
     </LinearLayout>
 
-    <!-- Nội dung tab Thông tin Đặt lịch -->
     <ScrollView
         android:id="@+id/layoutBookingInfo"
         android:layout_width="0dp"
@@ -118,7 +113,6 @@
             android:orientation="vertical"
             android:background="@android:color/transparent">
 
-            <!-- Card 1: Thông tin người dùng + avatar -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -194,7 +188,6 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Card 2: Thông tin đặt lịch -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardBookingInfo"
                 android:layout_width="match_parent"
@@ -317,7 +310,6 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Card 3: Ghi chú -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -343,7 +335,6 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Container cho 2 nút -->
             <LinearLayout
                 android:id="@+id/btnContainer"
                 android:layout_width="match_parent"
@@ -376,7 +367,6 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- Nội dung tab Dịch vụ -->
     <ScrollView
         android:id="@+id/layoutServiceDetail"
         android:layout_width="0dp"
@@ -389,18 +379,12 @@
         app:layout_constraintTop_toBottomOf="@id/lineLayout">
 
         <LinearLayout
+            android:id="@+id/layoutServiceDetails"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp"
             android:background="#085c35">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Nội dung dịch vụ sẽ được hiển thị tại đây"
-                android:textColor="#FFFFFF"
-                android:textSize="14sp" />
         </LinearLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

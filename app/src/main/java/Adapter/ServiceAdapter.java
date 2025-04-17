@@ -25,7 +25,7 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceViewHolder> {
     private final Context context;
     private List<Service> serviceList;
     private final OnServiceActionListener listener;
-    private final Map<String, Integer> orderQuantities;
+    private final Map<String, Integer> orderQuantities; // Lưu số lượng dịch vụ người dùng chọn
 
     public interface OnServiceActionListener {
         void onQuantityChanged(Service service, int newQuantity);
@@ -36,8 +36,6 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceViewHolder> {
         this.serviceList = serviceList;
         this.listener = listener;
         this.orderQuantities = new HashMap<>();
-
-        // Khởi tạo số lượng ban đầu là 0 cho tất cả dịch vụ
         initializeOrderQuantities(serviceList);
     }
 
@@ -53,11 +51,8 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceViewHolder> {
 
     public void updateList(List<Service> newList) {
         this.serviceList = newList;
-        orderQuantities.clear(); // Xóa số lượng đặt hàng cũ
-
-        // Khởi tạo lại số lượng ban đầu là 0 cho tất cả dịch vụ mới
+        orderQuantities.clear();
         initializeOrderQuantities(newList);
-
         notifyDataSetChanged();
     }
 
@@ -74,17 +69,13 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceViewHolder> {
         String serviceId = service.getId();
 
         if (serviceId == null) {
-            serviceId = "service_" + position; // Dự phòng nếu serviceId null
+            serviceId = "service_" + position;
         }
 
-        // Lưu serviceId vào tag của ViewHolder để sử dụng trong sự kiện click
         holder.itemView.setTag(serviceId);
-
-        // Hiển thị thông tin dịch vụ
         holder.tvName.setText(service.getName());
         holder.tvPrice.setText(String.format(Locale.getDefault(), "%,.0fđ", service.getPrice()));
 
-        // Hiển thị mô tả nếu có
         if (service.getDescription() != null && !service.getDescription().isEmpty()) {
             holder.tvDescription.setVisibility(View.VISIBLE);
             holder.tvDescription.setText(service.getDescription());
@@ -92,13 +83,9 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceViewHolder> {
             holder.tvDescription.setVisibility(View.GONE);
         }
 
-        // Hiển thị số lượng tồn kho từ quantity
         holder.tvStockQuantity.setText("Còn: " + service.getQuantity());
-
-        // Cập nhật hiển thị số lượng đặt hàng
         updateQuantityDisplay(holder, serviceId, service);
 
-        // Tải hình ảnh sử dụng Glide
         if (service.getImageUrl() != null && !service.getImageUrl().isEmpty()) {
             Glide.with(context)
                     .load(service.getImageUrl())
@@ -110,52 +97,30 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceViewHolder> {
             holder.ivDrink.setImageResource(R.drawable.sting);
         }
 
-        // Thiết lập sự kiện cho nút giảm
         final String finalServiceId = serviceId;
-
-        // Xóa listener cũ để tránh trùng lặp khi RecyclerView tái sử dụng ViewHolder
         holder.btnDecrease.setOnClickListener(null);
         holder.btnIncrease.setOnClickListener(null);
 
-        holder.btnDecrease.setOnClickListener(v -> {
-            decreaseQuantity(holder, finalServiceId, service);
-        });
-
-        // Thiết lập sự kiện cho nút tăng
-        holder.btnIncrease.setOnClickListener(v -> {
-            increaseQuantity(holder, finalServiceId, service);
-        });
+        holder.btnDecrease.setOnClickListener(v -> decreaseQuantity(holder, finalServiceId, service));
+        holder.btnIncrease.setOnClickListener(v -> increaseQuantity(holder, finalServiceId, service));
     }
 
     private void updateQuantityDisplay(ServiceViewHolder holder, String serviceId, Service service) {
-        // Lấy số lượng hiện tại từ Map
         int currentQuantity = orderQuantities.getOrDefault(serviceId, 0);
-
-        // Cập nhật hiển thị
         holder.tvQuantity.setText(String.valueOf(currentQuantity));
-
-        // Cập nhật trạng thái nút giảm
         holder.btnDecrease.setEnabled(currentQuantity > 0);
         holder.btnDecrease.setAlpha(currentQuantity > 0 ? 1.0f : 0.5f);
-
-        // Cập nhật trạng thái nút tăng dựa trên số lượng tồn kho
         boolean canIncrease = service.getQuantity() > currentQuantity;
         holder.btnIncrease.setEnabled(canIncrease);
         holder.btnIncrease.setAlpha(canIncrease ? 1.0f : 0.5f);
     }
 
     private void decreaseQuantity(ServiceViewHolder holder, String serviceId, Service service) {
-        // Lấy số lượng hiện tại từ Map
         int currentQuantity = orderQuantities.getOrDefault(serviceId, 0);
-
         if (currentQuantity > 0) {
             int newQuantity = currentQuantity - 1;
             orderQuantities.put(serviceId, newQuantity);
-
-            // Cập nhật giao diện
             updateQuantityDisplay(holder, serviceId, service);
-
-            // Thông báo cho listener
             if (listener != null) {
                 listener.onQuantityChanged(service, newQuantity);
             }
@@ -163,18 +128,11 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceViewHolder> {
     }
 
     private void increaseQuantity(ServiceViewHolder holder, String serviceId, Service service) {
-        // Lấy số lượng hiện tại từ Map
         int currentQuantity = orderQuantities.getOrDefault(serviceId, 0);
-
-        // Kiểm tra số lượng tồn kho
         if (currentQuantity < service.getQuantity()) {
             int newQuantity = currentQuantity + 1;
             orderQuantities.put(serviceId, newQuantity);
-
-            // Cập nhật giao diện
             updateQuantityDisplay(holder, serviceId, service);
-
-            // Thông báo cho listener
             if (listener != null) {
                 listener.onQuantityChanged(service, newQuantity);
             }
@@ -186,7 +144,6 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceViewHolder> {
         return serviceList != null ? serviceList.size() : 0;
     }
 
-    // Phương thức để lấy tổng số lượng đã đặt
     public int getTotalOrderQuantity() {
         int total = 0;
         for (Integer quantity : orderQuantities.values()) {
@@ -195,12 +152,10 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceViewHolder> {
         return total;
     }
 
-    // Phương thức để lấy Map số lượng đặt hàng
     public Map<String, Integer> getOrderQuantities() {
-        return new HashMap<>(orderQuantities); // Trả về bản sao để tránh thay đổi trực tiếp
+        return new HashMap<>(orderQuantities);
     }
 
-    // Phương thức để lấy tổng giá tiền
     public double getTotalPrice() {
         double total = 0;
         for (int i = 0; i < serviceList.size(); i++) {

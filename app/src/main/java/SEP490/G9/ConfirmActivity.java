@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -22,7 +23,9 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,6 +40,7 @@ import javax.crypto.spec.SecretKeySpec;
 import Api.ApiService;
 import Api.NetworkUtils;
 import Api.RetrofitClient;
+import Holder.OrderServiceHolder;
 import Model.ConfirmOrder;
 import Model.Courts;
 import Model.CreateOrderRegularRequest;
@@ -47,6 +51,7 @@ import Model.NotificationRequest;
 import Model.OrderDetail;
 import Model.OrderDetailGroup;
 import Model.Orders;
+import Model.ServiceDetail;
 import Session.SessionManager;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -72,6 +77,7 @@ public class ConfirmActivity extends AppCompatActivity {
     private String courtId, selectedDays, startDate, endDate, startTime, endTime;
     private List<String> selectedCourtSlots;
     private int totalPriceFixedOrder;
+    private String orderType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,59 +101,28 @@ public class ConfirmActivity extends AppCompatActivity {
         sessionManager = new SessionManager(this);
 
         Intent intent = getIntent();
-        String orderType = intent.getStringExtra("orderType");
+        orderType = intent.getStringExtra("orderType");
         String tvPhoneFromIntent = intent.getStringExtra("tvPhone");
         if (tvPhoneFromIntent != null) {
-            tvContact.setText("Liên hệ"+tvPhoneFromIntent);
+            tvContact.setText("Liên hệ: " + tvPhoneFromIntent);
+            Log.d("tvContact", tvPhoneFromIntent != null ? tvPhoneFromIntent : "Phone number not provided");
         }
+
+        if ("Đơn cố định".equals(orderType)) {
+            btnDeposit.setVisibility(View.GONE);
+            btnPayment.setText("Thanh toán");
+        }
+
         if ("Đơn cố định".equals(orderType)) {
             handleFixedOrder(intent);
+        } else if ("Đơn dịch vụ".equals(orderType)) {
+            handleServiceOrder(intent);
         } else {
             handleRegularOrder(intent);
         }
-        if (intent != null) {
-            String receivedPhone = intent.getStringExtra("tvPhone");
-            if (receivedPhone != null && !receivedPhone.isEmpty()) {
-                tvContact.setText("Liên hệ: " + receivedPhone);
-            }
-            Log.d("tvContact",tvPhoneFromIntent);
-        }
-
     }
 
     private void handleFixedOrder(Intent intent) {
-        String token = sessionManager.getToken();
-        ApiService apiService = RetrofitClient.getApiService(this);
-
-        // Lấy thông tin người dùng (giữ nguyên mã gốc)
-        if (token != null && !token.isEmpty()) {
-            String authHeader = "Bearer " + token;
-            NetworkUtils.callApi(apiService.getMyInfo(authHeader), this, new NetworkUtils.ApiCallback<MyInfoResponse>() {
-                @Override
-                public void onSuccess(MyInfoResponse r) {
-                    if (r != null && r.getResult() != null) {
-                        String fullName = r.getResult().getFirstName() + " " + r.getResult().getLastName();
-                        etName.setText(fullName);
-                        etPhone.setText(r.getResult().getPhoneNumber());
-                        userId = r.getResult().getId();
-                        sessionManager.saveUserId(userId);
-                        registerNotification();
-                    }
-                }
-                @Override
-                public void onError(String e) {
-                    Toast.makeText(ConfirmActivity.this, "Lấy thông tin thất bại!", Toast.LENGTH_SHORT).show();
-                }
-            });
-        } else {
-            Toast.makeText(this, "Bạn đang đặt sân với vai trò là Guest!", Toast.LENGTH_SHORT).show();
-            List<String> guestPhones = sessionManager.getGuestPhones();
-            if (!guestPhones.isEmpty()) {
-                etPhone.setText(guestPhones.get(0));
-            }
-        }
-
-        // Lấy dữ liệu từ Intent
         courtId = intent.getStringExtra("courtId");
         selectedDays = intent.getStringExtra("selectedDays");
         startDate = intent.getStringExtra("startDate");
@@ -164,7 +139,6 @@ public class ConfirmActivity extends AppCompatActivity {
             flexibleCourtSlotFixes = new HashMap<>();
         }
 
-        // Kiểm tra dữ liệu đầu vào
         if (courtId == null || courtId.isEmpty() ||
                 selectedDays == null || selectedDays.isEmpty() ||
                 startDate == null || endDate == null ||
@@ -175,10 +149,16 @@ public class ConfirmActivity extends AppCompatActivity {
             return;
         }
 
+        int totalMinutes = calculateTotalTimeForFixedOrder();
+        int hours = totalMinutes / 60;
+        int mins = totalMinutes % 60;
+        totalTime = String.format(Locale.getDefault(), "%dh%02d", hours, mins);
+        tvTotalTimeLine.setText("Tổng thời gian chơi: " + totalTime);
+
         String formattedStartTime = startTime.contains(":") && startTime.split(":").length == 2 ? startTime + ":00" : startTime;
         String formattedEndTime = endTime.contains(":") && endTime.split(":").length == 2 ? endTime + ":00" : endTime;
 
-        // Lấy tổng tiền từ API và tính toán tổng tiền dựa trên số lượng sân
+        ApiService apiService = RetrofitClient.getApiService(this);
         Call<Double> call = apiService.getPaymentValue(courtId, selectedDays, startDate, endDate, formattedStartTime, formattedEndTime);
         call.enqueue(new Callback<Double>() {
             @Override
@@ -188,11 +168,9 @@ public class ConfirmActivity extends AppCompatActivity {
                     int numberOfCourts = selectedCourtSlots.size();
                     int finalTotalPrice = totalPriceFixedOrder * numberOfCourts;
                     tvTotalPriceLine.setText(Html.fromHtml("Tổng tiền: <b>" + formatMoney(finalTotalPrice) + "</b>"));
-                    Log.d("ConfirmActivity", "Tổng tiền nhận từ API: " + totalPriceFixedOrder + ", Số sân: " + numberOfCourts + ", Tổng tiền hiển thị: " + finalTotalPrice);
                 } else {
                     Toast.makeText(ConfirmActivity.this, "Lỗi khi lấy tổng tiền", Toast.LENGTH_SHORT).show();
                     tvTotalPriceLine.setText("Tổng tiền: Lỗi");
-                    Log.e("ConfirmActivity", "Lỗi API: " + response.code());
                 }
             }
 
@@ -200,15 +178,13 @@ public class ConfirmActivity extends AppCompatActivity {
             public void onFailure(Call<Double> call, Throwable t) {
                 Toast.makeText(ConfirmActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 tvTotalPriceLine.setText("Tổng tiền: Lỗi mạng");
-                Log.e("ConfirmActivity", "Lỗi mạng: " + t.getMessage());
             }
         });
 
         fetchCourtDetails(courtId);
 
-        tvDate.setText(" Ngày " + startDate + " đến ngày " + endDate + "\n Thời gian: " + startTime + " - " + endTime + "\n Trong: " + selectedDays);
+        tvDate.setText("Ngày " + startDate + " đến ngày " + endDate + "\nThời gian: " + startTime + " - " + endTime + "\nTrong: " + selectedDays);
 
-        // Hiển thị danh sách sân đã chọn và thay thế
         layoutConfirmOrders.removeAllViews();
         if (selectedCourtSlots != null) {
             for (String courtSlot : selectedCourtSlots) {
@@ -229,107 +205,7 @@ public class ConfirmActivity extends AppCompatActivity {
             layoutConfirmOrders.addView(tvReplacement);
         }
 
-        // Sự kiện nút thanh toán và đặt cọc
-        btnPayment.setOnClickListener(v -> {
-            String phone = etPhone.getText().toString().trim();
-            if (!validateInput(phone)) return;
-            createFixedOrder(false, totalPriceFixedOrder);
-        });
-
-        btnDeposit.setOnClickListener(v -> {
-            String phone = etPhone.getText().toString().trim();
-            if (!validateInput(phone)) return;
-            createFixedOrder(true, totalPriceFixedOrder);
-        });
-
-        btnBack.setOnClickListener(v -> finish());
-    }
-
-    private void createFixedOrder(boolean isDeposit, int totalPriceFixedOrder) {
-        String name = etName.getText().toString().trim();
-        String phone = etPhone.getText().toString().trim();
-        String note = etNote.getText().toString().trim();
-
-        if (name.isEmpty() || phone.isEmpty()) {
-            Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (!name.matches("^[\\p{L}\\s]+$") || name.length() < 2) {
-            Toast.makeText(this, "Tên chỉ chứa chữ cái và khoảng trắng, ít nhất 2 ký tự", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (!phone.matches("0\\d{9}")) {
-            Toast.makeText(this, "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        CreateOrderRegularRequest req = new CreateOrderRegularRequest();
-        req.setCourtId(courtId);
-        req.setCourtName(courtName);
-        req.setAddress(courtAddress);
-        req.setUserId(userId);
-        req.setCustomerName(name);
-        req.setPhoneNumber(phone);
-        req.setNote(note);
-        req.setPaymentStatus("Chưa thanh toán");
-        req.setOrderType("Đơn cố định");
-        req.setStartDate(startDate);
-        req.setEndDate(endDate);
-        req.setStartTime(startTime);
-        req.setEndTime(endTime);
-        req.setSelectedDays(selectedDays);
-        req.setSelectedCourtSlots(selectedCourtSlots != null ? selectedCourtSlots : new ArrayList<>());
-        req.setFlexibleCourtSlotFixes(flexibleCourtSlotFixes);
-        // Tính lại finalTotalPrice dựa trên totalPriceFixedOrder và số lượng sân
-        int numberOfCourts = selectedCourtSlots != null ? selectedCourtSlots.size() : 0;
-        int finalTotalPrice = totalPriceFixedOrder * numberOfCourts;
-        Log.d("ConfirmActivity", "Tổng tiền nhận từ API: " + totalPriceFixedOrder + ", Số sân: " + numberOfCourts + ", Tổng tiền hiển thị: " + finalTotalPrice);
-        Log.d("ConfirmActivity", "Dữ liệu đơn cố định: " + new Gson().toJson(req));
-        ApiService api = RetrofitClient.getApiService(this);
-        Call<CreateOrderResponse> call = api.createFixedOrder(req);
-        call.enqueue(new Callback<CreateOrderResponse>() {
-            @Override
-            public void onResponse(Call<CreateOrderResponse> call, Response<CreateOrderResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    CreateOrderResponse r = response.body();
-                    Intent i = new Intent(ConfirmActivity.this, QRCodeActivity.class);
-                    i.putExtra("orderType", "Đơn cố định");
-                    i.putExtra("orderId", r.getId());
-                    i.putExtra("totalPriceFixedOrder", finalTotalPrice); // Sử dụng finalTotalPrice
-                    i.putExtra("qrCodeData", r.getQrcode());
-                    i.putExtra("paymentTimeout", r.getPaymentTimeout());
-                    i.putExtra("overallTotalPrice", finalTotalPrice); // Cập nhật giá trị tổng
-                    i.putExtra("depositAmount", r.getDepositAmount());
-                    i.putExtra("isDeposit", isDeposit);
-                    i.putExtra("courtId", courtId);
-                    startActivity(i);
-                    finish();
-                } else {
-                    Toast.makeText(ConfirmActivity.this, "Tạo đơn thất bại!", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<CreateOrderResponse> call, Throwable t) {
-                Toast.makeText(ConfirmActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void handleRegularOrder(Intent intent) {
-        clubId = intent.getStringExtra("club_id");
-        selectedDate = intent.getStringExtra("selectedDate");
-        confirmOrdersJson = intent.getStringExtra("confirmOrdersJson");
-        orderId = intent.getStringExtra("orderId");
-
-        if (selectedDate == null || selectedDate.trim().isEmpty()) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            selectedDate = sdf.format(new Date());
-        }
-        tvDate.setText("Thông tin chi tiết:");
-
         String token = sessionManager.getToken();
-        ApiService apiService = RetrofitClient.getApiService(this);
         if (token != null && !token.isEmpty()) {
             String authHeader = "Bearer " + token;
             NetworkUtils.callApi(apiService.getMyInfo(authHeader), this, new NetworkUtils.ApiCallback<MyInfoResponse>() {
@@ -351,6 +227,108 @@ public class ConfirmActivity extends AppCompatActivity {
             });
         } else {
             Toast.makeText(this, "Bạn đang đặt sân với vai trò là Guest!", Toast.LENGTH_SHORT).show();
+            etName.setText("");
+            etPhone.setText("");
+            etNote.setText("");
+            List<String> guestPhones = sessionManager.getGuestPhones();
+            if (!guestPhones.isEmpty()) {
+                etPhone.setText(guestPhones.get(0));
+            }
+        }
+
+        btnPayment.setOnClickListener(v -> {
+            String name = etName.getText().toString().trim();
+            String phone = etPhone.getText().toString().trim();
+            String note = etNote.getText().toString().trim();
+
+            if (token == null || token.isEmpty()) {
+                if (name.isEmpty() || phone.isEmpty()) {
+                    Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+            if (name.isEmpty() || phone.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!name.matches("^[\\p{L}\\s]+$") || name.length() < 2) {
+                Toast.makeText(this, "Tên chỉ chứa chữ cái và khoảng trắng, ít nhất 2 ký tự", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!phone.matches("0\\d{9}")) {
+                Toast.makeText(this, "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            createFixedOrder(false, totalPriceFixedOrder);
+        });
+
+        btnDeposit.setOnClickListener(v -> {
+            String name = etName.getText().toString().trim();
+            String phone = etPhone.getText().toString().trim();
+            String note = etNote.getText().toString().trim();
+
+            if (token == null || token.isEmpty()) {
+                if (name.isEmpty() || phone.isEmpty()) {
+                    Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+            if (name.isEmpty() || phone.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!name.matches("^[\\p{L}\\s]+$") || name.length() < 2) {
+                Toast.makeText(this, "Tên chỉ chứa chữ cái và khoảng trắng, ít nhất 2 ký tự", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!phone.matches("0\\d{9}")) {
+                Toast.makeText(this, "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            createFixedOrder(true, totalPriceFixedOrder);
+        });
+
+        btnBack.setOnClickListener(v -> finish());
+    }
+
+    private void handleRegularOrder(Intent intent) {
+        clubId = intent.getStringExtra("club_id");
+        selectedDate = intent.getStringExtra("selectedDate");
+        confirmOrdersJson = intent.getStringExtra("confirmOrdersJson");
+        orderId = intent.getStringExtra("orderId");
+
+        if (selectedDate == null || selectedDate.trim().isEmpty()) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            selectedDate = sdf.format(new Date());
+        }
+        tvDate.setText("Thông tin chi tiết:");
+
+        ApiService apiService = RetrofitClient.getApiService(this);
+        String token = sessionManager.getToken();
+        if (token != null && !token.isEmpty()) {
+            String authHeader = "Bearer " + token;
+            NetworkUtils.callApi(apiService.getMyInfo(authHeader), this, new NetworkUtils.ApiCallback<MyInfoResponse>() {
+                @Override
+                public void onSuccess(MyInfoResponse r) {
+                    if (r != null && r.getResult() != null) {
+                        String fullName = r.getResult().getFirstName() + " " + r.getResult().getLastName();
+                        etName.setText(fullName);
+                        etPhone.setText(r.getResult().getPhoneNumber());
+                        userId = r.getResult().getId();
+                        sessionManager.saveUserId(userId);
+                        registerNotification();
+                    }
+                }
+                @Override
+                public void onError(String e) {
+                    Toast.makeText(ConfirmActivity.this, "Lấy thông tin thất bại!", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Toast.makeText(this, "Bạn đang đặt sân với vai trò là Guest!", Toast.LENGTH_SHORT).show();
+            etName.setText("");
+            etPhone.setText("");
+            etNote.setText("");
             List<String> guestPhones = sessionManager.getGuestPhones();
             if (!guestPhones.isEmpty()) {
                 etPhone.setText(guestPhones.get(0));
@@ -370,8 +348,28 @@ public class ConfirmActivity extends AppCompatActivity {
         buildConfirmOrdersUI();
 
         btnPayment.setOnClickListener(v -> {
+            String name = etName.getText().toString().trim();
             String phone = etPhone.getText().toString().trim();
-            if (!validateInput(phone)) return;
+            String note = etNote.getText().toString().trim();
+
+            if (token == null || token.isEmpty()) {
+                if (name.isEmpty() || phone.isEmpty()) {
+                    Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+            if (name.isEmpty() || phone.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!name.matches("^[\\p{L}\\s]+$") || name.length() < 2) {
+                Toast.makeText(this, "Tên chỉ chứa chữ cái và khoảng trắng, ít nhất 2 ký tự", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!phone.matches("0\\d{9}")) {
+                Toast.makeText(this, "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0", Toast.LENGTH_SHORT).show();
+                return;
+            }
             if (userId == null || userId.isEmpty()) {
                 sessionManager.addGuestPhone(phone);
                 registerNotification();
@@ -380,13 +378,165 @@ public class ConfirmActivity extends AppCompatActivity {
         });
 
         btnDeposit.setOnClickListener(v -> {
+            String name = etName.getText().toString().trim();
             String phone = etPhone.getText().toString().trim();
-            if (!validateInput(phone)) return;
+            String note = etNote.getText().toString().trim();
+
+            if (token == null || token.isEmpty()) {
+                if (name.isEmpty() || phone.isEmpty()) {
+                    Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+            if (name.isEmpty() || phone.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!name.matches("^[\\p{L}\\s]+$") || name.length() < 2) {
+                Toast.makeText(this, "Tên chỉ chứa chữ cái và khoảng trắng, ít nhất 2 ký tự", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!phone.matches("0\\d{9}")) {
+                Toast.makeText(this, "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0", Toast.LENGTH_SHORT).show();
+                return;
+            }
             if (userId == null || userId.isEmpty()) {
                 sessionManager.addGuestPhone(phone);
                 registerNotification();
             }
             processOrder(true);
+        });
+
+        btnBack.setOnClickListener(v -> finish());
+    }
+
+    private void handleServiceOrder(Intent intent) {
+        courtName = intent.getStringExtra("courtName");
+        courtAddress = intent.getStringExtra("address");
+        double paymentAmount = intent.getDoubleExtra("paymentAmount", 0);
+        String serviceDetailsJson = intent.getStringExtra("serviceDetailsJson");
+        orderId = intent.getStringExtra("orderId");
+        String qrCodeData = intent.getStringExtra("qrCodeData");
+        long paymentTimeout = intent.getLongExtra("paymentTimeout", 0);
+
+        List<ServiceDetail> serviceDetails = new ArrayList<>();
+        if (serviceDetailsJson != null && !serviceDetailsJson.isEmpty()) {
+            try {
+                Log.d("ConfirmActivity", "serviceDetailsJson: " + serviceDetailsJson);
+                Gson gson = new Gson();
+                serviceDetails = gson.fromJson(serviceDetailsJson, new TypeToken<List<ServiceDetail>>(){}.getType());
+                if (serviceDetails == null) {
+                    serviceDetails = new ArrayList<>();
+                    Toast.makeText(this, "Danh sách dịch vụ trống", Toast.LENGTH_SHORT).show();
+                }
+            } catch (Exception e) {
+                Log.e("ConfirmActivity", "Lỗi parse serviceDetailsJson: " + e.getMessage());
+                Toast.makeText(this, "Lỗi dữ liệu dịch vụ: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                finish();
+                return;
+            }
+        } else {
+            Log.e("ConfirmActivity", "serviceDetailsJson is null or empty");
+            Toast.makeText(this, "Không có dữ liệu dịch vụ", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        tvStadiumName.setText("Tên sân: " + courtName);
+        tvAddress.setText("Địa chỉ: " + courtAddress);
+        tvDate.setText("Thông tin đơn dịch vụ:");
+
+        layoutConfirmOrders.removeAllViews();
+        for (ServiceDetail detail : serviceDetails) {
+            TextView tvService = new TextView(this);
+            tvService.setText(detail.getCourtServiceName() + " x" + detail.getQuantity() + " : " + formatMoney((int) (detail.getPrice() * detail.getQuantity())));
+            tvService.setTextColor(getResources().getColor(android.R.color.white));
+            tvService.setTextSize(14);
+            layoutConfirmOrders.addView(tvService);
+        }
+
+        tvTotalPriceLine.setText(Html.fromHtml("Tổng tiền: <b>" + formatMoney((int) paymentAmount) + "</b>"));
+
+        btnDeposit.setVisibility(View.GONE);
+        btnPayment.setText("Thanh toán");
+
+        ApiService apiService = RetrofitClient.getApiService(this);
+        String token = sessionManager.getToken();
+        if (token != null && !token.isEmpty()) {
+            String authHeader = "Bearer " + token;
+            NetworkUtils.callApi(apiService.getMyInfo(authHeader), this, new NetworkUtils.ApiCallback<MyInfoResponse>() {
+                @Override
+                public void onSuccess(MyInfoResponse r) {
+                    if (r != null && r.getResult() != null) {
+                        String fullName = r.getResult().getFirstName() + " " + r.getResult().getLastName();
+                        etName.setText(fullName);
+                        etPhone.setText(r.getResult().getPhoneNumber());
+                        userId = r.getResult().getId();
+                        sessionManager.saveUserId(userId);
+                        registerNotification();
+                    }
+                }
+                @Override
+                public void onError(String e) {
+                    Toast.makeText(ConfirmActivity.this, "Lấy thông tin thất bại!", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Toast.makeText(this, "Bạn đang đặt dịch vụ với vai trò là Guest!", Toast.LENGTH_SHORT).show();
+            etName.setText("");
+            etPhone.setText("");
+            etNote.setText(courtName);
+            etNote.setEnabled(false);
+            List<String> guestPhones = sessionManager.getGuestPhones();
+            if (!guestPhones.isEmpty()) {
+                etPhone.setText(guestPhones.get(0));
+            }
+        }
+
+        btnPayment.setOnClickListener(v -> {
+            String name = etName.getText().toString().trim();
+            String phone = etPhone.getText().toString().trim();
+            String note = etNote.getText().toString().trim();
+
+            if (token == null || token.isEmpty()) {
+                if (name.isEmpty() || phone.isEmpty()) {
+                    Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+            if (name.isEmpty() || phone.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!name.matches("^[\\p{L}\\s]+$") || name.length() < 2) {
+                Toast.makeText(this, "Tên chỉ chứa chữ cái và khoảng trắng, ít nhất 2 ký tự", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!phone.matches("0\\d{9}")) {
+                Toast.makeText(this, "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (userId == null || userId.isEmpty()) {
+                sessionManager.addGuestPhone(phone);
+                registerNotification();
+            }
+
+            OrderServiceHolder.getInstance().addOrderDetail(orderId, serviceDetailsJson);
+
+            Intent i = new Intent(ConfirmActivity.this, QRCodeActivity.class);
+            i.putExtra("orderType", "Đơn dịch vụ");
+            i.putExtra("orderId", orderId);
+            i.putExtra("qrCodeData", qrCodeData);
+            i.putExtra("paymentTimeout", paymentTimeout);
+            i.putExtra("overallTotalPrice", (int) paymentAmount);
+            i.putExtra("paymentAmount", (int) paymentAmount);
+            i.putExtra("serviceDetailsJson", serviceDetailsJson);
+            i.putExtra("isDeposit", false);
+            i.putExtra("customerName", name);  // Thêm thông tin khách hàng
+            i.putExtra("phoneNumber", phone);  // Thêm số điện thoại
+            i.putExtra("note", note);          // Thêm ghi chú
+            startActivity(i);
+            finish();
         });
 
         btnBack.setOnClickListener(v -> finish());
@@ -447,23 +597,67 @@ public class ConfirmActivity extends AppCompatActivity {
         tvTotalTimeLine.setText("Tổng thời gian chơi: " + totalTime);
     }
 
-    private void processOrder(boolean isDeposit) {
+    private void createFixedOrder(boolean isDeposit, int totalPriceFixedOrder) {
         String name = etName.getText().toString().trim();
         String phone = etPhone.getText().toString().trim();
         String note = etNote.getText().toString().trim();
 
-        if (name.isEmpty() || phone.isEmpty()) {
-            Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (!name.matches("^[\\p{L}\\s]+$") || name.length() < 2) {
-            Toast.makeText(this, "Tên chỉ chứa chữ cái và khoảng trắng, ít nhất 2 ký tự", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (!phone.matches("0\\d{9}")) {
-            Toast.makeText(this, "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        CreateOrderRegularRequest req = new CreateOrderRegularRequest();
+        req.setCourtId(courtId);
+        req.setCourtName(courtName);
+        req.setAddress(courtAddress);
+        req.setUserId(userId);
+        req.setCustomerName(name);
+        req.setPhoneNumber(phone);
+        req.setNote(note);
+        req.setPaymentStatus("Chưa thanh toán");
+        req.setOrderType("Đơn cố định");
+        req.setStartDate(startDate);
+        req.setEndDate(endDate);
+        req.setStartTime(startTime);
+        req.setEndTime(endTime);
+        req.setSelectedDays(selectedDays);
+        req.setSelectedCourtSlots(selectedCourtSlots != null ? selectedCourtSlots : new ArrayList<>());
+        req.setFlexibleCourtSlotFixes(flexibleCourtSlotFixes);
+
+        int numberOfCourts = selectedCourtSlots != null ? selectedCourtSlots.size() : 0;
+        int finalTotalPrice = totalPriceFixedOrder * numberOfCourts;
+
+        ApiService api = RetrofitClient.getApiService(this);
+        Call<CreateOrderResponse> call = api.createFixedOrder(req);
+        call.enqueue(new Callback<CreateOrderResponse>() {
+            @Override
+            public void onResponse(Call<CreateOrderResponse> call, Response<CreateOrderResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    CreateOrderResponse r = response.body();
+                    Intent i = new Intent(ConfirmActivity.this, QRCodeActivity.class);
+                    i.putExtra("orderType", "Đơn cố định");
+                    i.putExtra("orderId", r.getId());
+                    i.putExtra("totalPriceFixedOrder", finalTotalPrice);
+                    i.putExtra("qrCodeData", r.getQrcode());
+                    i.putExtra("overallTotalPrice", finalTotalPrice);
+                    i.putExtra("depositAmount", r.getDepositAmount());
+                    i.putExtra("isDeposit", isDeposit);
+                    i.putExtra("totalTime", totalTime);
+                    i.putExtra("courtId", courtId);
+                    startActivity(i);
+                    finish();
+                } else {
+                    Toast.makeText(ConfirmActivity.this, "Tạo đơn thất bại!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CreateOrderResponse> call, Throwable t) {
+                Toast.makeText(ConfirmActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void processOrder(boolean isDeposit) {
+        String name = etName.getText().toString().trim();
+        String phone = etPhone.getText().toString().trim();
+        String note = etNote.getText().toString().trim();
 
         btnPayment.setEnabled(false);
         btnDeposit.setEnabled(false);
@@ -530,13 +724,11 @@ public class ConfirmActivity extends AppCompatActivity {
         ApiService api = RetrofitClient.getApiService(this);
 
         if (orderId != null && !orderId.isEmpty()) {
-            Log.d("ConfirmActivity", "Kiểm tra đơn hàng cũ với orderId: " + orderId);
             Call<Orders> orderCall = api.getOrderById(orderId);
             NetworkUtils.callApi(orderCall, this, new NetworkUtils.ApiCallback<Orders>() {
                 @Override
                 public void onSuccess(Orders order) {
                     if (order == null) {
-                        Log.e("ConfirmActivity", "Đơn hàng không tồn tại với orderId: " + orderId);
                         Toast.makeText(ConfirmActivity.this, "Đơn hàng không tồn tại", Toast.LENGTH_SHORT).show();
                         btnPayment.setEnabled(true);
                         btnDeposit.setEnabled(true);
@@ -585,7 +777,6 @@ public class ConfirmActivity extends AppCompatActivity {
                             String.valueOf(finalDepositAmount),
                             phone));
 
-                    Log.d("ConfirmActivity", "Gửi yêu cầu thay đổi đơn: " + new Gson().toJson(req));
                     Call<CreateOrderResponse> call = api.changeOrder(orderId, req);
                     NetworkUtils.callApi(call, ConfirmActivity.this, new NetworkUtils.ApiCallback<CreateOrderResponse>() {
                         @Override
@@ -624,7 +815,6 @@ public class ConfirmActivity extends AppCompatActivity {
 
                         @Override
                         public void onError(String e) {
-                            Log.e("ConfirmActivity", "Thay đổi lịch thất bại: " + e);
                             Toast.makeText(ConfirmActivity.this, "Thay đổi lịch thất bại: " + e, Toast.LENGTH_SHORT).show();
                             btnPayment.setEnabled(true);
                             btnDeposit.setEnabled(true);
@@ -634,7 +824,6 @@ public class ConfirmActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(String e) {
-                    Log.e("ConfirmActivity", "Không thể lấy thông tin đơn cũ: " + e);
                     Toast.makeText(ConfirmActivity.this, "Không thể lấy thông tin đơn cũ: " + e, Toast.LENGTH_SHORT).show();
                     btnPayment.setEnabled(true);
                     btnDeposit.setEnabled(true);
@@ -654,7 +843,6 @@ public class ConfirmActivity extends AppCompatActivity {
                     String.valueOf(finalDepositAmount),
                     phone));
 
-            Log.d("ConfirmActivity", "Gửi yêu cầu tạo đơn mới: " + new Gson().toJson(req));
             Call<CreateOrderResponse> call = api.createOrder(req);
             NetworkUtils.callApi(call, ConfirmActivity.this, new NetworkUtils.ApiCallback<CreateOrderResponse>() {
                 @Override
@@ -693,7 +881,6 @@ public class ConfirmActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(String e) {
-                    Log.e("ConfirmActivity", "Tạo đơn thất bại: " + e);
                     Toast.makeText(ConfirmActivity.this, "Tạo đơn thất bại: " + e, Toast.LENGTH_SHORT).show();
                     btnPayment.setEnabled(true);
                     btnDeposit.setEnabled(true);
@@ -703,8 +890,23 @@ public class ConfirmActivity extends AppCompatActivity {
     }
 
     private int toMinutes(String time) {
+        if (time == null || !time.contains(":")) {
+            Log.e("ConfirmActivity", "Thời gian không hợp lệ: " + time);
+            return 0;
+        }
         String[] parts = time.split(":");
-        return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]);
+        if (parts.length < 2) {
+            Log.e("ConfirmActivity", "Thời gian không đúng định dạng: " + time);
+            return 0;
+        }
+        try {
+            int hours = Integer.parseInt(parts[0]);
+            int minutes = Integer.parseInt(parts[1]);
+            return hours * 60 + minutes;
+        } catch (NumberFormatException e) {
+            Log.e("ConfirmActivity", "Lỗi chuyển đổi số: " + e.getMessage());
+            return 0;
+        }
     }
 
     private String formatMoney(int amount) {
@@ -727,29 +929,17 @@ public class ConfirmActivity extends AppCompatActivity {
         }
     }
 
-    private boolean validateInput(String phone) {
-        if (phone.isEmpty() || !phone.matches("0\\d{9}")) {
-            Toast.makeText(this, "Vui lòng nhập số điện thoại hợp lệ", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        return true;
-    }
-
     private void registerNotification() {
         if (userId != null && !userId.isEmpty()) {
             FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     String fcmToken = task.getResult();
                     sendDeviceTokenToServer(userId, fcmToken);
-                    Log.d("FCM_TOKEN", fcmToken);
                 }
             });
         } else {
             List<String> guestPhones = sessionManager.getGuestPhones();
-            if (guestPhones.isEmpty()) {
-                Log.e("FCM", "Không có số điện thoại guest để đăng ký FCM token");
-                return;
-            }
+            if (guestPhones.isEmpty()) return;
             FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     String fcmToken = task.getResult();
@@ -769,8 +959,6 @@ public class ConfirmActivity extends AppCompatActivity {
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (!response.isSuccessful()) {
                     Log.e("Notify", "Đăng ký token thất bại cho key " + key + ": " + response.code());
-                } else {
-                    Log.d("Notify", "Đăng ký token thành công cho key: " + key);
                 }
             }
             @Override
@@ -778,5 +966,59 @@ public class ConfirmActivity extends AppCompatActivity {
                 Log.e("Notify", "Lỗi khi đăng ký FCM token cho key " + key, t);
             }
         });
+    }
+
+    private int calculateTotalTimeForFixedOrder() {
+        int minutesPerDay = toMinutes(endTime) - toMinutes(startTime);
+        if (minutesPerDay <= 0) {
+            Log.e("ConfirmActivity", "Thời gian không hợp lệ: endTime phải sau startTime");
+            return 0;
+        }
+
+        int numberOfDays = calculateNumberOfDays(startDate, endDate, selectedDays);
+        if (numberOfDays <= 0) {
+            Log.e("ConfirmActivity", "Không có ngày nào được chọn trong khoảng thời gian");
+            return 0;
+        }
+
+        int numberOfCourts = selectedCourtSlots != null ? selectedCourtSlots.size() : 0;
+        if (numberOfCourts == 0) {
+            Log.e("ConfirmActivity", "Không có sân nào được chọn");
+            return 0;
+        }
+
+        return minutesPerDay * numberOfDays * numberOfCourts;
+    }
+
+    private int calculateNumberOfDays(String startDate, String endDate, String selectedDays) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        try {
+            Date start = sdf.parse(startDate);
+            Date end = sdf.parse(endDate);
+
+            if (start == null || end == null || start.after(end)) {
+                Log.e("ConfirmActivity", "Ngày không hợp lệ");
+                return 0;
+            }
+
+            String[] daysArray = selectedDays.split(",");
+            List<String> selectedDaysList = Arrays.asList(daysArray);
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(start);
+            int count = 0;
+
+            while (!calendar.getTime().after(end)) {
+                String dayName = new SimpleDateFormat("EEEE", Locale.ENGLISH).format(calendar.getTime());
+                if (selectedDaysList.contains(dayName.toUpperCase())) {
+                    count++;
+                }
+                calendar.add(Calendar.DATE, 1);
+            }
+            return count;
+        } catch (Exception e) {
+            Log.e("ConfirmActivity", "Lỗi tính số ngày: " + e.getMessage());
+            return 0;
+        }
     }
 }

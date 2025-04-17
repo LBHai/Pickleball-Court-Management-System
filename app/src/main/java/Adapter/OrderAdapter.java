@@ -24,10 +24,21 @@ import SEP490.G9.R;
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> {
     private List<Orders> orderList;
     private Context context;
+    private OnItemClickListener onItemClickListener; // Thêm interface để xử lý click
+
+    // Interface để xử lý sự kiện click
+    public interface OnItemClickListener {
+        void onItemClick(Orders order);
+    }
 
     public OrderAdapter(List<Orders> orderList, Context context) {
         this.orderList = orderList;
         this.context = context;
+    }
+
+    // Setter cho listener
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.onItemClickListener = listener;
     }
 
     @Override
@@ -96,19 +107,24 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         // Xử lý sự kiện click
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, DetailBookingActivity.class);
-            intent.putExtra("orderId", order.getId());
-            if (order.getOrderDetails() != null && !order.getOrderDetails().isEmpty()) {
-                OrderDetail firstDetail = order.getOrderDetails().get(0);
-                if (firstDetail.getBookingDates() != null && !firstDetail.getBookingDates().isEmpty()) {
-                    intent.putExtra("selectedDate", firstDetail.getBookingDates().get(0));
+            if (onItemClickListener != null) {
+                onItemClickListener.onItemClick(order);
+            } else {
+                // Giữ logic click cũ nếu không có listener
+                Intent intent = new Intent(context, DetailBookingActivity.class);
+                intent.putExtra("orderId", order.getId());
+                if (order.getOrderDetails() != null && !order.getOrderDetails().isEmpty()) {
+                    OrderDetail firstDetail = order.getOrderDetails().get(0);
+                    if (firstDetail.getBookingDates() != null && !firstDetail.getBookingDates().isEmpty()) {
+                        intent.putExtra("selectedDate", firstDetail.getBookingDates().get(0));
+                    }
                 }
+                intent.putExtra("totalPrice", order.getTotalAmount());
+                intent.putExtra("totalTime", order.getTotalTime());
+                intent.putExtra("orderStatus", order.getOrderStatus());
+                intent.putExtra("courtId", order.getCourtId());
+                context.startActivity(intent);
             }
-            intent.putExtra("totalPrice", order.getTotalAmount());
-            intent.putExtra("totalTime", order.getTotalTime());
-            intent.putExtra("orderStatus", order.getOrderStatus());
-            intent.putExtra("courtId", order.getCourtId());
-            context.startActivity(intent);
         });
     }
 

@@ -20,6 +20,8 @@ import Model.NotificationResponse;
 import Model.CreateOrderRegularRequest;
 import Model.Orders;
 import Model.Service;
+import Model.ServiceOrderRequest;
+import Model.UnreadResponse;
 import Model.UploadAvatar;
 import Model.User;
 import Model.UpdateMyInfor;
@@ -36,6 +38,7 @@ import retrofit2.http.PUT;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import retrofit2.http.Url;
 
 public interface ApiService {
 
@@ -73,8 +76,7 @@ public interface ApiService {
     Call<Void> registerNotification(@Body NotificationRequest request);
 
     // GET danh sách thông báo
-    @GET("identity/public/notification/getNotifications")
-    Call<NotificationResponse> getNotifications(@Query("value") String key);
+
     
     @GET("court/public/court_price/getByCourtId/{courtId}")
     Call<CourtPrice> getCourtPriceByCourtId(@Path("courtId") String courtId);
@@ -125,5 +127,18 @@ public interface ApiService {
     Call<NotificationResponse> getNotificationsByPhone(@Query("phone") String phoneNumber);
     @GET("court/public/getServices")
     Call<List<Service>> getServices(@Query("courtId") String courtId);
+    // Lấy danh sách thông báo
+    @GET("identity/public/notification/getNotifications")
+    Call<NotificationResponse> getNotifications(@Query("value") String value);
+
+    // Lấy số lượng thông báo chưa đọc
+    @GET("identity/public/notification/courtUnRead")
+    Call<UnreadResponse> getUnreadCount(@Query("value") String value);
+
+    // Đánh dấu thông báo đã đọc
+    @PUT("identity/public/notification/read")
+    Call<Void> markAsRead(@Query("id") String notificationId);
+    @POST("identity/public/order/service")
+    Call<CreateOrderResponse> createServiceOrder(@Body ServiceOrderRequest request);
 
 }

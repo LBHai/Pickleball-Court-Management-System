@@ -29,6 +29,7 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
+import com.nex3z.notificationbadge.NotificationBadge;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -41,9 +42,13 @@ import java.util.Locale;
 
 import Api.ApiService;
 import Api.RetrofitClient;
+import Holder.OrderServiceHolder;
 import Model.MyInfo;
 import Model.MyInfoResponse;
+import Model.NotificationItem;
+import Model.NotificationResponse;
 import Model.Orders;
+import Model.UnreadResponse;
 import SEP490.G9.ChangePassword;
 import SEP490.G9.DetailBookingActivity;
 import SEP490.G9.EditInformationActivity;
@@ -70,6 +75,9 @@ public class AccountFragment extends Fragment {
     private List<Orders> filteredOrderList;
     private boolean student;
     private ImageView ivAvatar;
+    private NotificationBadge badge;
+    private List<NotificationItem> notificationList;
+    private int unreadCount = 0;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -94,6 +102,9 @@ public class AccountFragment extends Fragment {
         filteredOrderList = new ArrayList<>();
         orderAdapter = new OrderAdapter(filteredOrderList, getContext());
         recyclerOrder.setAdapter(orderAdapter);
+        badge = view.findViewById(R.id.badge);
+        getNotifications();
+
 
         if (sessionManager.getToken() == null || sessionManager.getToken().isEmpty()) {
             btnOptions.setVisibility(View.GONE);
@@ -123,7 +134,25 @@ public class AccountFragment extends Fragment {
             }
             getAllOrderListForGuest();
         }
+        // Thiết lập listener cho adapter để truyền dữ liệu khi click vào đơn hàng
+        orderAdapter.setOnItemClickListener(order -> {
+            Intent intent = new Intent(getActivity(), DetailBookingActivity.class);
+            intent.putExtra("orderId", order.getId());
+            intent.putExtra("totalTime", order.getTotalTime());
+            intent.putExtra("selectedDate", order.getCreatedAt().substring(0, 10)); // Giả sử lấy ngày từ createdAt
+            intent.putExtra("totalPrice", order.getTotalAmount());
+            intent.putExtra("courtId", order.getCourtId());
+            intent.putExtra("orderType", order.getOrderType());
+            // Truyền serviceDetailsJson từ OrderServiceHolder nếu có
+            String serviceDetailsJson = OrderServiceHolder.getInstance().getServiceDetailsJson(order.getId());
+            if (serviceDetailsJson != null) {
+                intent.putExtra("serviceDetailsJson", serviceDetailsJson);
+            }
+            startActivity(intent);
+        });
+
         return view;
+
     }
     private void showDatePickerDialog() {
         // Create a MaterialDatePicker for selecting a date range
@@ -203,7 +232,8 @@ public class AccountFragment extends Fragment {
     }
 
     private void showStatusFilterDialog() {
-        String[] statuses = {"Đang xử lý", "Đã hoàn thành", "Hủy đặt lịch", "Đặt lịch thành công", "Thay đổi lịch đặt thành công", "Hủy đặt lịch do quá giờ thanh toán"};
+        String[] statuses = {"Đang xử lý", "Đã hoàn thành", "Hủy đặt lịch", "Đặt lịch thành công", "Thay đổi lịch đặt thành công", "Hủy đặt lịch do quá giờ thanh toán","Đặt dịch vụ tại sân"
+        };
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Chọn trạng thái");
         builder.setSingleChoiceItems(statuses, -1, (dialog, which) -> {
@@ -471,7 +501,6 @@ public class AccountFragment extends Fragment {
         String userId = sessionManager.getUserId();
         Log.d("AccountFragment", "User logged out with ID: " + userId);
         sessionManager.clearSession();
-
         Intent intent = new Intent(getActivity(), LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
@@ -521,5 +550,46 @@ public class AccountFragment extends Fragment {
         Intent refresh = getActivity().getIntent();
         getActivity().finish();
         startActivity(refresh);
+    }
+
+
+
+    private void getNotifications() {
+        ApiService apiService = RetrofitClient.getApiService(getContext());
+        // Giả sử bạn truyền "userId" hoặc "phone" theo yêu cầu của API
+        apiService.getNotifications("4562366f-3cfa-43ad-b25e-bef873c8a114")
+                .enqueue(new Callback<NotificationResponse>() {
+                    @Override
+                    public void onResponse(Call<NotificationResponse> call, Response<NotificationResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            NotificationResponse notiResponse = response.body();
+                            notificationList = notiResponse.getNotifications();
+
+                            // Nếu API trả về sẵn số lượng chưa đọc:
+                            int unreadCount = notiResponse.getUnreadCount();
+                            badge.setNumber(unreadCount);
+
+                            // Hoặc nếu không có trường unreadCount, bạn có thể tính toán:
+                            // updateBadge();
+                        }
+                    }
+                    @Override
+                    public void onFailure(Call<NotificationResponse> call, Throwable t) {
+                        // Xử lý lỗi
+                    }
+                });
+    }
+
+    // Nếu không có trường unreadCount từ API, tính toán dựa trên danh sách thông báo:
+    private void updateBadge() {
+        int unreadCount = 0;
+        if (notificationList != null) {
+            for (NotificationItem item : notificationList) {
+                if (!"read".equalsIgnoreCase(item.getStatus())) {
+                    unreadCount++;
+                }
+            }
+        }
+        badge.setNumber(unreadCount);
     }
 }

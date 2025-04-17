@@ -1,5 +1,6 @@
 package SEP490.G9;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,15 +16,22 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import Adapter.ServiceAdapter;
-import SEP490.G9.R;
+import Api.ApiService;
+import Api.RetrofitClient;
+import Model.Courts;
+import Model.CreateOrderResponse;
+import Model.Service;
+import Model.ServiceDetail;
+import Model.ServiceOrderRequest;
+import Session.SessionManager;
+import com.google.android.material.button.MaterialButton;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
-import Model.Service;
-import Api.ApiService;
-import Api.RetrofitClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -36,101 +44,88 @@ public class ServiceActivity extends Fragment {
     private TextView tvEmptyServices;
     private TextView tvTotalItems;
     private TextView tvTotalPrice;
+    private MaterialButton btnOrderServices;
     private String courtId;
+    private SessionManager sessionManager;
+    private List<ServiceDetail> orderedServiceDetails;
 
     public ServiceActivity() {
         // Required empty public constructor
     }
 
-    // Thêm courtId vào newInstance
     public static ServiceActivity newInstance(String courtId) {
         ServiceActivity fragment = new ServiceActivity();
         Bundle args = new Bundle();
         args.putString("courtId", courtId);
-
         fragment.setArguments(args);
         return fragment;
     }
 
-    // Để tương thích với code cũ không có tham số
-    public static ServiceActivity newInstance() {
-        return newInstance("1"); // Giá trị mặc định nếu không có courtId
-    }
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate layout activity_service.xml
         View view = inflater.inflate(R.layout.activity_service, container, false);
 
-        // Lấy courtId từ arguments
         if (getArguments() != null) {
             courtId = getArguments().getString("courtId", "1");
-            Log.d("courtId",courtId);
+            Log.d("courtId", courtId);
         } else {
-            courtId = "1"; // Giá trị mặc định
+            courtId = "1";
         }
 
-        // Khởi tạo views
+        sessionManager = new SessionManager(getContext());
+        orderedServiceDetails = new ArrayList<>();
+
         recyclerViewServices = view.findViewById(R.id.recyclerViewServices);
         progressBar = view.findViewById(R.id.progressBar);
         tvEmptyServices = view.findViewById(R.id.tvEmptyServices);
-        tvTotalItems = view.findViewById(R.id.tvItemCount);  // Đảm bảo ID này tồn tại trong layout
-        tvTotalPrice = view.findViewById(R.id.tvTotalPrice); // Đảm bảo ID này tồn tại trong layout
+        tvTotalItems = view.findViewById(R.id.tvItemCount);
+        tvTotalPrice = view.findViewById(R.id.tvTotalPrice);
+        btnOrderServices = view.findViewById(R.id.btnOrderServices);
 
-        // Cài đặt RecyclerView
         recyclerViewServices.setLayoutManager(new LinearLayoutManager(getContext()));
         setupRecyclerView();
 
-        // Load dữ liệu
         loadServices();
+
+        btnOrderServices.setOnClickListener(v -> handleOrderServices());
 
         return view;
     }
 
     private void setupRecyclerView() {
-        // Khởi tạo ServiceAdapter với đủ 3 tham số
         serviceAdapter = new ServiceAdapter(
-                getContext(),  // Context
-                serviceList,   // Danh sách dịch vụ
-                new ServiceAdapter.OnServiceActionListener() {  // Listener để cập nhật khi người dùng thay đổi số lượng
+                getContext(),
+                serviceList,
+                new ServiceAdapter.OnServiceActionListener() {
                     @Override
                     public void onQuantityChanged(Service service, int newQuantity) {
-                        // Cập nhật tổng số lượng và tổng tiền
                         updateTotals();
                     }
                 }
         );
-
         recyclerViewServices.setAdapter(serviceAdapter);
     }
 
     private void loadServices() {
         showLoading(true);
-
         ApiService apiService = RetrofitClient.getApiService(getContext());
         apiService.getServices(courtId).enqueue(new Callback<List<Service>>() {
             @Override
             public void onResponse(Call<List<Service>> call, Response<List<Service>> response) {
                 showLoading(false);
-
                 if (response.isSuccessful() && response.body() != null) {
                     serviceList.clear();
                     serviceList.addAll(response.body());
                     serviceAdapter.notifyDataSetChanged();
-
-                    // Kiểm tra nếu danh sách trống
                     if (serviceList.isEmpty()) {
                         showEmptyView(true);
                     } else {
                         showEmptyView(false);
                     }
                 } else {
-                    // Xử lý khi không có dữ liệu hoặc lỗi API
                     showEmptyView(true);
                     Toast.makeText(getContext(), "Không thể tải dữ liệu dịch vụ", Toast.LENGTH_SHORT).show();
                 }
-                Log.d("ServiceActivity", "Số lượng dịch vụ nhận về: " + response.body().size());
-
             }
 
             @Override
@@ -143,41 +138,117 @@ public class ServiceActivity extends Fragment {
     }
 
     private void updateTotals() {
-        // Lấy tổng số lượng đã đặt từ adapter
         int totalItems = serviceAdapter.getTotalOrderQuantity();
-
-        // Lấy tổng giá tiền từ adapter
         double totalPrice = serviceAdapter.getTotalPrice();
-
-        // Cập nhật UI
-        if (tvTotalItems != null) {
-            tvTotalItems.setText(totalItems + " mục");
-        }
-
-        if (tvTotalPrice != null) {
-            tvTotalPrice.setText(String.format(Locale.getDefault(), "%,.0fđ", totalPrice));
-        }
+        tvTotalItems.setText(totalItems + " mục");
+        tvTotalPrice.setText(String.format(Locale.getDefault(), "%,.0fđ", totalPrice));
     }
 
+    private void handleOrderServices() {
+        Map<String, Integer> orderQuantities = serviceAdapter.getOrderQuantities();
+        orderedServiceDetails.clear();
 
+        for (Map.Entry<String, Integer> entry : orderQuantities.entrySet()) {
+            String serviceId = entry.getKey();
+            int selectedQuantity = entry.getValue();
+
+            if (selectedQuantity > 0) {
+                Service service = findServiceById(serviceId);
+                if (service != null) {
+                    ServiceDetail detail = new ServiceDetail();
+                    detail.setCourtServiceId(serviceId);
+                    detail.setCourtServiceName(service.getName());
+                    detail.setQuantity(selectedQuantity);
+                    detail.setPrice(service.getPrice());
+                    orderedServiceDetails.add(detail);
+                }
+            }
+        }
+
+        if (orderedServiceDetails.isEmpty()) {
+            Toast.makeText(getContext(), "Vui lòng chọn ít nhất một dịch vụ", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String userId = sessionManager.getUserId();
+        String totalPriceText = tvTotalPrice.getText().toString().replace("đ", "").replace(",", "").trim();
+        double paymentAmount = Double.parseDouble(totalPriceText);
+
+        ApiService apiService = RetrofitClient.getApiService(getContext());
+        Call<Courts> courtCall = apiService.getCourtById(courtId);
+        courtCall.enqueue(new Callback<Courts>() {
+            @Override
+            public void onResponse(Call<Courts> call, Response<Courts> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Courts court = response.body();
+                    String courtName = court.getName();
+                    String address = court.getAddress();
+
+                    ServiceOrderRequest request = new ServiceOrderRequest();
+                    request.setCourtId(courtId);
+                    request.setCourtName(courtName);
+                    request.setAddress(address);
+                    request.setUserId(userId);
+                    request.setPaymentAmount(paymentAmount);
+                    request.setServiceDetails(orderedServiceDetails);
+
+                    Call<CreateOrderResponse> orderCall = apiService.createServiceOrder(request);
+                    orderCall.enqueue(new Callback<CreateOrderResponse>() {
+                        @Override
+                        public void onResponse(Call<CreateOrderResponse> call, Response<CreateOrderResponse> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                CreateOrderResponse orderResponse = response.body();
+
+                                Intent intent = new Intent(getActivity(), ConfirmActivity.class);
+                                intent.putExtra("orderType", "Đơn dịch vụ");
+                                intent.putExtra("orderId", orderResponse.getId());
+                                intent.putExtra("qrCodeData", orderResponse.getQrcode());
+                                intent.putExtra("paymentTimeout", orderResponse.getPaymentTimeout());
+                                intent.putExtra("paymentAmount", paymentAmount);
+                                intent.putExtra("courtName", courtName);
+                                intent.putExtra("address", address);
+                                String serviceDetailsJson = new Gson().toJson(orderedServiceDetails);
+                                Log.d("ServiceActivity", "serviceDetailsJson: " + serviceDetailsJson);
+                                intent.putExtra("serviceDetailsJson", serviceDetailsJson);
+                                startActivity(intent);
+                            } else {
+                                Toast.makeText(getContext(), "Tạo đơn dịch vụ thất bại", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<CreateOrderResponse> call, Throwable t) {
+                            Toast.makeText(getContext(), "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    Toast.makeText(getContext(), "Không thể lấy thông tin sân", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Courts> call, Throwable t) {
+                Toast.makeText(getContext(), "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private Service findServiceById(String id) {
+        for (Service service : serviceList) {
+            if (service.getId().equals(id)) {
+                return service;
+            }
+        }
+        return null;
+    }
 
     private void showLoading(boolean isLoading) {
-        if (progressBar != null) {
-            progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-        }
-
-        if (recyclerViewServices != null) {
-            recyclerViewServices.setVisibility(isLoading ? View.GONE : View.VISIBLE);
-        }
+        progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        recyclerViewServices.setVisibility(isLoading ? View.GONE : View.VISIBLE);
     }
 
     private void showEmptyView(boolean isEmpty) {
-        if (tvEmptyServices != null) {
-            tvEmptyServices.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
-        }
-
-        if (recyclerViewServices != null) {
-            recyclerViewServices.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
-        }
+        tvEmptyServices.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        recyclerViewServices.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
     }
 }

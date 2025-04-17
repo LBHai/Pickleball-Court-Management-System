@@ -41,7 +41,7 @@
                 android:layout_gravity="end|top"
                 android:layout_margin="12dp"
                 android:contentDescription="Map"
-                app:fabSize="mini"
+                app:fabCustomSize="40dp"
                 app:srcCompat="@drawable/map"
                 app:tint="@android:color/white"
                 app:backgroundTint="#4CAF50" />

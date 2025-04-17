@@ -34,7 +34,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end|top"
                 android:layout_margin="12dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/btnFavorite"
@@ -49,26 +50,23 @@
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:layout_gravity="center"
-                        android:src="@mipmap/ic_heart"
+                        android:src="@drawable/ic_heart_outline"
                         android:contentDescription="Favorite" />
                 </androidx.cardview.widget.CardView>
 
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/btnShare"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    app:cardCornerRadius="20dp"
-                    app:cardBackgroundColor="@android:color/white">
-
-                    <ImageView
-                        android:id="@+id/btnMap"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/map"
-                        android:contentDescription="Map" />
-                </androidx.cardview.widget.CardView>
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/btnMap"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:contentDescription="Map"
+                    app:fabCustomSize="40dp"
+                    app:srcCompat="@drawable/map"
+                    app:tint="@android:color/white"
+                    app:backgroundTint="#4CAF50" />
             </LinearLayout>
+
+
         </FrameLayout>
 
         <!-- Court info section -->
