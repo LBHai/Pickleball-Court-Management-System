@@ -175,37 +175,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Label và EditText: User Rank -->
-        <TextView
-            android:id="@+id/tvUserRankLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/user_rank"
-            android:textColor="@android:color/white"
-            android:textSize="16sp"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/etLastName"
-            app:layout_constraintStart_toStartOf="parent" />
 
-        <EditText
-            android:id="@+id/etUserRank"
-            android:layout_width="0dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="4dp"
-            android:inputType="textPersonName"
-            android:enabled="false"
-            android:background="@drawable/bg_edittext_disabled"
-            android:paddingStart="16dp"
-            android:paddingEnd="40dp"
-            android:textColor="@android:color/black"
-            android:textColorHint="#888888"
-            android:hint="@string/enter_user_rank"
-            android:textSize="16sp"
-            app:layout_constraintTop_toBottomOf="@id/tvUserRankLabel"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-        <!-- Nút xóa (clear) cho User Rank -->
         <ImageView
             android:id="@+id/ivClearFullName"
             android:layout_width="24dp"
@@ -213,9 +183,9 @@
             android:layout_marginEnd="16dp"
             android:src="@drawable/bin"
             android:visibility="gone"
-            app:layout_constraintTop_toTopOf="@id/etUserRank"
-            app:layout_constraintBottom_toBottomOf="@id/etUserRank"
-            app:layout_constraintEnd_toEndOf="@id/etUserRank" />
+            app:layout_constraintTop_toTopOf="@id/etLastName"
+            app:layout_constraintBottom_toBottomOf="@id/etLastName"
+            app:layout_constraintEnd_toEndOf="@id/etLastName" />
 
         <!-- Label và Spinner: Gender -->
         <TextView
@@ -226,7 +196,7 @@
             android:textColor="@android:color/white"
             android:textSize="16sp"
             android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/etUserRank"
+            app:layout_constraintTop_toBottomOf="@id/etLastName"
             app:layout_constraintStart_toStartOf="parent" />
 
         <Spinner

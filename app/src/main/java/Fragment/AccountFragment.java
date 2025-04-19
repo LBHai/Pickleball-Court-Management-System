@@ -1,20 +1,20 @@
 package Fragment;
 
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,12 +22,11 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.google.android.material.datepicker.CalendarConstraints;
-import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.nex3z.notificationbadge.NotificationBadge;
 
@@ -35,7 +34,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -48,7 +46,6 @@ import Model.MyInfoResponse;
 import Model.NotificationItem;
 import Model.NotificationResponse;
 import Model.Orders;
-import Model.UnreadResponse;
 import SEP490.G9.ChangePassword;
 import SEP490.G9.DetailBookingActivity;
 import SEP490.G9.EditInformationActivity;
@@ -78,23 +75,28 @@ public class AccountFragment extends Fragment {
     private NotificationBadge badge;
     private List<NotificationItem> notificationList;
     private int unreadCount = 0;
+    private LinearLayout authButtonsContainer;
+    private Button btnLogin, btnRegister;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         sessionManager = new SessionManager(getContext());
         View view = inflater.inflate(R.layout.fragment_account, container, false);
         setHasOptionsMenu(true);
-
         tvUserName = view.findViewById(R.id.userName);
         tvPhoneNumber = view.findViewById(R.id.phoneNumber);
         btnNoti = view.findViewById(R.id.notification);
         btnOptions = view.findViewById(R.id.options);
         btnFilter = view.findViewById(R.id.btn_filter);
         ivAvatar = view.findViewById(R.id.ivAvatar);
-
         tvTabBooked = view.findViewById(R.id.tvTabBooked);
         tvTabInfoMember = view.findViewById(R.id.tvTabInfoMember);
         tvMemberInfo = view.findViewById(R.id.tvMemberInfo);
+
+        authButtonsContainer = view.findViewById(R.id.authButtonsContainer);
+        btnLogin = view.findViewById(R.id.btnLogin);
+        btnRegister = view.findViewById(R.id.btnRegister);
 
         recyclerOrder = view.findViewById(R.id.listOrderHistory);
         recyclerOrder.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -134,22 +136,73 @@ public class AccountFragment extends Fragment {
             }
             getAllOrderListForGuest();
         }
-        // Thiết lập listener cho adapter để truyền dữ liệu khi click vào đơn hàng
         orderAdapter.setOnItemClickListener(order -> {
             Intent intent = new Intent(getActivity(), DetailBookingActivity.class);
             intent.putExtra("orderId", order.getId());
             intent.putExtra("totalTime", order.getTotalTime());
-            intent.putExtra("selectedDate", order.getCreatedAt().substring(0, 10)); // Giả sử lấy ngày từ createdAt
+            intent.putExtra("selectedDate", order.getCreatedAt().substring(0, 10));
             intent.putExtra("totalPrice", order.getTotalAmount());
             intent.putExtra("courtId", order.getCourtId());
             intent.putExtra("orderType", order.getOrderType());
-            // Truyền serviceDetailsJson từ OrderServiceHolder nếu có
+            intent.putExtra("customerName", order.getCustomerName());  // Truyền từ Orders
+            intent.putExtra("phoneNumber", order.getPhoneNumber());    // Truyền từ Orders
+            intent.putExtra("note", order.getNote());                  // Truyền từ Orders
             String serviceDetailsJson = OrderServiceHolder.getInstance().getServiceDetailsJson(order.getId());
             if (serviceDetailsJson != null) {
                 intent.putExtra("serviceDetailsJson", serviceDetailsJson);
             }
+            Log.d("AccountFragment", "Truyền customerName: " + order.getCustomerName() + ", phoneNumber: " + order.getPhoneNumber());
+
             startActivity(intent);
         });
+
+        // Kiểm tra trạng thái đăng nhập và hiển thị UI phù hợp
+        if (sessionManager.getToken() == null || sessionManager.getToken().isEmpty()) {
+            // Người dùng chưa đăng nhập, hiển thị nút login và register
+            btnOptions.setVisibility(View.GONE);
+            authButtonsContainer.setVisibility(View.VISIBLE);
+
+            // Thiết lập sự kiện click cho nút Login
+            btnLogin.setOnClickListener(v -> {
+                Intent intent = new Intent(getActivity(), LoginActivity.class);
+                startActivity(intent);
+            });
+
+            // Thiết lập sự kiện click cho nút Register
+            btnRegister.setOnClickListener(v -> {
+                Intent intent = new Intent(getActivity(), SignUpActivity.class);
+                startActivity(intent);
+            });
+        } else {
+            // Người dùng đã đăng nhập, hiển thị nút options
+            btnOptions.setVisibility(View.VISIBLE);
+            authButtonsContainer.setVisibility(View.GONE);
+        }
+
+        btnNoti.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), NotificationActivity.class);
+            startActivity(intent);
+        });
+
+        btnOptions.setOnClickListener(this::showPopupMenu);
+
+        btnFilter.setOnClickListener(this::showFilterMenu);
+
+        showBookedTab();
+        tvTabBooked.setOnClickListener(v -> showBookedTab());
+        tvTabInfoMember.setOnClickListener(v -> showMemberInfoTab());
+
+        if (sessionManager.getToken() != null && !sessionManager.getToken().isEmpty()) {
+            getMyInfo();
+        } else {
+            if (!sessionManager.hasShownGuestDialog()) {
+                showGuestDialog();
+                sessionManager.setHasShownGuestDialog(true);
+            }
+            getAllOrderListForGuest();
+        }
+
+        // Rest of the code remains the same
 
         return view;
 
@@ -362,6 +415,7 @@ public class AccountFragment extends Fragment {
                             tvPhoneNumber.setText(info.getPhoneNumber());
 
                             String avatarUrl = info.getAvatarUrl();
+
                             Log.d("AccountFragment", "Avatar URL: " + avatarUrl);
 
                             if (requireContext() == null) {
@@ -552,12 +606,19 @@ public class AccountFragment extends Fragment {
         startActivity(refresh);
     }
 
-
-
     private void getNotifications() {
         ApiService apiService = RetrofitClient.getApiService(getContext());
-        // Giả sử bạn truyền "userId" hoặc "phone" theo yêu cầu của API
-        apiService.getNotifications("4562366f-3cfa-43ad-b25e-bef873c8a114")
+
+        // Lấy userId hoặc phoneNumber động từ session
+        String userId = sessionManager.getUserId(); // hoặc getPhoneNumber()
+
+        // Kiểm tra null đề phòng trường hợp chưa đăng nhập
+        if (userId == null || userId.isEmpty()) {
+            // Có thể xử lý trường hợp guest ở đây
+            return;
+        }
+
+        apiService.getNotifications(userId)
                 .enqueue(new Callback<NotificationResponse>() {
                     @Override
                     public void onResponse(Call<NotificationResponse> call, Response<NotificationResponse> response) {
@@ -565,12 +626,11 @@ public class AccountFragment extends Fragment {
                             NotificationResponse notiResponse = response.body();
                             notificationList = notiResponse.getNotifications();
 
-                            // Nếu API trả về sẵn số lượng chưa đọc:
                             int unreadCount = notiResponse.getUnreadCount();
                             badge.setNumber(unreadCount);
 
-                            // Hoặc nếu không có trường unreadCount, bạn có thể tính toán:
-                            // updateBadge();
+                            // Nếu không có trường unreadCount thì dùng:
+                            updateBadge();
                         }
                     }
                     @Override
@@ -579,6 +639,7 @@ public class AccountFragment extends Fragment {
                     }
                 });
     }
+
 
     // Nếu không có trường unreadCount từ API, tính toán dựa trên danh sách thông báo:
     private void updateBadge() {

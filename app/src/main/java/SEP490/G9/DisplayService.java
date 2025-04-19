@@ -1,4 +1,4 @@
-package Fragment;
+package SEP490.G9;
 
 import android.os.Bundle;
 import android.text.Editable;
@@ -7,8 +7,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -16,47 +16,51 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.button.MaterialButton;
-
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
+
 import Adapter.CourtsServiceAdapter;
 import Api.ApiService;
 import Api.RetrofitClient;
 import Model.Courts;
 import SEP490.G9.R;
-import SEP490.G9.ServiceActivity;
 
-public class CourtServiceFragment extends Fragment {
-
+public class DisplayService extends Fragment {
     private RecyclerView rcvClubs;
     private EditText edtSearch;
     private CourtsServiceAdapter courtsServiceAdapter;
-    // originalCourtsList giữ dữ liệu gốc
     private List<Courts> originalCourtsList = new ArrayList<>();
+    private TextView tvService;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_court_service, container, false);
+        View view = inflater.inflate(R.layout.fragment_display_service, container, false);
 
-        rcvClubs = view.findViewById(R.id.rcvClubs);
-        edtSearch = view.findViewById(R.id.edtSearch);
+
+
+        // Thiết lập RecyclerView
         rcvClubs.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        // Gọi API để lấy dữ liệu courts
         callApiGetCourts();
 
+        // Thiết lập chức năng tìm kiếm
         edtSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) { /* Không cần thao tác gì */ }
+
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 filterClubs(s.toString());
             }
+
             @Override
             public void afterTextChanged(Editable s) { /* Không cần thao tác gì */ }
         });
+
         return view;
     }
 
@@ -73,6 +77,7 @@ public class CourtServiceFragment extends Fragment {
                     Toast.makeText(getContext(), "Lỗi API: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
+
             @Override
             public void onFailure(retrofit2.Call<List<Courts>> call, Throwable t) {
                 Log.e("API_ERROR", "Lỗi gọi API: " + t.getMessage());
@@ -81,28 +86,24 @@ public class CourtServiceFragment extends Fragment {
         });
     }
 
-    // Trong CourtServiceFragment.java, phương thức setupRecyclerView():
     private void setupRecyclerView(List<Courts> list) {
-        // Khởi tạo adapter và cài đặt listener cho nút btnService
         courtsServiceAdapter = new CourtsServiceAdapter(getContext(), list, new CourtsServiceAdapter.OnCourtClickListener() {
             @Override
             public void onCourtClick(Courts court) {
-                // Khi bấm vào btnService, chuyển sang fragment ServiceActivity
-                // Truyền courtId từ đối tượng court vào newInstance()
+                // Chuyển sang ServiceActivity khi bấm vào một court
                 ServiceActivity serviceFragment = ServiceActivity.newInstance(court.getId());
-                // Sử dụng FragmentTransaction để thay thế Fragment hiện tại
                 getParentFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.fragment_container, serviceFragment) // R.id.fragment_container là container của fragment trong layout của Activity
+                        .replace(R.id.fragment_container, serviceFragment)
                         .addToBackStack(null)
                         .commit();
             }
         });
+
         rcvClubs.setAdapter(courtsServiceAdapter);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rcvClubs.getContext(), DividerItemDecoration.VERTICAL);
         rcvClubs.addItemDecoration(dividerItemDecoration);
     }
-
 
     private String removeDiacritics(String str) {
         if (str == null) return "";

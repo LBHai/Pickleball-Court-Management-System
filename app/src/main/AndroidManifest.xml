@@ -40,6 +40,9 @@
             android:name=".EditInformationActivity"
             android:exported="false" />
         <activity
+            android:name=".ForgotPasswordActivity"
+            android:exported="false" />
+        <activity
             android:name=".BookingTableActivity"
             android:exported="false" />
         <!-- <activity -->

@@ -1,159 +1,213 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="@drawable/bg"
     tools:context=".LoginActivity">
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <androidx.cardview.widget.CardView
+        android:id="@+id/homeButtonContainer"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="16dp"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
-            android:id="@+id/imageView"
-            style="@style/imgBG"
-            android:contentDescription="Pickleball"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            android:id="@+id/btnHome"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="12dp"
+            android:src="@drawable/ic_home"
+            android:contentDescription="Home Button"
+            android:background="?attr/selectableItemBackgroundBorderless" />
+    </androidx.cardview.widget.CardView>
+    <!-- Full-screen background image -->
+    <ImageView
+        android:id="@+id/imgBackgroundLogin"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/imagebackground"
+        android:contentDescription="Background"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-            />
+    <!-- Semi-transparent overlay to improve text visibility -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline"
-            android:layout_width="wrap_content"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardLogo"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginTop="64dp"
+        app:cardCornerRadius="60dp"
+        app:cardElevation="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="20dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/imgbg"
+            android:contentDescription="App Logo" />
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/tvWelcome"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Welcome Back"
+        android:textColor="@color/white"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardLogo" />
+
+    <TextView
+        android:id="@+id/tvLoginPrompt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Sport is not giving up"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvWelcome" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardLoginForm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="24dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvLoginPrompt">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_begin="32dp" />
+            android:padding="24dp">
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_end="32dp" />
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilUsername"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Username"
+                app:boxStrokeColor="@color/colorPrimary"
+                app:hintTextColor="@color/colorPrimary"
+                app:startIconDrawable="@drawable/person"
+                app:startIconTint="@color/colorPrimary"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/layoutUsername"
-            style="@style/layoutUsername"
-            app:boxBackgroundColor="@color/input_background"
-            app:boxStrokeWidth="0dp"
-            app:layout_constraintEnd_toStartOf="@id/guideline2"
-            app:layout_constraintStart_toStartOf="@id/guideline"
-            app:layout_constraintTop_toBottomOf="@id/imageView">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edtUsername"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:maxLines="1" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/edtUsername"
-                style="@style/txtUsername"
-                android:imeOptions="actionDone"
-                android:singleLine="true"
-                android:maxLines="1"
-                android:inputType="text"/>
-        </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilPassword"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:hint="Password"
+                app:boxStrokeColor="@color/colorPrimary"
+                app:endIconMode="password_toggle"
+                app:hintTextColor="@color/colorPrimary"
+                app:startIconDrawable="@drawable/lock"
+                app:startIconTint="@color/colorPrimary"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tilUsername">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/layoutPassword"
-            style="@style/layoutPassword"
-            app:boxBackgroundColor="@color/input_background"
-            app:boxStrokeWidth="0dp"
-            app:endIconMode="password_toggle"
-            app:layout_constraintEnd_toStartOf="@id/guideline2"
-            app:layout_constraintStart_toStartOf="@id/guideline"
-            app:layout_constraintTop_toBottomOf="@id/layoutUsername">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edtPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionDone"
+                    android:inputType="textPassword"
+                    android:maxLines="1" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/edtPassword"
-                style="@style/txtPassword"
-                android:imeOptions="actionDone"
-                android:inputType="textPassword"
-                android:singleLine="true"
-                android:maxLines="1"
-                />
-        </com.google.android.material.textfield.TextInputLayout>
+            <TextView
+                android:id="@+id/tvForgotPassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Forgot Password?"
+                android:textColor="@color/green"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tilPassword" />
 
-        <Button
-            android:id="@+id/btnLogin"
-            style="@style/btnLogin"
-            app:layout_constraintEnd_toStartOf="@+id/guideline2"
-            app:layout_constraintStart_toStartOf="@+id/guideline"
-            app:layout_constraintTop_toBottomOf="@+id/layoutPassword" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLogin"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="24dp"
+                android:text="LOGIN"
+                android:textSize="16sp"
+                app:cornerRadius="8dp"
+                app:backgroundTint="@color/green"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvForgotPassword" />
 
-        <TextView
-            android:id="@+id/btnForget"
-            style="@style/txtForget"
-            app:layout_constraintEnd_toStartOf="@id/guideline2"
-            app:layout_constraintTop_toBottomOf="@id/btnLogin"
-            />
-        <View
-            android:id="@+id/leftbar"
-            style="@style/bar"
-            app:layout_constraintBottom_toBottomOf="@+id/OR"
-            app:layout_constraintEnd_toStartOf="@+id/OR"
-            app:layout_constraintStart_toStartOf="@+id/guideline"
-            app:layout_constraintTop_toTopOf="@+id/OR" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
 
-        <TextView
-            android:id="@+id/OR"
-            style="@style/txtOR"
-            app:layout_constraintBottom_toTopOf="@+id/btnLoginwithgg"
-            app:layout_constraintEnd_toStartOf="@+id/guideline2"
-            app:layout_constraintStart_toStartOf="@+id/guideline"
-            app:layout_constraintTop_toBottomOf="@+id/btnForget" />
+    <TextView
+        android:id="@+id/tvNoAccount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Don't have an account?"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toStartOf="@id/btnSignup"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardLoginForm" />
 
-        <View
-            android:id="@+id/rightbar"
-            style="@style/bar"
-            app:layout_constraintBottom_toBottomOf="@+id/OR"
-            app:layout_constraintEnd_toEndOf="@+id/guideline2"
-            app:layout_constraintStart_toEndOf="@+id/OR"
-            app:layout_constraintTop_toTopOf="@+id/OR" />
+    <TextView
+        android:id="@+id/btnSignup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:text="Sign Up"
+        android:textColor="@color/yellow"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBaseline_toBaselineOf="@id/tvNoAccount"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tvNoAccount" />
 
-        <Button
-            android:id="@+id/btnLoginwithgg"
-            style="@style/btnLoginwithgg"
-            app:iconTint="@color/white"
-            app:icon="@drawable/facebook_icon_2013"
-            app:iconPadding="8dp"
-            app:iconSize="24dp"
-            app:layout_constraintEnd_toStartOf="@+id/guideline2"
-            app:layout_constraintStart_toStartOf="@+id/guideline"
-            app:layout_constraintTop_toBottomOf="@+id/OR" />
-
-        <View
-            android:id="@+id/view"
-            android:layout_width="0dp"
-            android:layout_height="54dp"
-            android:layout_marginTop="32dp"
-            android:background="@color/input_background"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnLoginwithgg"
-            app:layout_constraintVertical_bias="1.0" />
-
-        <TextView
-            android:id="@+id/tvDhac"
-            style="@style/txtDhac"
-            android:text="Don't have an account?"
-            app:layout_constraintBottom_toBottomOf="@+id/view"
-            app:layout_constraintEnd_toStartOf="@+id/btnSignup"
-            app:layout_constraintHorizontal_chainStyle="packed"
-            app:layout_constraintStart_toEndOf="@+id/view"
-            app:layout_constraintStart_toStartOf="@+id/guideline"
-            app:layout_constraintTop_toTopOf="@+id/view" />
-
-        <TextView
-            android:id="@+id/btnSignup"
-            style="@style/txtSignup"
-            app:layout_constraintBottom_toBottomOf="@+id/tvDhac"
-            app:layout_constraintEnd_toStartOf="@+id/guideline2"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/tvDhac"
-            app:layout_constraintTop_toTopOf="@+id/tvDhac"
-            />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

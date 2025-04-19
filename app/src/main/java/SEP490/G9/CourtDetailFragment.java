@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,10 +24,7 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
-import Adapter.CourtDetailPagerAdapter;
-import SEP490.G9.BookingRegularTableActivity;
-import SEP490.G9.BookingTableActivity;
-import SEP490.G9.R;
+import Adapter.CourtDetailAdapter;
 
 public class CourtDetailFragment extends Fragment {
 
@@ -86,7 +82,7 @@ public class CourtDetailFragment extends Fragment {
         }
 
         // Cấu hình ViewPager và TabLayout
-        CourtDetailPagerAdapter adapter = new CourtDetailPagerAdapter(this, clubId);
+        CourtDetailAdapter adapter = new CourtDetailAdapter(this, clubId);
         viewPager.setAdapter(adapter);
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position) {

@@ -8,7 +8,7 @@
     android:background="@color/dark_green"
     tools:context="Fragment.AccountFragment">
 
-    <!-- Khu vực Header -->
+    <!-- Header -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
@@ -19,7 +19,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Container notification: sử dụng ConstraintLayout thay vì RelativeLayout -->
+        <!-- Container notification -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/notificationContainer"
             android:layout_width="wrap_content"
@@ -47,10 +47,11 @@
                 app:layout_constraintTop_toTopOf="@id/notification"
                 app:nbAnimationEnabled="true"
                 app:nbBackground="@drawable/badge_background"
-                app:nbMaxTextLength="5" />
+                app:nbMaxTextLength="10" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <!-- Nút Options (khi đã đăng nhập) -->
         <ImageButton
             android:id="@+id/options"
             android:layout_width="30dp"
@@ -64,6 +65,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             tools:ignore="TouchTargetSizeCheck" />
+
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/ivAvatar"
@@ -92,12 +94,15 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
+        <!-- ... các phần khác giữ nguyên ... -->
+
         <LinearLayout
             android:id="@+id/phoneContainer"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:orientation="horizontal"
+            android:gravity="center_vertical"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/userName">
 
@@ -123,12 +128,43 @@
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
-            <!-- Thêm View spacer để đẩy btn_filter sang bên phải -->
+            <!-- Thêm View spacer để đẩy các nút sang bên phải -->
             <View
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1" />
 
+            <!-- Container cho nút login và register khi chưa đăng nhập -->
+            <LinearLayout
+                android:id="@+id/authButtonsContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <Button
+                    android:id="@+id/btnLogin"
+                    android:layout_width="140dp"
+                    android:layout_height="40dp"
+                    android:text="Đăng nhập"
+                    android:textSize="13sp"
+                    android:paddingHorizontal="8dp"
+                    android:backgroundTint="@color/white"
+                    android:textColor="@color/dark_green"
+                    android:layout_marginEnd="4dp"/>
+
+                <Button
+                    android:id="@+id/btnRegister"
+                    android:layout_width="140dp"
+                    android:layout_height="40dp"
+                    android:text="Đăng ký"
+                    android:textSize="13sp"
+                    android:paddingHorizontal="8dp"
+                    android:backgroundTint="@color/white"
+                    android:textColor="@color/dark_green"/>
+            </LinearLayout>
+
+            <!-- Filter button - hiển thị khi đã đăng nhập -->
             <ImageButton
                 android:id="@+id/btn_filter"
                 android:layout_width="36dp"

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Thanh tiêu đề trên cùng -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Bảng giá sân"
+                android:textColor="@color/dark_green"
+                android:textStyle="bold"
+                android:textSize="22sp"
+                android:gravity="center"
+                android:padding="8dp" />
+        </LinearLayout>
+
+        <!-- Tên bộ môn (nếu muốn) -->
+
+        <!-- TableLayout "bao" 2 dòng: T2 - T6 và T7 - CN -->
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stretchColumns="*"
+            android:layout_marginTop="8dp"
+            android:background="#FFFFFF"
+            android:padding="1dp">
+
+            <!-- Dòng 1: Label "T2 - T6" (cột 1) và bảng con (cột 2) -->
+            <TableRow>
+
+                <TextView
+                    android:id="@+id/tvLabelWeekday"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/cell_border"
+                    android:gravity="center"
+                    android:minHeight="80dp"
+                    android:padding="8dp"
+                    android:text="T2 - T6"
+                    android:textColor="@color/dark_green" />
+
+                <TableLayout
+                    android:id="@+id/tableWeekday"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3">
+                </TableLayout>
+            </TableRow>
+
+            <!-- Dòng 2: Label "T7 - CN" (cột 1) và bảng con (cột 2) -->
+            <TableRow>
+
+                <TextView
+                    android:id="@+id/tvLabelWeekend"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="T7 - CN"
+                    android:textColor="@color/dark_green"
+                    android:gravity="center"
+                    android:background="@drawable/cell_border"
+                    android:padding="8dp"
+                    android:minHeight="80dp" />
+
+                <TableLayout
+                    android:id="@+id/tableWeekend"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3">
+                </TableLayout>
+            </TableRow>
+
+        </TableLayout>
+
+    </LinearLayout>
+</ScrollView>

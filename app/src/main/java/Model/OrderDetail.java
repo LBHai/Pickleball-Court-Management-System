@@ -4,7 +4,6 @@ import java.util.List;
 
 public class OrderDetail {
     private String courtSlotId;
-    private String courtSlotName;
     private String startTime;
     private String endTime;
     private int price;
@@ -20,14 +19,6 @@ public class OrderDetail {
 
     public void setCourtSlotId(String courtSlotId) {
         this.courtSlotId = courtSlotId;
-    }
-
-    public String getCourtSlotName() {
-        return courtSlotName;
-    }
-
-    public void setCourtSlotName(String courtSlotName) {
-        this.courtSlotName = courtSlotName;
     }
 
     public String getStartTime() {

@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
@@ -25,23 +26,33 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.text.Normalizer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-
+import java.util.Locale;
+import android.app.AlertDialog;
 import Adapter.CourtsAdapter;
 import Api.ApiService;
 import Api.RetrofitClient;
 import Model.Courts;
+import Model.MyInfo;
+import Model.MyInfoResponse;
 import SEP490.G9.CourtDetailFragment;
+import SEP490.G9.LoginActivity;
+import SEP490.G9.NotificationActivity;
 import SEP490.G9.R;
+import SEP490.G9.SignUpActivity;
 import Session.SessionManager;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -65,10 +76,12 @@ public class CourtsFragment extends Fragment {
     private FloatingActionButton fabScrollUp;
     private TextView tvUserName;
     private TextView tvDate;
-    private ImageView imgFavorite;
+    private ImageView imgFavorite,imgNotification,imgAvtarIconCompact;
+    private SessionManager sessionManager;
     private CardView favoriteContainer;
     private ImageView imgSearch;
     private LinearLayout notificationContainer;
+
 
     // EditText cho thanh tìm kiếm khi header mở rộng
     private EditText etSearch;
@@ -98,7 +111,23 @@ public class CourtsFragment extends Fragment {
         imgAvtarIcon = view.findViewById(R.id.imgAvtarIcon);
         fabScrollUp = view.findViewById(R.id.fabScrollUp);
         tvUserName = view.findViewById(R.id.tvUserName);
+
+        sessionManager = new SessionManager(requireContext());
+        sessionManager.setHasShownGuestDialog(false);
+
+        tvUserName = view.findViewById(R.id.tvUserName);
+        imgUserAvatar = view.findViewById(R.id.imgUserAvatar);
+        imgAvtarIcon = view.findViewById(R.id.imgAvtarIcon);
+        imgAvtarIconCompact = view.findViewById(R.id.imgAvtarIconCompact);
+        getMyInfoAndShow();
+
         tvDate = view.findViewById(R.id.tvDate);
+        Date today = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        String currentDate = sdf.format(today);
+        tvDate.setText(currentDate);
+
+
         imgFavorite = view.findViewById(R.id.imgFavorite);
         favoriteContainer = view.findViewById(R.id.favoriteContainer);
         imgSearch = view.findViewById(R.id.imgSearch);
@@ -114,8 +143,13 @@ public class CourtsFragment extends Fragment {
                 courtsAdapter.updateList(fullCourtsList); // Hiện lại toàn bộ
                 imgFavorite.setImageResource(R.drawable.ic_heart_outline); // Đổi lại icon thành tim trắng
             }
-        });
 
+        });
+        imgNotification = view.findViewById(R.id.imgNotification);
+        imgNotification.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), NotificationActivity.class);
+            startActivity(intent);
+        });
         // Lấy tham chiếu EditText trong cardSearch (trạng thái expanded)
         etSearch = view.findViewById(R.id.edtSearch);
         etSearch.setFilters(new InputFilter[] {
@@ -183,7 +217,12 @@ public class CourtsFragment extends Fragment {
 
         // Tính toán lại vị trí cho các thành phần dùng trong animation
         view.post(() -> calculateAnimationPositions());
-
+        if (!isUserLoggedIn()) {
+            if (!sessionManager.hasShownGuestDialog()) {
+                showGuestDialog();
+                sessionManager.setHasShownGuestDialog(true);
+            }
+        }
         return view;
     }
 
@@ -492,6 +531,100 @@ public class CourtsFragment extends Fragment {
         }
         courtsAdapter.updateList(filteredList);
     }
+    private void getMyInfoAndShow() {
+        String token = sessionManager.getToken();
+        if (token == null || token.isEmpty()) {
+            tvUserName.setText("Khách");
+            imgUserAvatar.setImageResource(R.drawable.avatar);
+            imgAvtarIcon.setImageResource(R.drawable.avatar);
+            imgAvtarIconCompact.setImageResource(R.drawable.avatar);
+            return;
+        }
 
+        String authHeader = "Bearer " + token;
+        ApiService apiService = RetrofitClient.getApiService(getContext());
+        apiService.getMyInfo(authHeader).enqueue(new retrofit2.Callback<MyInfoResponse>() {
+            @Override
+            public void onResponse(Call<MyInfoResponse> call, Response<MyInfoResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getResult() != null) {
+                    MyInfo info = response.body().getResult();
+                    String fullName = info.getFirstName() + " " + info.getLastName();
+                    String avatarUrl = info.getAvatarUrl();
+
+                    tvUserName.setText(fullName);
+
+                    if (avatarUrl != null && !avatarUrl.isEmpty()) {
+                        Glide.with(requireContext())
+                                .load(avatarUrl)
+                                .placeholder(R.drawable.avatar)
+                                .error(R.drawable.avatar)
+                                .into(imgUserAvatar);
+
+                        Glide.with(requireContext())
+                                .load(avatarUrl)
+                                .placeholder(R.drawable.avatar)
+                                .error(R.drawable.avatar)
+                                .into(imgAvtarIcon);
+
+                        Glide.with(requireContext())
+                                .load(avatarUrl)
+                                .placeholder(R.drawable.avatar)
+                                .error(R.drawable.avatar)
+                                .into(imgAvtarIconCompact);
+                    } else {
+                        imgUserAvatar.setImageResource(R.drawable.avatar);
+                        imgAvtarIcon.setImageResource(R.drawable.avatar);
+                        imgAvtarIconCompact.setImageResource(R.drawable.avatar);
+                    }
+                } else {
+                    tvUserName.setText("Không rõ tên");
+                    imgUserAvatar.setImageResource(R.drawable.avatar);
+                    imgAvtarIcon.setImageResource(R.drawable.avatar);
+                    imgAvtarIconCompact.setImageResource(R.drawable.avatar);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MyInfoResponse> call, Throwable t) {
+                tvUserName.setText("Lỗi kết nối");
+                imgUserAvatar.setImageResource(R.drawable.avatar);
+                imgAvtarIcon.setImageResource(R.drawable.avatar);
+                imgAvtarIconCompact.setImageResource(R.drawable.avatar);
+            }
+        });
+    }
+    private void showGuestDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setMessage("Tạo tài khoản để dễ dàng quản lý và lưu trữ lịch đặt của bạn.");
+
+        builder.setPositiveButton("Đăng nhập", (dialog, which) -> {
+            Intent intent = new Intent(requireActivity(), LoginActivity.class);
+            startActivity(intent);
+            requireActivity().finish();
+        });
+
+        builder.setNegativeButton("Đăng ký", (dialog, which) -> {
+            Intent intent = new Intent(requireActivity(), SignUpActivity.class);
+            startActivity(intent);
+            requireActivity().finish();
+        });
+
+        builder.setNeutralButton("OK", (dialog, which) -> dialog.dismiss());
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black));
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                .setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black));
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL)
+                .setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL)
+                .setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.green));
+    }
+    private boolean isUserLoggedIn() {
+        String token = sessionManager.getToken();
+        return token != null && !token.isEmpty();
+    }
 
 }

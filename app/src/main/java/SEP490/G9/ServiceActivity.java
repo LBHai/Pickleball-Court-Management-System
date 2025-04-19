@@ -19,10 +19,8 @@ import Adapter.ServiceAdapter;
 import Api.ApiService;
 import Api.RetrofitClient;
 import Model.Courts;
-import Model.CreateOrderResponse;
 import Model.Service;
 import Model.ServiceDetail;
-import Model.ServiceOrderRequest;
 import Session.SessionManager;
 import com.google.android.material.button.MaterialButton;
 import com.google.gson.Gson;
@@ -170,7 +168,6 @@ public class ServiceActivity extends Fragment {
             return;
         }
 
-        String userId = sessionManager.getUserId();
         String totalPriceText = tvTotalPrice.getText().toString().replace("đ", "").replace(",", "").trim();
         double paymentAmount = Double.parseDouble(totalPriceText);
 
@@ -184,43 +181,16 @@ public class ServiceActivity extends Fragment {
                     String courtName = court.getName();
                     String address = court.getAddress();
 
-                    ServiceOrderRequest request = new ServiceOrderRequest();
-                    request.setCourtId(courtId);
-                    request.setCourtName(courtName);
-                    request.setAddress(address);
-                    request.setUserId(userId);
-                    request.setPaymentAmount(paymentAmount);
-                    request.setServiceDetails(orderedServiceDetails);
-
-                    Call<CreateOrderResponse> orderCall = apiService.createServiceOrder(request);
-                    orderCall.enqueue(new Callback<CreateOrderResponse>() {
-                        @Override
-                        public void onResponse(Call<CreateOrderResponse> call, Response<CreateOrderResponse> response) {
-                            if (response.isSuccessful() && response.body() != null) {
-                                CreateOrderResponse orderResponse = response.body();
-
-                                Intent intent = new Intent(getActivity(), ConfirmActivity.class);
-                                intent.putExtra("orderType", "Đơn dịch vụ");
-                                intent.putExtra("orderId", orderResponse.getId());
-                                intent.putExtra("qrCodeData", orderResponse.getQrcode());
-                                intent.putExtra("paymentTimeout", orderResponse.getPaymentTimeout());
-                                intent.putExtra("paymentAmount", paymentAmount);
-                                intent.putExtra("courtName", courtName);
-                                intent.putExtra("address", address);
-                                String serviceDetailsJson = new Gson().toJson(orderedServiceDetails);
-                                Log.d("ServiceActivity", "serviceDetailsJson: " + serviceDetailsJson);
-                                intent.putExtra("serviceDetailsJson", serviceDetailsJson);
-                                startActivity(intent);
-                            } else {
-                                Toast.makeText(getContext(), "Tạo đơn dịch vụ thất bại", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Call<CreateOrderResponse> call, Throwable t) {
-                            Toast.makeText(getContext(), "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    Intent intent = new Intent(getActivity(), ConfirmActivity.class);
+                    intent.putExtra("orderType", "Đơn dịch vụ");
+                    intent.putExtra("courtId", courtId);
+                    intent.putExtra("courtName", courtName);
+                    intent.putExtra("address", address);
+                    intent.putExtra("paymentAmount", paymentAmount);
+                    String serviceDetailsJson = new Gson().toJson(orderedServiceDetails);
+                    Log.d("ServiceActivity", "serviceDetailsJson: " + serviceDetailsJson);
+                    intent.putExtra("serviceDetailsJson", serviceDetailsJson);
+                    startActivity(intent);
                 } else {
                     Toast.makeText(getContext(), "Không thể lấy thông tin sân", Toast.LENGTH_SHORT).show();
                 }

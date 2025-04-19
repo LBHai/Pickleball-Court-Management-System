@@ -60,14 +60,14 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         String detailInfo = "Chi tiết: ";
         if (order.getOrderDetails() != null && !order.getOrderDetails().isEmpty()) {
             OrderDetail firstDetail = order.getOrderDetails().get(0);
-            String slotName = firstDetail.getCourtSlotName();
+            //String slotName = firstDetail.getCourtSlotName();
             String startTime = firstDetail.getStartTime();
             String endTime = firstDetail.getEndTime();
-            if (startTime != null && startTime.length() >= 5 && endTime != null && endTime.length() >= 5) {
-                detailInfo += slotName + " : " + startTime.substring(0, 5) + " - " + endTime.substring(0, 5);
-            } else {
-                detailInfo += "Không hợp lệ";
-            }
+//            if (startTime != null && startTime.length() >= 5 && endTime != null && endTime.length() >= 5) {
+//                detailInfo += slotName + " : " + startTime.substring(0, 5) + " - " + endTime.substring(0, 5);
+//            } else {
+//                detailInfo += "Không hợp lệ";
+//            }
         } else {
             detailInfo += "Không có";
         }

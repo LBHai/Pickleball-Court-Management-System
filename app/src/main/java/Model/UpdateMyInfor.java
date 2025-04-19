@@ -9,7 +9,6 @@ public class UpdateMyInfor {
     private String dob;
     private String email;
     private String phoneNumber;
-    private String userRank;
     private String gender;  // đổi từ String sang int (0: MALE, 1: FEMALE)
     private transient boolean student;
 
@@ -25,7 +24,6 @@ public class UpdateMyInfor {
         this.dob = dob;
         this.email = email;
         this.phoneNumber = phoneNumber;
-        this.userRank = userRank;
         this.gender = gender;
         this.student = student;
     }
@@ -94,13 +92,6 @@ public class UpdateMyInfor {
         this.phoneNumber = phoneNumber;
     }
 
-    public String getUserRank() {
-        return userRank;
-    }
-
-    public void setUserRank(String userRank) {
-        this.userRank = userRank;
-    }
 
     public String getGender() {
         return gender;

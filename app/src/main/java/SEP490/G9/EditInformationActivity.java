@@ -25,6 +25,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.imageview.ShapeableImageView;
 
 import java.io.ByteArrayOutputStream;
@@ -38,6 +42,8 @@ import java.util.List;
 
 import Api.ApiService;
 import Api.RetrofitClient;
+import Model.MyInfo;
+import Model.MyInfoResponse;
 import Model.UpdateMyInfor;
 import Session.SessionManager;
 import okhttp3.MediaType;
@@ -49,7 +55,7 @@ import retrofit2.Response;
 
 public class EditInformationActivity extends AppCompatActivity {
 
-    private EditText etEmail, etFirstName, etLastName, etPhoneNumber, etUserRank;
+    private EditText etEmail, etFirstName, etLastName, etPhoneNumber;
     private Spinner spGender, spDay, spMonth, spYear;
     private CheckBox cbStudent;
     private Button btnSave;
@@ -66,17 +72,21 @@ public class EditInformationActivity extends AppCompatActivity {
 
     private Uri selectedImageUri = null;
     private Uri photoUri; // Lưu URI của ảnh chụp từ camera
+    private SessionManager sessionManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_information);
 
+        sessionManager = new SessionManager(this);
+
+
         etEmail = findViewById(R.id.etEmail);
         etFirstName = findViewById(R.id.etFirstName);
         etLastName = findViewById(R.id.etLastName);
         etPhoneNumber = findViewById(R.id.etPhoneNumber);
-        etUserRank = findViewById(R.id.etUserRank);
         spGender = findViewById(R.id.spGender);
         spDay = findViewById(R.id.spDay);
         spMonth = findViewById(R.id.spMonth);
@@ -86,9 +96,11 @@ public class EditInformationActivity extends AppCompatActivity {
         btnEditAvatar = findViewById(R.id.btnEditAvatar);
         imgAvatar = findViewById(R.id.imgAvatar);
 
+        loadUserAvatar();
+
+
         setupSpinners();
         loadIntentData();
-
         btnEditAvatar.setOnClickListener(v -> showImagePickerDialog());
         btnSave.setOnClickListener(v -> saveUserInfo());
 
@@ -262,7 +274,6 @@ public class EditInformationActivity extends AppCompatActivity {
             etFirstName.setText(intent.getStringExtra("firstName"));
             etLastName.setText(intent.getStringExtra("lastName"));
             etPhoneNumber.setText(intent.getStringExtra("phoneNumber"));
-            etUserRank.setText(intent.getStringExtra("userRank"));
 
             String genderFromIntent = intent.getStringExtra("gender");
             ArrayAdapter<CharSequence> genderAdapter = (ArrayAdapter<CharSequence>) spGender.getAdapter();
@@ -316,7 +327,6 @@ public class EditInformationActivity extends AppCompatActivity {
         String firstName = etFirstName.getText().toString().trim();
         String lastName = etLastName.getText().toString().trim();
         String phoneNumber = etPhoneNumber.getText().toString().trim();
-        String userRank = etUserRank.getText().toString().trim();
 
         String spinnerGender = spGender.getSelectedItem().toString();
         String gender;
@@ -511,4 +521,38 @@ public class EditInformationActivity extends AppCompatActivity {
         // Nếu vẫn không thể đạt 250KB, trả về null
         return null;
     }
+    private void loadUserAvatar() {
+        ApiService apiService = RetrofitClient.getApiService(this);
+        String token = sessionManager.getToken();
+
+        apiService.getMyInfo("Bearer " + token).enqueue(new Callback<MyInfoResponse>() {
+            @Override
+            public void onResponse(Call<MyInfoResponse> call, Response<MyInfoResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    MyInfo info = response.body().getResult();
+                    String avatarUrl = info.getAvatarUrl();
+
+                    if (avatarUrl != null && !avatarUrl.isEmpty()) {
+                        RequestOptions options = new RequestOptions()
+                                .placeholder(R.drawable.avatar)
+                                .error(R.drawable.avatar)
+                                .diskCacheStrategy(DiskCacheStrategy.ALL);
+
+                        Glide.with(getApplicationContext())
+                                .load(avatarUrl)
+                                .apply(options)
+                                .transition(DrawableTransitionOptions.withCrossFade())
+                                .into(imgAvatar);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MyInfoResponse> call, Throwable t) {
+                imgAvatar.setImageResource(R.drawable.avatar);
+            }
+        });
+    }
+
+
 }

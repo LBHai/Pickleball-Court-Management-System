@@ -17,6 +17,7 @@ import java.util.Set;
 import Adapter.NotificationAdapter;
 import Api.ApiService;
 import Api.RetrofitClient;
+import Model.NotificationData;
 import Model.NotificationItem;
 import Model.NotificationResponse;
 import Session.SessionManager;
@@ -222,13 +223,23 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
      */
     private void openNotificationDetail(NotificationItem notification) {
         Intent intent = new Intent(NotificationActivity.this, DetailBookingActivity.class);
-        // Giả sử bạn có orderId trong notificationData hoặc bất kỳ field nào của notification:
         String orderId = notification.getId(); // Hoặc notification.getNotificationData().getOrderId();
         intent.putExtra("orderId", orderId);
         intent.putExtra("notificationTitle", notification.getTitle());
         intent.putExtra("notificationDescription", notification.getDescription());
         intent.putExtra("notificationTime", notification.getCreateAt());
         intent.putExtra("notificationStatus", notification.getStatus());
+
+        NotificationData data = notification.getNotificationData();
+        if (data != null) {
+            intent.putExtra("orderId", data.getOrderId());
+            intent.putExtra("totalTime", data.getTotalTime());
+            intent.putExtra("totalPrice", data.getTotalPrice());
+            intent.putExtra("orderStatus", data.getOrderStatus());
+            intent.putExtra("courtId", data.getCourtId());
+            intent.putExtra("dateBooking", data.getDateBooking());
+            intent.putExtra("slotPrices", data.getSlotPrices());
+        }
         startActivity(intent);
     }
 

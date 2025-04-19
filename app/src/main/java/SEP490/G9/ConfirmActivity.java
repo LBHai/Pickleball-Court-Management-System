@@ -1,6 +1,7 @@
 package SEP490.G9;
 
 import android.content.Intent;
+
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
@@ -52,6 +53,7 @@ import Model.OrderDetail;
 import Model.OrderDetailGroup;
 import Model.Orders;
 import Model.ServiceDetail;
+import Model.ServiceOrderRequest;
 import Session.SessionManager;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -78,6 +80,8 @@ public class ConfirmActivity extends AppCompatActivity {
     private List<String> selectedCourtSlots;
     private int totalPriceFixedOrder;
     private String orderType;
+    // Biến trạng thái để kiểm soát nút Thanh toán cho Đơn dịch vụ
+    private boolean isPaymentButtonClicked = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,12 +120,233 @@ public class ConfirmActivity extends AppCompatActivity {
         if ("Đơn cố định".equals(orderType)) {
             handleFixedOrder(intent);
         } else if ("Đơn dịch vụ".equals(orderType)) {
+            courtName = intent.getStringExtra("courtName");
+            etNote.setText(courtName);
+            etNote.setEnabled(false);
             handleServiceOrder(intent);
         } else {
             handleRegularOrder(intent);
         }
     }
 
+    private void handleServiceOrder(Intent intent) {
+        courtName = intent.getStringExtra("courtName");
+        courtAddress = intent.getStringExtra("address");
+        String serviceDetailsJson = intent.getStringExtra("serviceDetailsJson");
+        orderId = intent.getStringExtra("orderId");
+
+        List<ServiceDetail> serviceDetails = new ArrayList<>();
+        if (serviceDetailsJson != null && !serviceDetailsJson.isEmpty()) {
+            try {
+                Gson gson = new Gson();
+                serviceDetails = gson.fromJson(serviceDetailsJson, new TypeToken<List<ServiceDetail>>(){}.getType());
+                if (serviceDetails == null) {
+                    serviceDetails = new ArrayList<>();
+                    Toast.makeText(this, "Danh sách dịch vụ trống", Toast.LENGTH_SHORT).show();
+                }
+            } catch (Exception e) {
+                Log.e("ConfirmActivity", "Lỗi parse serviceDetailsJson: " + e.getMessage());
+                Toast.makeText(this, "Lỗi dữ liệu dịch vụ: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                finish();
+                return;
+            }
+        } else {
+            Log.e("ConfirmActivity", "serviceDetailsJson is null or empty");
+            Toast.makeText(this, "Không có dữ liệu dịch vụ", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        final List<ServiceDetail> finalServiceDetails = serviceDetails;
+        final double paymentAmount = calculatePaymentAmount(serviceDetails);
+
+        tvStadiumName.setText("Tên sân: " + courtName);
+        tvAddress.setText("Địa chỉ: " + courtAddress);
+        tvDate.setText("Thông tin đơn dịch vụ:");
+
+        layoutConfirmOrders.removeAllViews();
+        for (ServiceDetail detail : serviceDetails) {
+            TextView tvService = new TextView(this);
+            tvService.setText(detail.getCourtServiceName() + " x" + detail.getQuantity() + " : " + formatMoney((int) (detail.getPrice() * detail.getQuantity())));
+            tvService.setTextColor(getResources().getColor(android.R.color.white));
+            tvService.setTextSize(14);
+            layoutConfirmOrders.addView(tvService);
+        }
+
+        tvTotalPriceLine.setText(Html.fromHtml("Tổng tiền: <b>" + formatMoney((int) paymentAmount) + "</b>"));
+
+        btnDeposit.setVisibility(View.GONE);
+        btnPayment.setText("Thanh toán");
+
+        ApiService apiService = RetrofitClient.getApiService(this);
+        String token = sessionManager.getToken();
+        if (token != null && !token.isEmpty()) {
+            String authHeader = "Bearer " + token;
+            NetworkUtils.callApi(apiService.getMyInfo(authHeader), this, new NetworkUtils.ApiCallback<MyInfoResponse>() {
+                @Override
+                public void onSuccess(MyInfoResponse r) {
+                    if (r != null && r.getResult() != null) {
+                        String fullName = r.getResult().getFirstName() + " " + r.getResult().getLastName();
+                        etName.setText(fullName);
+                        etPhone.setText(r.getResult().getPhoneNumber());
+                        userId = r.getResult().getId();
+                        sessionManager.saveUserId(userId);
+                        registerNotification();
+                    }
+                }
+                @Override
+                public void onError(String e) {
+                    Toast.makeText(ConfirmActivity.this, "Lấy thông tin thất bại!", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Toast.makeText(this, "Bạn đang đặt dịch vụ với vai trò là Guest!", Toast.LENGTH_SHORT).show();
+            etName.setText("");
+            etPhone.setText("");
+            List<String> guestPhones = sessionManager.getGuestPhones();
+            if (!guestPhones.isEmpty()) {
+                etPhone.setText(guestPhones.get(0));
+            }
+        }
+
+        // Xử lý sự kiện nút Thanh toán cho Đơn dịch vụ
+        btnPayment.setOnClickListener(new View.OnClickListener() {
+            // Sử dụng flag để theo dõi trạng thái xử lý
+            private boolean isProcessing = false;
+
+            @Override
+            public void onClick(View v) {
+                // Kiểm tra nếu đang xử lý thì không làm gì
+                if (isProcessing) {
+                    Toast.makeText(ConfirmActivity.this, "Đang xử lý, vui lòng chờ...", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // Đánh dấu đang bắt đầu xử lý và vô hiệu hóa nút
+                isProcessing = true;
+                btnPayment.setEnabled(false);
+
+                String name = etName.getText().toString().trim();
+                String phone = etPhone.getText().toString().trim();
+                String note = etNote.getText().toString().trim();
+
+                Log.d("ConfirmActivity", "Dữ liệu đầu vào - courtId: " + intent.getStringExtra("courtId") +
+                        ", courtName: " + courtName +
+                        ", address: " + courtAddress +
+                        ", userId: " + userId +
+                        ", paymentAmount: " + paymentAmount +
+                        ", customerName: " + name +
+                        ", phoneNumber: " + phone +
+                        ", note: " + note +
+                        ", serviceDetails: " + new Gson().toJson(finalServiceDetails));
+
+                // Kiểm tra dữ liệu đầu vào
+                if (token == null || token.isEmpty()) {
+                    if (name.isEmpty() || phone.isEmpty()) {
+                        Toast.makeText(ConfirmActivity.this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
+                        isProcessing = false;
+                        btnPayment.setEnabled(true);
+                        return;
+                    }
+                }
+                if (name.isEmpty() || phone.isEmpty()) {
+                    Toast.makeText(ConfirmActivity.this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
+                    isProcessing = false;
+                    btnPayment.setEnabled(true);
+                    return;
+                }
+                if (!name.matches("^[\\p{L}\\s]+$") || name.length() < 2) {
+                    Toast.makeText(ConfirmActivity.this, "Tên chỉ chứa chữ cái và khoảng trắng, ít nhất 2 ký tự", Toast.LENGTH_SHORT).show();
+                    isProcessing = false;
+                    btnPayment.setEnabled(true);
+                    return;
+                }
+                if (!phone.matches("0\\d{9}")) {
+                    Toast.makeText(ConfirmActivity.this, "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0", Toast.LENGTH_SHORT).show();
+                    isProcessing = false;
+                    btnPayment.setEnabled(true);
+                    return;
+                }
+                if (userId == null || userId.isEmpty()) {
+                    sessionManager.addGuestPhone(phone);
+                    registerNotification();
+                }
+
+                // Chuẩn bị yêu cầu tạo đơn dịch vụ
+                ServiceOrderRequest request = new ServiceOrderRequest();
+                request.setCourtId(intent.getStringExtra("courtId"));
+                request.setCourtName(courtName);
+                request.setAddress(courtAddress);
+                request.setUserId(userId);
+                request.setPaymentAmount(paymentAmount);
+                request.setCustomerName(name);
+                request.setPhoneNumber(phone);
+                request.setNote(courtName); // Note bắt buộc là courtName
+                request.setServiceDetails(finalServiceDetails);
+
+                // Gọi API để tạo đơn dịch vụ
+                ApiService apiService = RetrofitClient.getApiService(ConfirmActivity.this);
+                Call<CreateOrderResponse> call = apiService.createServiceOrder(request);
+                call.enqueue(new Callback<CreateOrderResponse>() {
+                    @Override
+                    public void onResponse(Call<CreateOrderResponse> call, Response<CreateOrderResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            CreateOrderResponse orderResponse = response.body();
+                            Log.d("ConfirmActivity", "Tạo đơn dịch vụ thành công. OrderId: " + orderResponse.getId() +
+                                    ", QRCode: " + orderResponse.getQrcode() +
+                                    ", PaymentTimeout: " + orderResponse.getPaymentTimeout());
+
+                            String orderId = orderResponse.getId();
+                            String qrCodeData = orderResponse.getQrcode();
+                            String paymentTimeout = orderResponse.getPaymentTimeout();
+
+                            // Lưu thông tin đơn hàng
+                            OrderServiceHolder.getInstance().addOrderDetail(orderId, serviceDetailsJson);
+
+                            // Tính toán tổng thời gian (để tránh null trong QRCodeActivity)
+                            int hours = 0;
+                            int mins = 0;
+                            String totalTime = String.format(Locale.getDefault(), "%dh%02d", hours, mins);
+
+                            // Chuyển sang màn hình QRCodeActivity
+                            Intent i = new Intent(ConfirmActivity.this, QRCodeActivity.class);
+                            i.putExtra("orderType", "Đơn dịch vụ");
+                            i.putExtra("orderId", orderId);
+                            i.putExtra("qrCodeData", qrCodeData);
+                            i.putExtra("paymentTimeout", paymentTimeout);
+                            i.putExtra("overallTotalPrice", (int) paymentAmount);
+                            i.putExtra("paymentAmount", (int) paymentAmount);
+                            i.putExtra("serviceDetailsJson", serviceDetailsJson);
+                            i.putExtra("isDeposit", false);
+                            i.putExtra("customerName", name);
+                            i.putExtra("phoneNumber", phone);
+                            i.putExtra("note", note);
+                            i.putExtra("totalTime", totalTime); // Thêm totalTime để tránh null exception
+                            startActivity(i);
+                            finish();
+                        } else {
+                            Log.e("ConfirmActivity", "Tạo đơn dịch vụ thất bại. Mã trạng thái HTTP: " + response.code());
+                            Toast.makeText(ConfirmActivity.this, "Tạo đơn dịch vụ thất bại!", Toast.LENGTH_SHORT).show();
+                            // Khôi phục trạng thái nút
+                            isProcessing = false;
+                            btnPayment.setEnabled(true);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<CreateOrderResponse> call, Throwable t) {
+                        Log.e("ConfirmActivity", "Lỗi mạng khi tạo đơn dịch vụ: " + t.getMessage(), t);
+                        Toast.makeText(ConfirmActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        // Khôi phục trạng thái nút
+                        isProcessing = false;
+                        btnPayment.setEnabled(true);
+                    }
+                });
+            }
+        });
+
+        btnBack.setOnClickListener(v -> finish());
+    }
     private void handleFixedOrder(Intent intent) {
         courtId = intent.getStringExtra("courtId");
         selectedDays = intent.getStringExtra("selectedDays");
@@ -160,12 +385,13 @@ public class ConfirmActivity extends AppCompatActivity {
 
         ApiService apiService = RetrofitClient.getApiService(this);
         Call<Double> call = apiService.getPaymentValue(courtId, selectedDays, startDate, endDate, formattedStartTime, formattedEndTime);
+        final List<String> finalSelectedCourtSlots = selectedCourtSlots;
         call.enqueue(new Callback<Double>() {
             @Override
             public void onResponse(Call<Double> call, Response<Double> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     totalPriceFixedOrder = response.body().intValue();
-                    int numberOfCourts = selectedCourtSlots.size();
+                    int numberOfCourts = finalSelectedCourtSlots.size();
                     int finalTotalPrice = totalPriceFixedOrder * numberOfCourts;
                     tvTotalPriceLine.setText(Html.fromHtml("Tổng tiền: <b>" + formatMoney(finalTotalPrice) + "</b>"));
                 } else {
@@ -410,138 +636,6 @@ public class ConfirmActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> finish());
     }
 
-    private void handleServiceOrder(Intent intent) {
-        courtName = intent.getStringExtra("courtName");
-        courtAddress = intent.getStringExtra("address");
-        double paymentAmount = intent.getDoubleExtra("paymentAmount", 0);
-        String serviceDetailsJson = intent.getStringExtra("serviceDetailsJson");
-        orderId = intent.getStringExtra("orderId");
-        String qrCodeData = intent.getStringExtra("qrCodeData");
-        long paymentTimeout = intent.getLongExtra("paymentTimeout", 0);
-
-        List<ServiceDetail> serviceDetails = new ArrayList<>();
-        if (serviceDetailsJson != null && !serviceDetailsJson.isEmpty()) {
-            try {
-                Log.d("ConfirmActivity", "serviceDetailsJson: " + serviceDetailsJson);
-                Gson gson = new Gson();
-                serviceDetails = gson.fromJson(serviceDetailsJson, new TypeToken<List<ServiceDetail>>(){}.getType());
-                if (serviceDetails == null) {
-                    serviceDetails = new ArrayList<>();
-                    Toast.makeText(this, "Danh sách dịch vụ trống", Toast.LENGTH_SHORT).show();
-                }
-            } catch (Exception e) {
-                Log.e("ConfirmActivity", "Lỗi parse serviceDetailsJson: " + e.getMessage());
-                Toast.makeText(this, "Lỗi dữ liệu dịch vụ: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                finish();
-                return;
-            }
-        } else {
-            Log.e("ConfirmActivity", "serviceDetailsJson is null or empty");
-            Toast.makeText(this, "Không có dữ liệu dịch vụ", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-
-        tvStadiumName.setText("Tên sân: " + courtName);
-        tvAddress.setText("Địa chỉ: " + courtAddress);
-        tvDate.setText("Thông tin đơn dịch vụ:");
-
-        layoutConfirmOrders.removeAllViews();
-        for (ServiceDetail detail : serviceDetails) {
-            TextView tvService = new TextView(this);
-            tvService.setText(detail.getCourtServiceName() + " x" + detail.getQuantity() + " : " + formatMoney((int) (detail.getPrice() * detail.getQuantity())));
-            tvService.setTextColor(getResources().getColor(android.R.color.white));
-            tvService.setTextSize(14);
-            layoutConfirmOrders.addView(tvService);
-        }
-
-        tvTotalPriceLine.setText(Html.fromHtml("Tổng tiền: <b>" + formatMoney((int) paymentAmount) + "</b>"));
-
-        btnDeposit.setVisibility(View.GONE);
-        btnPayment.setText("Thanh toán");
-
-        ApiService apiService = RetrofitClient.getApiService(this);
-        String token = sessionManager.getToken();
-        if (token != null && !token.isEmpty()) {
-            String authHeader = "Bearer " + token;
-            NetworkUtils.callApi(apiService.getMyInfo(authHeader), this, new NetworkUtils.ApiCallback<MyInfoResponse>() {
-                @Override
-                public void onSuccess(MyInfoResponse r) {
-                    if (r != null && r.getResult() != null) {
-                        String fullName = r.getResult().getFirstName() + " " + r.getResult().getLastName();
-                        etName.setText(fullName);
-                        etPhone.setText(r.getResult().getPhoneNumber());
-                        userId = r.getResult().getId();
-                        sessionManager.saveUserId(userId);
-                        registerNotification();
-                    }
-                }
-                @Override
-                public void onError(String e) {
-                    Toast.makeText(ConfirmActivity.this, "Lấy thông tin thất bại!", Toast.LENGTH_SHORT).show();
-                }
-            });
-        } else {
-            Toast.makeText(this, "Bạn đang đặt dịch vụ với vai trò là Guest!", Toast.LENGTH_SHORT).show();
-            etName.setText("");
-            etPhone.setText("");
-            etNote.setText(courtName);
-            etNote.setEnabled(false);
-            List<String> guestPhones = sessionManager.getGuestPhones();
-            if (!guestPhones.isEmpty()) {
-                etPhone.setText(guestPhones.get(0));
-            }
-        }
-
-        btnPayment.setOnClickListener(v -> {
-            String name = etName.getText().toString().trim();
-            String phone = etPhone.getText().toString().trim();
-            String note = etNote.getText().toString().trim();
-
-            if (token == null || token.isEmpty()) {
-                if (name.isEmpty() || phone.isEmpty()) {
-                    Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-            }
-            if (name.isEmpty() || phone.isEmpty()) {
-                Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (!name.matches("^[\\p{L}\\s]+$") || name.length() < 2) {
-                Toast.makeText(this, "Tên chỉ chứa chữ cái và khoảng trắng, ít nhất 2 ký tự", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (!phone.matches("0\\d{9}")) {
-                Toast.makeText(this, "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (userId == null || userId.isEmpty()) {
-                sessionManager.addGuestPhone(phone);
-                registerNotification();
-            }
-
-            OrderServiceHolder.getInstance().addOrderDetail(orderId, serviceDetailsJson);
-
-            Intent i = new Intent(ConfirmActivity.this, QRCodeActivity.class);
-            i.putExtra("orderType", "Đơn dịch vụ");
-            i.putExtra("orderId", orderId);
-            i.putExtra("qrCodeData", qrCodeData);
-            i.putExtra("paymentTimeout", paymentTimeout);
-            i.putExtra("overallTotalPrice", (int) paymentAmount);
-            i.putExtra("paymentAmount", (int) paymentAmount);
-            i.putExtra("serviceDetailsJson", serviceDetailsJson);
-            i.putExtra("isDeposit", false);
-            i.putExtra("customerName", name);  // Thêm thông tin khách hàng
-            i.putExtra("phoneNumber", phone);  // Thêm số điện thoại
-            i.putExtra("note", note);          // Thêm ghi chú
-            startActivity(i);
-            finish();
-        });
-
-        btnBack.setOnClickListener(v -> finish());
-    }
-
     private void fetchCourtDetails(String id) {
         ApiService apiService = RetrofitClient.getApiService(this);
         NetworkUtils.callApi(apiService.getCourtById(id), this, new NetworkUtils.ApiCallback<Courts>() {
@@ -640,6 +734,9 @@ public class ConfirmActivity extends AppCompatActivity {
                     i.putExtra("isDeposit", isDeposit);
                     i.putExtra("totalTime", totalTime);
                     i.putExtra("courtId", courtId);
+                    i.putExtra("customerName", name);
+                    i.putExtra("phoneNumber", phone);
+                    i.putExtra("note", note);
                     startActivity(i);
                     finish();
                 } else {
@@ -673,14 +770,14 @@ public class ConfirmActivity extends AppCompatActivity {
         if (n == 1) {
             depositAmount = totalAmount;
         } else {
-            List<Integer> slotPrices = new ArrayList<>();
+            List<Integer> slotPricesList = new ArrayList<>();
             for (ConfirmOrder o : confirmOrders) {
-                slotPrices.add((int) o.getDailyPrice());
+                slotPricesList.add((int) o.getDailyPrice());
             }
-            Collections.sort(slotPrices);
+            Collections.sort(slotPricesList);
             int k = (int) Math.ceil(n / 3.0);
-            for (int i = 0; i < k && i < slotPrices.size(); i++) {
-                depositAmount += slotPrices.get(i);
+            for (int i = 0; i < k && i < slotPricesList.size(); i++) {
+                depositAmount += slotPricesList.get(i);
             }
         }
 
@@ -689,8 +786,8 @@ public class ConfirmActivity extends AppCompatActivity {
 
         CreateOrderRequest req = new CreateOrderRequest();
         req.setCourtId(clubId);
-        req.setCourtName(courtName);
-        req.setAddress(courtAddress);
+//        req.setCourtName(courtName);
+//        req.setAddress(courtAddress);
         req.setCustomerName(name);
         req.setUserId(userId);
         req.setPhoneNumber(phone);
@@ -705,7 +802,7 @@ public class ConfirmActivity extends AppCompatActivity {
             String date = o.getDayBooking() != null ? o.getDayBooking() : selectedDate;
             OrderDetail d = new OrderDetail();
             d.setCourtSlotId(o.getCourtSlotId());
-            d.setCourtSlotName(o.getCourtSlotName());
+            //d.setCourtSlotName(o.getCourtSlotName());
             d.setStartTime(o.getStartTime());
             d.setEndTime(o.getEndTime());
             d.setPrice((int) o.getDailyPrice());
@@ -722,6 +819,11 @@ public class ConfirmActivity extends AppCompatActivity {
         req.setOrderDetails(orderDetailGroups);
 
         ApiService api = RetrofitClient.getApiService(this);
+
+        List<Integer> slotPricesList = new ArrayList<>();
+        for (ConfirmOrder o : confirmOrders) {
+            slotPricesList.add((int) o.getDailyPrice());
+        }
 
         if (orderId != null && !orderId.isEmpty()) {
             Call<Orders> orderCall = api.getOrderById(orderId);
@@ -794,16 +896,24 @@ public class ConfirmActivity extends AppCompatActivity {
                                     i.putExtra("depositAmount", finalDepositAmount);
                                     i.putExtra("isDeposit", isDeposit);
                                     i.putExtra("courtId", clubId);
+                                    i.putExtra("customerName", name);
+                                    i.putExtra("phoneNumber", phone);
+                                    i.putExtra("note", note);
                                     i.putExtra("orderType", getIntent().getStringExtra("orderType"));
+                                    i.putIntegerArrayListExtra("slotPrices", new ArrayList<>(slotPricesList));
                                 }
                                 i.putExtra("orderId", r.getId());
                                 i.putExtra("totalTime", totalTime);
                                 i.putExtra("selectedDate", selectedDate);
                                 i.putExtra("totalPrice", r.getTotalAmount());
                                 i.putExtra("courtId", clubId);
+                                i.putExtra("customerName", name);
+                                i.putExtra("phoneNumber", phone);
+                                i.putExtra("note", note);
                                 i.putExtra("refundAmount", computedRefundAmount);
                                 i.putExtra("confirmOrdersJson", confirmOrdersJson);
                                 i.putExtra("orderType", getIntent().getStringExtra("orderType"));
+                                i.putIntegerArrayListExtra("slotPrices", new ArrayList<>(slotPricesList));
                                 startActivity(i);
                                 finish();
                             } else {
@@ -856,6 +966,9 @@ public class ConfirmActivity extends AppCompatActivity {
                         i.putExtra("depositAmount", finalDepositAmount);
                         i.putExtra("paymentAmount", paymentAmount);
                         i.putExtra("amountPaid", amountPaid);
+                        i.putExtra("customerName", name);
+                        i.putExtra("phoneNumber", phone);
+                        i.putExtra("note", note);
                         i.putExtra("isDeposit", isDeposit);
                         i.putExtra("totalTime", totalTime);
                         i.putExtra("selectedDate", selectedDate);
@@ -863,6 +976,7 @@ public class ConfirmActivity extends AppCompatActivity {
                         i.putExtra("courtId", clubId);
                         i.putExtra("confirmOrdersJson", confirmOrdersJson);
                         i.putExtra("orderType", getIntent().getStringExtra("orderType"));
+                        i.putIntegerArrayListExtra("slotPrices", new ArrayList<>(slotPricesList));
                         startActivity(i);
                         finish();
                     } else {
@@ -872,8 +986,12 @@ public class ConfirmActivity extends AppCompatActivity {
                         i.putExtra("selectedDate", selectedDate);
                         i.putExtra("totalPrice", finalTotalAmount);
                         i.putExtra("courtId", clubId);
+                        i.putExtra("customerName", name);
+                        i.putExtra("phoneNumber", phone);
+                        i.putExtra("note", note);
                         i.putExtra("confirmOrdersJson", confirmOrdersJson);
                         i.putExtra("orderType", getIntent().getStringExtra("orderType"));
+                        i.putIntegerArrayListExtra("slotPrices", new ArrayList<>(slotPricesList));
                         startActivity(i);
                         finish();
                     }
@@ -1020,5 +1138,13 @@ public class ConfirmActivity extends AppCompatActivity {
             Log.e("ConfirmActivity", "Lỗi tính số ngày: " + e.getMessage());
             return 0;
         }
+    }
+
+    private double calculatePaymentAmount(List<ServiceDetail> serviceDetails) {
+        double amount = 0;
+        for (ServiceDetail detail : serviceDetails) {
+            amount += detail.getPrice() * detail.getQuantity();
+        }
+        return amount;
     }
 }

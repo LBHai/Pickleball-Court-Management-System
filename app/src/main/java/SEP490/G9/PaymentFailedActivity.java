@@ -5,15 +5,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 public class PaymentFailedActivity extends AppCompatActivity {
-    private TextView tvOrderId;
     private ImageButton btnBack;
     private Button btnHistory;
-    private String orderId, totalTime, selectedDate, orderStatus, courtId, orderType;
+    private String orderId, totalTime, selectedDate, orderStatus, courtId, orderType, serviceDetailsJson;
     private int totalPrice;
 
     @Override
@@ -24,6 +22,7 @@ public class PaymentFailedActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
         btnHistory = findViewById(R.id.btnHistory);
 
+        // Lấy dữ liệu từ Intent
         orderId = getIntent().getStringExtra("orderId");
         totalTime = getIntent().getStringExtra("totalTime");
         selectedDate = getIntent().getStringExtra("selectedDate");
@@ -31,11 +30,13 @@ public class PaymentFailedActivity extends AppCompatActivity {
         orderStatus = getIntent().getStringExtra("orderStatus");
         courtId = getIntent().getStringExtra("courtId");
         orderType = getIntent().getStringExtra("orderType");
+        serviceDetailsJson = getIntent().getStringExtra("serviceDetailsJson");
 
         if (totalTime == null) {
-            Log.e("PaymentFailedActivity", "totalTime là null, kiểm tra lại QRCodeActivity");
+            Log.e("PaymentFailedActivity", "totalTime là null");
             totalTime = "0h00";
         }
+        Log.d("PaymentFailedActivity", "serviceDetailsJson: " + serviceDetailsJson);
 
         btnBack.setOnClickListener(v -> goBackToMainActivity());
 
@@ -48,10 +49,10 @@ public class PaymentFailedActivity extends AppCompatActivity {
             intent.putExtra("orderStatus", orderStatus);
             intent.putExtra("courtId", courtId);
             intent.putExtra("orderType", orderType);
-            intent.putExtra("serviceDetailsJson", getIntent().getStringExtra("serviceDetailsJson"));
-            intent.putExtra("customerName", getIntent().getStringExtra("customerName"));  // Truyền tiếp
-            intent.putExtra("phoneNumber", getIntent().getStringExtra("phoneNumber"));    // Truyền tiếp
-            intent.putExtra("note", getIntent().getStringExtra("note"));                  // Truyền tiếp
+            intent.putExtra("serviceDetailsJson", serviceDetailsJson);
+            intent.putExtra("customerName", getIntent().getStringExtra("customerName"));
+            intent.putExtra("phoneNumber", getIntent().getStringExtra("phoneNumber"));
+            intent.putExtra("note", getIntent().getStringExtra("note"));
             startActivity(intent);
             finish();
         });

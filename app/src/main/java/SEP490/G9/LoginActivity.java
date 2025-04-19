@@ -31,6 +31,7 @@ public class LoginActivity extends AppCompatActivity {
     private Button btnLogin;
     private SessionManager sessionManager;
     private String userId = null;
+    private TextView tvForgotPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +43,11 @@ public class LoginActivity extends AppCompatActivity {
         edtUsername = findViewById(R.id.edtUsername);
         edtPassword = findViewById(R.id.edtPassword);
         btnLogin = findViewById(R.id.btnLogin);
-
+        tvForgotPassword = findViewById(R.id.tvForgotPassword);
+        tvForgotPassword.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
+            startActivity(intent);
+        });
         // Xử lý nút Login
         btnLogin.setOnClickListener(v -> login());
 

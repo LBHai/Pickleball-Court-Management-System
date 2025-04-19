@@ -3,7 +3,6 @@ package Model;
 import com.google.gson.annotations.SerializedName;
 
 public class NotificationItem {
-
     @SerializedName("id")
     private String id;
 
@@ -20,12 +19,12 @@ public class NotificationItem {
     private String createAt;
 
     @SerializedName("notificationData")
-    private Object notificationData;
+    private NotificationData notificationData;
 
     public NotificationItem() {
     }
 
-    public NotificationItem(String id, String title, String description, String status, String createAt, Object notificationData) {
+    public NotificationItem(String id, String title, String description, String status, String createAt, NotificationData notificationData) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -74,11 +73,11 @@ public class NotificationItem {
         this.createAt = createAt;
     }
 
-    public Object getNotificationData() {
+    public NotificationData getNotificationData() {
         return notificationData;
     }
 
-    public void setNotificationData(Object notificationData) {
+    public void setNotificationData(NotificationData notificationData) {
         this.notificationData = notificationData;
     }
 }

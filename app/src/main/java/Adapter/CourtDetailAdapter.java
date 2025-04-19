@@ -6,16 +6,16 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
+import SEP490.G9.DisplayInforCourt;
 import SEP490.G9.GalleryFragment;
-import SEP490.G9.InfoFragment;
-import SEP490.G9.ServiceFragment;
+import SEP490.G9.DisplayService;
 
-public class CourtDetailPagerAdapter extends FragmentStateAdapter {
+public class CourtDetailAdapter extends FragmentStateAdapter {
 
     private static final int TAB_COUNT = 3;
     private String clubId; // ID sân được truyền từ CourtDetailFragment
 
-    public CourtDetailPagerAdapter(@NonNull Fragment fragment, String clubId) {
+    public CourtDetailAdapter(@NonNull Fragment fragment, String clubId) {
         super(fragment);
         this.clubId = clubId;
     }
@@ -26,18 +26,18 @@ public class CourtDetailPagerAdapter extends FragmentStateAdapter {
         switch (position) {
             case 0:
                 // Tạo InfoFragment và truyền clubId qua Bundle nếu cần
-                InfoFragment infoFragment = new InfoFragment();
+                DisplayInforCourt displayInforCourt = new DisplayInforCourt();
                 Bundle bundle = new Bundle();
                 bundle.putString("club_id", clubId);
-                infoFragment.setArguments(bundle);
-                return infoFragment;
+                displayInforCourt.setArguments(bundle);
+                return displayInforCourt;
             case 1:
                 // Tạo CourtServiceFragment và truyền clubId qua Bundle
-                ServiceFragment serviceFragment = new ServiceFragment();
+                DisplayService displayService = new DisplayService();
                 Bundle bundle3 = new Bundle();
                 bundle3.putString("club_id", clubId);
-                serviceFragment.setArguments(bundle3);
-                return serviceFragment;
+                displayService.setArguments(bundle3);
+                return displayService;
             case 2:
                 // Tạo GalleryFragment và truyền clubId qua Bundle
                 GalleryFragment galleryFragment = new GalleryFragment();
@@ -46,7 +46,7 @@ public class CourtDetailPagerAdapter extends FragmentStateAdapter {
                 galleryFragment.setArguments(bundle2);
                 return galleryFragment;
             default:
-                return new InfoFragment();
+                return new DisplayInforCourt();
         }
     }
 

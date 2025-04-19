@@ -16,8 +16,7 @@ public class PaymentSuccessActivity extends AppCompatActivity {
     private TextView tvTitle, tvSubTitle;
     private Button btnXemLichDatChiTiet, btnQuayVe;
     private ImageButton btnBack;
-    private String orderId, totalTime, selectedDate, courtId, orderType;
-    private int totalPrice;
+    private String orderId, totalTime, selectedDate, orderStatus, courtId, orderType, serviceDetailsJson;    private int totalPrice;
     private ArrayList<Integer> slotPrices;
 
     @Override
@@ -32,18 +31,16 @@ public class PaymentSuccessActivity extends AppCompatActivity {
         btnXemLichDatChiTiet = findViewById(R.id.btnXemLichDatChiTiet);
         btnQuayVe = findViewById(R.id.btnQuayVe);
 
-        // Nhận dữ liệu từ Intent
-        Intent intent = getIntent();
-        if (intent != null) {
-            orderId = intent.getStringExtra("orderId");
-            totalTime = intent.getStringExtra("totalTime");
-            selectedDate = intent.getStringExtra("selectedDate");
-            totalPrice = intent.getIntExtra("totalPrice", 0);
-            courtId = intent.getStringExtra("courtId");
-            orderType = intent.getStringExtra("orderType");
-        }
+        orderId = getIntent().getStringExtra("orderId");
+        totalTime = getIntent().getStringExtra("totalTime");
+        selectedDate = getIntent().getStringExtra("selectedDate");
+        totalPrice = getIntent().getIntExtra("totalPrice", 0);
+        orderStatus = getIntent().getStringExtra("orderStatus");
+        courtId = getIntent().getStringExtra("courtId");
+        orderType = getIntent().getStringExtra("orderType");
+        serviceDetailsJson = getIntent().getStringExtra("serviceDetailsJson");
         slotPrices = getIntent().getIntegerArrayListExtra("slotPrices");
-
+        Log.d("PaymentSuccessActivity", "serviceDetailsJson: " + serviceDetailsJson);
         // In log danh sách giá nếu slotPrices không null
         if (slotPrices != null) {
             for (Integer price : slotPrices) {

@@ -1,6 +1,7 @@
 package Api;
 
 import java.util.List;
+import java.util.Map;
 
 import Model.CUser;
 import Model.ChangePasswordRequest;
@@ -13,16 +14,17 @@ import Model.CourtSlot;
 import Model.CreateOrderRegularRequest;
 import Model.CreateOrderRequest;
 import Model.CreateOrderResponse;
+import Model.ForgetPasswordRequest;
+import Model.ForgetPasswordResponse;
 import Model.GetToken;
 import Model.MyInfoResponse;
 import Model.NotificationRequest;
 import Model.NotificationResponse;
-import Model.CreateOrderRegularRequest;
 import Model.Orders;
 import Model.Service;
 import Model.ServiceOrderRequest;
+import Model.Transaction;
 import Model.UnreadResponse;
-import Model.UploadAvatar;
 import Model.User;
 import Model.UpdateMyInfor;
 import okhttp3.MultipartBody;
@@ -38,7 +40,6 @@ import retrofit2.http.PUT;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
-import retrofit2.http.Url;
 
 public interface ApiService {
 
@@ -77,7 +78,7 @@ public interface ApiService {
 
     // GET danh sách thông báo
 
-    
+
     @GET("court/public/court_price/getByCourtId/{courtId}")
     Call<CourtPrice> getCourtPriceByCourtId(@Path("courtId") String courtId);
 
@@ -140,5 +141,9 @@ public interface ApiService {
     Call<Void> markAsRead(@Query("id") String notificationId);
     @POST("identity/public/order/service")
     Call<CreateOrderResponse> createServiceOrder(@Body ServiceOrderRequest request);
-
+    @GET("identity/public/getTransactionHistory")
+    Call<List<Transaction>> getTransactionHistory(@Query("orderId") String orderId);
+        @Headers("Content-Type: application/json")
+        @POST("identity/auth/forgetPassword")
+        Call<Void> forgetPassword(@Body ForgetPasswordRequest body);
 }

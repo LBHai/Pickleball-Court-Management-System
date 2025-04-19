@@ -16,7 +16,7 @@
     <string name="menu_gallery" translatable="false">Gallery</string>
     <string name="menu_slideshow" translatable="false">Slideshow</string>
 
-
+    <string name="create_account">Create Account</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="first_name">First Name</string>

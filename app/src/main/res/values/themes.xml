@@ -80,10 +80,10 @@
         <item name="android:background">@color/input_text</item>
     </style>
 
-    <style name="btnLoginwithgg" parent="Widget.MaterialComponents.Button.TextButton">
+    <style name="btnBackHome" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:text">Log in with Facebook</item>
+        <item name="android:text">Home</item>
         <item name="android:layout_marginTop">16dp</item>
         <item name="android:textColor">@color/white</item>
     </style>

@@ -4,8 +4,6 @@ import java.util.List;
 
 public class CreateOrderRequest {
     private String courtId;
-    private String courtName;
-    private String address;
     private String userId; // có thể null
     private String customerName;
     private String phoneNumber;
@@ -26,10 +24,6 @@ public class CreateOrderRequest {
     // Getters & Setters
     public String getCourtId() { return courtId; }
     public void setCourtId(String courtId) { this.courtId = courtId; }
-    public String getCourtName() { return courtName; }
-    public void setCourtName(String courtName) { this.courtName = courtName; }
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
     public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }
     public String getCustomerName() { return customerName; }
