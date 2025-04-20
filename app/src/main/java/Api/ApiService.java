@@ -23,6 +23,7 @@ import Model.NotificationResponse;
 import Model.Orders;
 import Model.Service;
 import Model.ServiceOrderRequest;
+import Model.StudentRegistrationRequest;
 import Model.Transaction;
 import Model.UnreadResponse;
 import Model.User;
@@ -146,4 +147,6 @@ public interface ApiService {
         @Headers("Content-Type: application/json")
         @POST("identity/auth/forgetPassword")
         Call<Void> forgetPassword(@Body ForgetPasswordRequest body);
+    @POST("identity/users/registerForStudent")
+    Call<Void> registerStudent(@Body StudentRegistrationRequest req);
 }

@@ -1,4 +1,4 @@
-package SEP490.G9;
+package Activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -20,6 +20,7 @@ import Api.RetrofitClient;
 import Model.NotificationData;
 import Model.NotificationItem;
 import Model.NotificationResponse;
+import SEP490.G9.R;
 import Session.SessionManager;
 import retrofit2.Call;
 import retrofit2.Callback;

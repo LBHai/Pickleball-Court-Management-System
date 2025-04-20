@@ -65,18 +65,20 @@
         <item>12</item>
     </string-array>
 
-    <!-- Mảng năm (ví dụ 1980 - 2030) -->
     <string-array name="year_array">
         <item>1980</item>
         <item>1981</item>
         <item>1982</item>
         <!-- ... -->
-        <item>2030</item>
+        <item>2099</item>
     </string-array>
     <string name="old_password">Mật khẩu cũ</string>
     <string name="new_password">Mật khẩu mới</string>
     <string name="re_enter_new_password">Nhập lại mật khẩu mới</string>
-    <string name="day">Đơn ngày</string>
+    <string name="dayorder">Đơn ngày</string>
+    <string name="prompt_day">Day</string>
+    <string name="prompt_month">Month</string>
+    <string name="prompt_year">Year</string>
     <string name="search">Tìm kiếm</string>
 
 </resources>

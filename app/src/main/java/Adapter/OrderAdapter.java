@@ -18,7 +18,7 @@ import java.util.Locale;
 
 import Model.Orders;
 import Model.OrderDetail;
-import SEP490.G9.DetailBookingActivity;
+import Activity.DetailBookingActivity;
 import SEP490.G9.R;
 
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> {

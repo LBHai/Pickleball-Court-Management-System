@@ -8,7 +8,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import SEP490.G9.DisplayInforCourt;
 import SEP490.G9.GalleryFragment;
-import SEP490.G9.DisplayService;
+import SEP490.G9.DisplayServiceFragment;
 
 public class CourtDetailAdapter extends FragmentStateAdapter {
 
@@ -32,12 +32,9 @@ public class CourtDetailAdapter extends FragmentStateAdapter {
                 displayInforCourt.setArguments(bundle);
                 return displayInforCourt;
             case 1:
-                // Tạo CourtServiceFragment và truyền clubId qua Bundle
-                DisplayService displayService = new DisplayService();
-                Bundle bundle3 = new Bundle();
-                bundle3.putString("club_id", clubId);
-                displayService.setArguments(bundle3);
+                DisplayServiceFragment displayService = DisplayServiceFragment.newInstance(clubId);
                 return displayService;
+
             case 2:
                 // Tạo GalleryFragment và truyền clubId qua Bundle
                 GalleryFragment galleryFragment = new GalleryFragment();

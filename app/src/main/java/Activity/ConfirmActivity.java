@@ -1,4 +1,4 @@
-package SEP490.G9;
+package Activity;
 
 import android.content.Intent;
 
@@ -52,8 +52,10 @@ import Model.NotificationRequest;
 import Model.OrderDetail;
 import Model.OrderDetailGroup;
 import Model.Orders;
+import Model.Service;
 import Model.ServiceDetail;
 import Model.ServiceOrderRequest;
+import SEP490.G9.R;
 import Session.SessionManager;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -80,7 +82,6 @@ public class ConfirmActivity extends AppCompatActivity {
     private List<String> selectedCourtSlots;
     private int totalPriceFixedOrder;
     private String orderType;
-    // Biến trạng thái để kiểm soát nút Thanh toán cho Đơn dịch vụ
     private boolean isPaymentButtonClicked = false;
 
     @Override
@@ -122,7 +123,7 @@ public class ConfirmActivity extends AppCompatActivity {
         } else if ("Đơn dịch vụ".equals(orderType)) {
             courtName = intent.getStringExtra("courtName");
             etNote.setText(courtName);
-            etNote.setEnabled(false);
+            etNote.setEnabled(false); // Không cho người dùng chỉnh sửa note
             handleServiceOrder(intent);
         } else {
             handleRegularOrder(intent);
@@ -130,19 +131,42 @@ public class ConfirmActivity extends AppCompatActivity {
     }
 
     private void handleServiceOrder(Intent intent) {
+        // Lấy dữ liệu từ Intent
         courtName = intent.getStringExtra("courtName");
         courtAddress = intent.getStringExtra("address");
         String serviceDetailsJson = intent.getStringExtra("serviceDetailsJson");
+        String serviceListJson = intent.getStringExtra("serviceListJson"); // Thêm dòng này để lấy danh sách Service
         orderId = intent.getStringExtra("orderId");
 
+        // Parse danh sách Service từ JSON
+        List<Service> serviceList = new ArrayList<>();
+        if (serviceListJson != null && !serviceListJson.isEmpty()) {
+            try {
+                Gson gson = new Gson();
+                serviceList = gson.fromJson(serviceListJson, new TypeToken<List<Service>>(){}.getType());
+            } catch (Exception e) {
+                Log.e("ConfirmActivity", "Lỗi parse serviceListJson: " + e.getMessage());
+                Toast.makeText(this, "Lỗi dữ liệu danh sách dịch vụ", Toast.LENGTH_SHORT).show();
+                finish();
+                return;
+            }
+        } else {
+            Log.e("ConfirmActivity", "serviceListJson is null or empty");
+            Toast.makeText(this, "Không có dữ liệu danh sách dịch vụ", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        // Kiểm tra và parse dữ liệu serviceDetailsJson
         List<ServiceDetail> serviceDetails = new ArrayList<>();
         if (serviceDetailsJson != null && !serviceDetailsJson.isEmpty()) {
             try {
                 Gson gson = new Gson();
                 serviceDetails = gson.fromJson(serviceDetailsJson, new TypeToken<List<ServiceDetail>>(){}.getType());
-                if (serviceDetails == null) {
-                    serviceDetails = new ArrayList<>();
+                if (serviceDetails == null || serviceDetails.isEmpty()) {
                     Toast.makeText(this, "Danh sách dịch vụ trống", Toast.LENGTH_SHORT).show();
+                    finish();
+                    return;
                 }
             } catch (Exception e) {
                 Log.e("ConfirmActivity", "Lỗi parse serviceDetailsJson: " + e.getMessage());
@@ -158,8 +182,10 @@ public class ConfirmActivity extends AppCompatActivity {
         }
 
         final List<ServiceDetail> finalServiceDetails = serviceDetails;
+        final List<Service> finalServiceList = serviceList;
         final double paymentAmount = calculatePaymentAmount(serviceDetails);
 
+        // Hiển thị thông tin lên giao diện
         tvStadiumName.setText("Tên sân: " + courtName);
         tvAddress.setText("Địa chỉ: " + courtAddress);
         tvDate.setText("Thông tin đơn dịch vụ:");
@@ -167,7 +193,17 @@ public class ConfirmActivity extends AppCompatActivity {
         layoutConfirmOrders.removeAllViews();
         for (ServiceDetail detail : serviceDetails) {
             TextView tvService = new TextView(this);
-            tvService.setText(detail.getCourtServiceName() + " x" + detail.getQuantity() + " : " + formatMoney((int) (detail.getPrice() * detail.getQuantity())));
+            // Tìm Service tương ứng với courtServiceId
+            String serviceName = "Dịch vụ không xác định";
+            for (Service service : finalServiceList) {
+                if (service.getId() != null && service.getId().equals(detail.getCourtServiceId())) {
+                    serviceName = service.getName();
+                    break;
+                }
+            }
+            // Sử dụng serviceName từ service.getName()
+            String serviceText = serviceName + " x" + detail.getQuantity() + " : " + formatMoney((int) (detail.getPrice() * detail.getQuantity()));
+            tvService.setText(serviceText);
             tvService.setTextColor(getResources().getColor(android.R.color.white));
             tvService.setTextSize(14);
             layoutConfirmOrders.addView(tvService);
@@ -175,9 +211,11 @@ public class ConfirmActivity extends AppCompatActivity {
 
         tvTotalPriceLine.setText(Html.fromHtml("Tổng tiền: <b>" + formatMoney((int) paymentAmount) + "</b>"));
 
+        // Ẩn nút đặt cọc và đặt tên nút thanh toán
         btnDeposit.setVisibility(View.GONE);
         btnPayment.setText("Thanh toán");
 
+        // Kiểm tra thông tin người dùng
         ApiService apiService = RetrofitClient.getApiService(this);
         String token = sessionManager.getToken();
         if (token != null && !token.isEmpty()) {
@@ -209,20 +247,17 @@ public class ConfirmActivity extends AppCompatActivity {
             }
         }
 
-        // Xử lý sự kiện nút Thanh toán cho Đơn dịch vụ
+        // Xử lý sự kiện nút thanh toán
         btnPayment.setOnClickListener(new View.OnClickListener() {
-            // Sử dụng flag để theo dõi trạng thái xử lý
             private boolean isProcessing = false;
 
             @Override
             public void onClick(View v) {
-                // Kiểm tra nếu đang xử lý thì không làm gì
                 if (isProcessing) {
                     Toast.makeText(ConfirmActivity.this, "Đang xử lý, vui lòng chờ...", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                // Đánh dấu đang bắt đầu xử lý và vô hiệu hóa nút
                 isProcessing = true;
                 btnPayment.setEnabled(false);
 
@@ -230,9 +265,8 @@ public class ConfirmActivity extends AppCompatActivity {
                 String phone = etPhone.getText().toString().trim();
                 String note = etNote.getText().toString().trim();
 
+                // Ghi log dữ liệu để debug
                 Log.d("ConfirmActivity", "Dữ liệu đầu vào - courtId: " + intent.getStringExtra("courtId") +
-                        ", courtName: " + courtName +
-                        ", address: " + courtAddress +
                         ", userId: " + userId +
                         ", paymentAmount: " + paymentAmount +
                         ", customerName: " + name +
@@ -240,15 +274,7 @@ public class ConfirmActivity extends AppCompatActivity {
                         ", note: " + note +
                         ", serviceDetails: " + new Gson().toJson(finalServiceDetails));
 
-                // Kiểm tra dữ liệu đầu vào
-                if (token == null || token.isEmpty()) {
-                    if (name.isEmpty() || phone.isEmpty()) {
-                        Toast.makeText(ConfirmActivity.this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
-                        isProcessing = false;
-                        btnPayment.setEnabled(true);
-                        return;
-                    }
-                }
+                // Xác thực dữ liệu đầu vào
                 if (name.isEmpty() || phone.isEmpty()) {
                     Toast.makeText(ConfirmActivity.this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
                     isProcessing = false;
@@ -267,25 +293,24 @@ public class ConfirmActivity extends AppCompatActivity {
                     btnPayment.setEnabled(true);
                     return;
                 }
+
+                // Đăng ký thông báo cho khách
                 if (userId == null || userId.isEmpty()) {
                     sessionManager.addGuestPhone(phone);
                     registerNotification();
                 }
 
-                // Chuẩn bị yêu cầu tạo đơn dịch vụ
+                // Tạo request cho API
                 ServiceOrderRequest request = new ServiceOrderRequest();
                 request.setCourtId(intent.getStringExtra("courtId"));
-                request.setCourtName(courtName);
-                request.setAddress(courtAddress);
                 request.setUserId(userId);
                 request.setPaymentAmount(paymentAmount);
                 request.setCustomerName(name);
                 request.setPhoneNumber(phone);
-                request.setNote(courtName); // Note bắt buộc là courtName
+                request.setNote(courtName); // Note bắt buộc là courtName theo yêu cầu
                 request.setServiceDetails(finalServiceDetails);
 
-                // Gọi API để tạo đơn dịch vụ
-                ApiService apiService = RetrofitClient.getApiService(ConfirmActivity.this);
+                // Gọi API tạo đơn dịch vụ
                 Call<CreateOrderResponse> call = apiService.createServiceOrder(request);
                 call.enqueue(new Callback<CreateOrderResponse>() {
                     @Override
@@ -303,12 +328,10 @@ public class ConfirmActivity extends AppCompatActivity {
                             // Lưu thông tin đơn hàng
                             OrderServiceHolder.getInstance().addOrderDetail(orderId, serviceDetailsJson);
 
-                            // Tính toán tổng thời gian (để tránh null trong QRCodeActivity)
-                            int hours = 0;
-                            int mins = 0;
-                            String totalTime = String.format(Locale.getDefault(), "%dh%02d", hours, mins);
+                            // Tạo totalTime mặc định để tránh lỗi ở QRCodeActivity
+                            String totalTime = String.format(Locale.getDefault(), "%dh%02d", 0, 0);
 
-                            // Chuyển sang màn hình QRCodeActivity
+                            // Chuyển sang QRCodeActivity
                             Intent i = new Intent(ConfirmActivity.this, QRCodeActivity.class);
                             i.putExtra("orderType", "Đơn dịch vụ");
                             i.putExtra("orderId", orderId);
@@ -321,13 +344,12 @@ public class ConfirmActivity extends AppCompatActivity {
                             i.putExtra("customerName", name);
                             i.putExtra("phoneNumber", phone);
                             i.putExtra("note", note);
-                            i.putExtra("totalTime", totalTime); // Thêm totalTime để tránh null exception
+                            i.putExtra("totalTime", totalTime);
                             startActivity(i);
                             finish();
                         } else {
                             Log.e("ConfirmActivity", "Tạo đơn dịch vụ thất bại. Mã trạng thái HTTP: " + response.code());
                             Toast.makeText(ConfirmActivity.this, "Tạo đơn dịch vụ thất bại!", Toast.LENGTH_SHORT).show();
-                            // Khôi phục trạng thái nút
                             isProcessing = false;
                             btnPayment.setEnabled(true);
                         }
@@ -337,7 +359,6 @@ public class ConfirmActivity extends AppCompatActivity {
                     public void onFailure(Call<CreateOrderResponse> call, Throwable t) {
                         Log.e("ConfirmActivity", "Lỗi mạng khi tạo đơn dịch vụ: " + t.getMessage(), t);
                         Toast.makeText(ConfirmActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                        // Khôi phục trạng thái nút
                         isProcessing = false;
                         btnPayment.setEnabled(true);
                     }

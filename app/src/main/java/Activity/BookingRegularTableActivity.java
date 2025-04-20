@@ -1,4 +1,4 @@
-package SEP490.G9;
+package Activity;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -33,6 +33,8 @@ import Api.ApiService;
 import Api.RetrofitClient;
 import Model.CheckInvalidSlotsRequest;
 import Model.CheckInvalidSlotsResponse;
+import SEP490.G9.R;
+import SEP490.G9.TimePickerDialog;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -47,12 +49,13 @@ public class BookingRegularTableActivity extends AppCompatActivity {
     private ApiService apiService;
     private LinearLayout resultContainer;
     private MaterialCheckBox cbMonday, cbTuesday, cbWednesday, cbThursday, cbFriday, cbSaturday, cbSunday;
-    private Map<String, String> flexibleCourtSlotFixes = new HashMap<>();
-    private Map<String, TextView> courtDateReplacementTextViews = new HashMap<>();
+    private Map<String, String> flexibleCourtSlotFixes = new HashMap<>(); // date -> replacement court
+    private Map<String, TextView> courtDateReplacementTextViews = new HashMap<>(); // court_date -> TextView
     private List<String> selectedCourtSlots = new ArrayList<>();
     private List<String> selectedCourts = new ArrayList<>();
     private MaterialButton btnStartTime, btnEndTime;
     private CheckInvalidSlotsResponse currentResponse;
+    private Map<String, String> selectedReplacementPerDate = new HashMap<>(); // date -> replacement court
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -193,6 +196,7 @@ public class BookingRegularTableActivity extends AppCompatActivity {
         flexibleCourtSlotFixes.clear();
         courtDateReplacementTextViews.clear();
         selectedCourtSlots.clear();
+        selectedReplacementPerDate.clear();
 
         if (res.getInvalidCourtSlots().isEmpty()) {
             if (res.getAvailableCourtSlots().isEmpty()) {
@@ -468,6 +472,16 @@ public class BookingRegularTableActivity extends AppCompatActivity {
         return availableCourtsForDate;
     }
 
+    private int countCourtDates(String court) {
+        int count = 0;
+        for (Map.Entry<String, Object> entry : currentResponse.getInvalidCourtSlots().entrySet()) {
+            if (entry.getKey().equals(court) && entry.getValue() instanceof List<?>) {
+                count = ((List<?>) entry.getValue()).size();
+            }
+        }
+        return count;
+    }
+
     private void showAlternativeDialog(String court, String date, List<String> availableCourts, String courtDateKey) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Chọn sân thay thế cho " + court + " - Ngày " + date);
@@ -478,6 +492,8 @@ public class BookingRegularTableActivity extends AppCompatActivity {
 
         String currentSelection = flexibleCourtSlotFixes.get(date);
         List<CheckBox> checkBoxes = new ArrayList<>();
+        boolean isSingleDateCourt = countCourtDates(court) == 1;
+        String selectedReplacementForDate = selectedReplacementPerDate.get(date);
 
         CheckBox cbNone = new CheckBox(this);
         cbNone.setText("Chưa chọn");
@@ -493,6 +509,13 @@ public class BookingRegularTableActivity extends AppCompatActivity {
             cb.setTextColor(ContextCompat.getColor(this, android.R.color.black));
             cb.setPadding(8, 8, 8, 8);
             cb.setChecked(availableCourt.equals(currentSelection));
+
+            // Nếu ngày đã có sân thay thế được chọn bởi sân khác, chỉ cho phép chọn sân đó hoặc "Chưa chọn"
+            if (selectedReplacementPerDate.containsKey(date) && !availableCourt.equals(selectedReplacementPerDate.get(date))) {
+                cb.setEnabled(false);
+                cb.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray));
+            }
+
             checkBoxes.add(cb);
             layout.addView(cb);
         }
@@ -521,27 +544,46 @@ public class BookingRegularTableActivity extends AppCompatActivity {
 
             if (chosenCourt != null) {
                 flexibleCourtSlotFixes.put(date, chosenCourt);
+                selectedReplacementPerDate.put(date, chosenCourt); // Lưu sân thay thế cho ngày này
                 if (!selectedCourtSlots.contains(court)) {
                     selectedCourtSlots.add(court);
                 }
                 courtDateReplacementTextViews.get(courtDateKey).setText(chosenCourt);
             } else {
                 flexibleCourtSlotFixes.remove(date);
-                courtDateReplacementTextViews.get(courtDateKey).setText("Chưa chọn");
-                boolean hasReplacement = false;
-                for (String key : flexibleCourtSlotFixes.keySet()) {
-                    if (courtDateReplacementTextViews.containsKey(court + "_" + key)) {
-                        hasReplacement = true;
-                        break;
-                    }
+                if (isSingleDateCourt || !hasOtherCourtsOnSameDate(date, court)) {
+                    selectedReplacementPerDate.remove(date); // Xóa nếu không còn sân nào chọn cho ngày này
                 }
-                if (!hasReplacement) {
+                courtDateReplacementTextViews.get(courtDateKey).setText("Chưa chọn");
+                if (!hasReplacementForCourt(court)) {
                     selectedCourtSlots.remove(court);
                 }
             }
         });
         builder.setNegativeButton("Hủy", null);
         builder.show();
+    }
+
+    private boolean hasOtherCourtsOnSameDate(String date, String currentCourt) {
+        for (Map.Entry<String, Object> entry : currentResponse.getInvalidCourtSlots().entrySet()) {
+            String court = entry.getKey();
+            if (!court.equals(currentCourt) && entry.getValue() instanceof List<?>) {
+                List<String> dates = (List<String>) entry.getValue();
+                if (dates.contains(date) && flexibleCourtSlotFixes.containsKey(date)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean hasReplacementForCourt(String court) {
+        for (String key : flexibleCourtSlotFixes.keySet()) {
+            if (courtDateReplacementTextViews.containsKey(court + "_" + key)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private List<String> getSelectedDays() {

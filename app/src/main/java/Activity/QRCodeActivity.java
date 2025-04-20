@@ -1,4 +1,4 @@
-package SEP490.G9;
+package Activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
@@ -25,6 +25,7 @@ import Api.NetworkUtils;
 import Api.RetrofitClient;
 import Holder.DataHolder;
 import Model.Orders;
+import SEP490.G9.R;
 import Socket.PaymentSocketListener;
 import Socket.PaymentSocketListener.ExtendedPaymentStatusCallback;
 import retrofit2.Call;

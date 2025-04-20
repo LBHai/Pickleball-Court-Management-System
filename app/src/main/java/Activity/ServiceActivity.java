@@ -1,4 +1,4 @@
-package SEP490.G9;
+package Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -21,6 +21,7 @@ import Api.RetrofitClient;
 import Model.Courts;
 import Model.Service;
 import Model.ServiceDetail;
+import SEP490.G9.R;
 import Session.SessionManager;
 import com.google.android.material.button.MaterialButton;
 import com.google.gson.Gson;
@@ -155,7 +156,7 @@ public class ServiceActivity extends Fragment {
                 if (service != null) {
                     ServiceDetail detail = new ServiceDetail();
                     detail.setCourtServiceId(serviceId);
-                    detail.setCourtServiceName(service.getName());
+                    //detail.setCourtServiceName(service.getName());
                     detail.setQuantity(selectedQuantity);
                     detail.setPrice(service.getPrice());
                     orderedServiceDetails.add(detail);
@@ -180,7 +181,6 @@ public class ServiceActivity extends Fragment {
                     Courts court = response.body();
                     String courtName = court.getName();
                     String address = court.getAddress();
-
                     Intent intent = new Intent(getActivity(), ConfirmActivity.class);
                     intent.putExtra("orderType", "Đơn dịch vụ");
                     intent.putExtra("courtId", courtId);
@@ -190,6 +190,8 @@ public class ServiceActivity extends Fragment {
                     String serviceDetailsJson = new Gson().toJson(orderedServiceDetails);
                     Log.d("ServiceActivity", "serviceDetailsJson: " + serviceDetailsJson);
                     intent.putExtra("serviceDetailsJson", serviceDetailsJson);
+                    String serviceListJson = new Gson().toJson(serviceList);
+                    intent.putExtra("serviceListJson", serviceListJson);
                     startActivity(intent);
                 } else {
                     Toast.makeText(getContext(), "Không thể lấy thông tin sân", Toast.LENGTH_SHORT).show();

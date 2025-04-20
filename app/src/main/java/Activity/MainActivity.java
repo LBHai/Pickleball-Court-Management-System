@@ -1,8 +1,7 @@
-package SEP490.G9;
+package Activity;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -16,6 +15,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import Fragment.AccountFragment;
 import Fragment.CourtsFragment;
 import Fragment.CourtServiceFragment;
+import SEP490.G9.R;
 import Session.SessionManager;
 
 public class MainActivity extends AppCompatActivity {

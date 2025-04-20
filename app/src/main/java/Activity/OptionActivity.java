@@ -1,4 +1,4 @@
-package SEP490.G9;
+package Activity;
 
 import android.os.Bundle;
 import android.view.MenuInflater;
@@ -7,6 +7,8 @@ import android.widget.ImageButton;
 import android.widget.PopupMenu;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import SEP490.G9.R;
 
 
 public class OptionActivity extends AppCompatActivity {

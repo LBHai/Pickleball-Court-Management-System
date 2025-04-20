@@ -1,11 +1,11 @@
-package SEP490.G9;
+package Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,13 +17,11 @@ import Api.ApiService;
 import Api.NetworkUtils;
 import Api.RetrofitClient;
 import Model.GetToken;
-import Model.MyInfo;
 import Model.MyInfoResponse;
 import Model.User;
+import SEP490.G9.R;
 import Session.SessionManager;
 import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -32,6 +30,7 @@ public class LoginActivity extends AppCompatActivity {
     private SessionManager sessionManager;
     private String userId = null;
     private TextView tvForgotPassword;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +64,16 @@ public class LoginActivity extends AppCompatActivity {
                 return true;
             }
             return false;
+        });
+        ImageView btnHome = findViewById(R.id.btnHome);
+
+        // Thiết lập sự kiện click cho nút Home
+        btnHome.setOnClickListener(v -> {
+            // Chuyển về MainActivity
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
+            finish(); // Đóng LoginActivity
         });
     }
 

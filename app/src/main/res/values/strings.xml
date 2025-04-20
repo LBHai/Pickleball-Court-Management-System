@@ -97,7 +97,10 @@
     <string name="old_password">Old Password</string>
     <string name="new_password">New Password</string>
     <string name="re_enter_new_password">Re-enter new password</string>
-    <string name="day">Day</string>
+    <string name="dayorder">Day Order</string>
+    <string name="prompt_day">Ngày</string>
+    <string name="prompt_month">Tháng</string>
+    <string name="prompt_year">Năm</string>
     <string name="search">Search</string>
 
 </resources>

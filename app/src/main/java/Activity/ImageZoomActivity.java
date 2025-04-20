@@ -1,10 +1,12 @@
-package SEP490.G9;
+package Activity;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+
+import SEP490.G9.R;
 
 public class ImageZoomActivity extends AppCompatActivity {
 

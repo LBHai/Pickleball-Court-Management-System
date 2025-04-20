@@ -1,4 +1,4 @@
-package SEP490.G9;
+package Activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
@@ -18,6 +18,7 @@ import Api.ApiService;
 import Api.RetrofitClient;
 import Model.CourtPrice;
 import Model.TimeSlot;
+import SEP490.G9.R;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

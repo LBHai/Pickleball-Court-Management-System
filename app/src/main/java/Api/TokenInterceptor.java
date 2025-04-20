@@ -16,7 +16,7 @@ import okhttp3.ResponseBody;
 
 import java.io.IOException;
 
-import SEP490.G9.LoginActivity;
+import Activity.LoginActivity;
 
 public class TokenInterceptor implements Interceptor {
     private final Context context;

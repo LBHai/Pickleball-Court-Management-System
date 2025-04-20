@@ -4,9 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SignUpActivity">
+    tools:context="Activity.SignUpActivity">
 
-    <!-- Full-screen background image - now directly in the root layout -->
+    <!-- Full-screen background image -->
     <ImageView
         android:id="@+id/imgBackground"
         android:layout_width="0dp"
@@ -19,7 +19,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Semi-transparent overlay to improve text visibility -->
+    <!-- Semi-transparent overlay -->
     <View
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -219,28 +219,62 @@
                             android:maxLines="1" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/tilDOB"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="match_parent"
+                    <!-- Nhãn Ngày sinh -->
+                    <TextView
+                        android:id="@+id/tvDobLabel"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:hint="Date of Birth (DD/MM/YYYY)"
-                        app:boxStrokeColor="@color/colorPrimary"
-                        app:endIconDrawable="@drawable/ic_calendar"
-                        app:endIconMode="custom"
-                        app:hintTextColor="@color/colorPrimary"
+                        android:text="@string/date_of_birth"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tilPhoneNumber" />
+
+                    <!-- Container cho DOB với ba Spinner -->
+                    <LinearLayout
+                        android:id="@+id/dobContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tilPhoneNumber">
+                        app:layout_constraintTop_toBottomOf="@id/tvDobLabel">
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/edtDOB"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="date"
-                            android:maxLines="1" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                        <!-- Spinner cho ngày -->
+                        <Spinner
+                            android:id="@+id/spinnerDay"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_marginEnd="8dp"
+                            android:layout_weight="1"
+                            android:background="@android:drawable/edit_text"
+                            android:prompt="@string/prompt_day"
+                            android:spinnerMode="dropdown" />
+
+                        <!-- Spinner cho tháng -->
+                        <Spinner
+                            android:id="@+id/spinnerMonth"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_marginEnd="8dp"
+                            android:layout_weight="1"
+                            android:background="@android:drawable/edit_text"
+                            android:prompt="@string/prompt_month"
+                            android:spinnerMode="dropdown" />
+
+                        <!-- Spinner cho năm -->
+                        <Spinner
+                            android:id="@+id/spinnerYear"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:background="@android:drawable/edit_text"
+                            android:prompt="@string/prompt_year"
+                            android:spinnerMode="dropdown" />
+                    </LinearLayout>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnSignup"
@@ -249,11 +283,11 @@
                         android:layout_marginTop="24dp"
                         android:text="CREATE ACCOUNT"
                         android:textSize="16sp"
-                        app:cornerRadius="8dp"
                         app:backgroundTint="@color/green"
+                        app:cornerRadius="8dp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tilDOB" />
+                        app:layout_constraintTop_toBottomOf="@id/dobContainer" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>

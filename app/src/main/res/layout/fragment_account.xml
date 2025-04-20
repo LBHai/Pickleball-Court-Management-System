@@ -30,7 +30,7 @@
             <ImageButton
                 android:id="@+id/notification"
                 android:layout_width="45dp"
-                android:layout_height="50dp"
+                android:layout_height="45dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="Thông báo"
                 android:scaleType="fitCenter"
@@ -200,13 +200,13 @@
                 android:textSize="16sp" />
 
             <TextView
-                android:id="@+id/tvTabInfoMember"
+                android:id="@+id/tvServiceInfo"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:paddingVertical="8dp"
-                android:text="Thông tin thành viên"
+                android:text="Dịch vụ đã đặt"
                 android:textColor="@android:color/darker_gray"
                 android:textSize="16sp" />
         </LinearLayout>
@@ -231,7 +231,7 @@
 
 
         <TextView
-            android:id="@+id/tvMemberInfo"
+            android:id="@+id/tvServiceOrderInfo"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"

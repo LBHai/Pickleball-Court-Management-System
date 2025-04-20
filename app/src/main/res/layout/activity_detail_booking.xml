@@ -58,16 +58,6 @@
             android:textColor="@android:color/white"
             android:textSize="16sp" />
 
-        <TextView
-            android:id="@+id/tvTabServiceDetail"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:paddingVertical="8dp"
-            android:text="Chi tiết Dịch vụ"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="16sp" />
     </LinearLayout>
 
     <LinearLayout
@@ -79,21 +69,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tabLayout">
-
-        <View
-            android:id="@+id/lineBookingInfo"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@android:color/white" />
-
-        <View
-            android:id="@+id/lineServiceDetail"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@android:color/white"
-            android:visibility="invisible" />
     </LinearLayout>
 
     <ScrollView

@@ -20,6 +20,7 @@ import com.bumptech.glide.Glide;
 import java.util.ArrayList;
 import java.util.List;
 
+import Activity.ImageZoomInOutActivity;
 import Api.ApiService;
 import Api.RetrofitClient;
 import Api.NetworkUtils;
@@ -150,15 +151,14 @@ public class GalleryFragment extends Fragment {
                     .load(courtImage.getImageUrl())
                     .into(holder.imageView);
 
-            // Thêm sự kiện nhấp chuột
             holder.imageView.setOnClickListener(v -> {
-                Intent intent = new Intent(context, ImageZoomActivity.class);
-                intent.putExtra("image_url", courtImage.getImageUrl());
+                Intent intent = new Intent(context, ImageZoomInOutActivity.class);
+                intent.putExtra(ImageZoomInOutActivity.EXTRA_URL, courtImage.getImageUrl());
                 context.startActivity(intent);
             });
         }
 
-        @Override
+            @Override
         public int getItemCount() {
             return courtImages.size();
         }

@@ -1,4 +1,4 @@
-package SEP490.G9;
+package Activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
@@ -10,6 +10,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+
+import SEP490.G9.R;
 
 public class PaymentSuccessActivity extends AppCompatActivity {
 

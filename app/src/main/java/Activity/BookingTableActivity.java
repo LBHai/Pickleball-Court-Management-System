@@ -1,4 +1,4 @@
-package SEP490.G9;
+package Activity;
 
 import Api.ApiService;
 import Api.NetworkUtils;
@@ -8,6 +8,7 @@ import Model.ConfirmOrder;
 import Model.CourtSlot;
 import Model.MyInfo;
 import Model.MyInfoResponse;
+import SEP490.G9.R;
 import Session.SessionManager;
 import android.app.DatePickerDialog;
 import android.content.Intent;
@@ -56,7 +57,7 @@ public class BookingTableActivity extends AppCompatActivity {
     private SimpleDateFormat sdfFull = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
 
     private String selectedDate = "";
-    private String courtId,tvPhone;
+    private String courtId, tvPhone;
 
     private Map<String, List<CourtSlot>> courtsByDate = new HashMap<>();
     private Map<String, Map<String, ConfirmOrder>> selectedOrdersByDate = new HashMap<>();
@@ -489,7 +490,6 @@ public class BookingTableActivity extends AppCompatActivity {
         String confirmOrdersJson = gson.toJson(confirmOrders);
         Intent intent = new Intent(BookingTableActivity.this, ConfirmActivity.class);
         intent.putExtra("tvPhone", tvPhone);
-
         intent.putExtra("confirmOrdersJson", confirmOrdersJson);
         intent.putExtra("club_id", courtId);
         intent.putExtra("selectedDate", selectedDate);

@@ -24,6 +24,8 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
+import Activity.BookingRegularTableActivity;
+import Activity.BookingTableActivity;
 import Adapter.CourtDetailAdapter;
 
 public class CourtDetailFragment extends Fragment {
@@ -64,7 +66,7 @@ public class CourtDetailFragment extends Fragment {
             // Lấy số điện thoại từ key "tvPhone"
             phoneNumber = args.getString("tvPhone", "");
             tvClubName.setText(clubName);
-            tvAddress.setText(address);
+            tvAddress.setText("Địa chỉ: "+address);
         } else {
             clubId = "";
             phoneNumber = "";

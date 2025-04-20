@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/green"
-    tools:context=".PaymentFailedActivity">
+    tools:context="Activity.PaymentFailedActivity">
 
     <!-- Thanh bar trên cùng với nút Back nằm ngang cùng chữ "Thanh toán" -->
     <RelativeLayout

@@ -93,5 +93,5 @@ dependencies {
     implementation ("com.google.android.material:material:1.9.0")
     implementation ("de.hdodenhof:circleimageview:3.1.0")
     implementation ("com.nex3z:notification-badge:1.0.4")
-
+    implementation ("com.github.chrisbanes:PhotoView:2.3.0")
 }

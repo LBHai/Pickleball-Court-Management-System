@@ -1,10 +1,9 @@
-package SEP490.G9;
+package Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,13 +13,11 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
 
-import org.json.JSONObject;
-
 import Api.ApiService;
-import Api.NetworkUtils;
 import Api.RetrofitClient;
 import Model.ForgetPasswordRequest;
 import Model.ForgetPasswordResponse;
+import SEP490.G9.R;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

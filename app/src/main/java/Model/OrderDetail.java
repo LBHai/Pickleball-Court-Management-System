@@ -4,21 +4,30 @@ import java.util.List;
 
 public class OrderDetail {
     private String courtSlotId;
+    private String courtSlotName; // Added field for court slot name
     private String startTime;
     private String endTime;
     private int price;
-    private List<String> bookingDates; // Thêm trường này để lưu danh sách ngày
+    private List<String> bookingDates;
 
-    // Constructor mặc định
+    // Default constructor
     public OrderDetail() {}
 
-    // Getters và Setters
+    // Getters and Setters
     public String getCourtSlotId() {
         return courtSlotId;
     }
 
     public void setCourtSlotId(String courtSlotId) {
         this.courtSlotId = courtSlotId;
+    }
+
+    public String getCourtSlotName() {
+        return courtSlotName;
+    }
+
+    public void setCourtSlotName(String courtSlotName) {
+        this.courtSlotName = courtSlotName;
     }
 
     public String getStartTime() {

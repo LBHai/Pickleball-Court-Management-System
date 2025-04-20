@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,8 +25,8 @@ import java.util.List;
 
 import Holder.CourtViewHolder;
 import Model.Courts;
-import SEP490.G9.BookingRegularTableActivity;
-import SEP490.G9.BookingTableActivity;
+import Activity.BookingRegularTableActivity;
+import Activity.BookingTableActivity;
 import SEP490.G9.DebouncedOnClickListener;
 import SEP490.G9.R;
 import Session.SessionManager;

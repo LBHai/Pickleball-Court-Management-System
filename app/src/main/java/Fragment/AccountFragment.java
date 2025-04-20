@@ -22,7 +22,6 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -47,12 +46,12 @@ import Model.NotificationItem;
 import Model.NotificationResponse;
 import Model.Orders;
 import SEP490.G9.ChangePassword;
-import SEP490.G9.DetailBookingActivity;
-import SEP490.G9.EditInformationActivity;
-import SEP490.G9.LoginActivity;
-import SEP490.G9.NotificationActivity;
+import Activity.DetailBookingActivity;
+import Activity.EditInformationActivity;
+import Activity.LoginActivity;
+import Activity.NotificationActivity;
 import SEP490.G9.R;
-import SEP490.G9.SignUpActivity;
+import Activity.SignUpActivity;
 import Session.SessionManager;
 import Adapter.OrderAdapter;
 import retrofit2.Call;
@@ -62,7 +61,7 @@ import retrofit2.Response;
 public class AccountFragment extends Fragment {
 
     private TextView tvUserName, tvPhoneNumber;
-    private TextView tvTabBooked, tvTabInfoMember, tvMemberInfo;
+    private TextView tvTabBooked, tvServiceInfo, tvServiceOrderInfo;
     private ImageButton btnNoti, btnOptions, btnFilter;
     private String id, username, email, firstName, lastName, userRank, gender, dob;
     private SessionManager sessionManager;
@@ -77,6 +76,8 @@ public class AccountFragment extends Fragment {
     private int unreadCount = 0;
     private LinearLayout authButtonsContainer;
     private Button btnLogin, btnRegister;
+    private List<Orders> bookedOrders;  // Thêm danh sách cho "Lịch đã đặt"
+    private List<Orders> serviceOrders; // Thêm danh sách cho "Dịch vụ đã đặt"
 
 
     @Override
@@ -91,8 +92,8 @@ public class AccountFragment extends Fragment {
         btnFilter = view.findViewById(R.id.btn_filter);
         ivAvatar = view.findViewById(R.id.ivAvatar);
         tvTabBooked = view.findViewById(R.id.tvTabBooked);
-        tvTabInfoMember = view.findViewById(R.id.tvTabInfoMember);
-        tvMemberInfo = view.findViewById(R.id.tvMemberInfo);
+        tvServiceInfo = view.findViewById(R.id.tvServiceInfo);
+        tvServiceOrderInfo = view.findViewById(R.id.tvServiceOrderInfo);
 
         authButtonsContainer = view.findViewById(R.id.authButtonsContainer);
         btnLogin = view.findViewById(R.id.btnLogin);
@@ -102,6 +103,10 @@ public class AccountFragment extends Fragment {
         recyclerOrder.setLayoutManager(new LinearLayoutManager(getContext()));
         orderList = new ArrayList<>();
         filteredOrderList = new ArrayList<>();
+
+        bookedOrders = new ArrayList<>();  // Khởi tạo danh sách
+        serviceOrders = new ArrayList<>();
+
         orderAdapter = new OrderAdapter(filteredOrderList, getContext());
         recyclerOrder.setAdapter(orderAdapter);
         badge = view.findViewById(R.id.badge);
@@ -125,7 +130,7 @@ public class AccountFragment extends Fragment {
 
         showBookedTab();
         tvTabBooked.setOnClickListener(v -> showBookedTab());
-        tvTabInfoMember.setOnClickListener(v -> showMemberInfoTab());
+        tvServiceInfo.setOnClickListener(v -> showMemberInfoTab());
 
         if (sessionManager.getToken() != null && !sessionManager.getToken().isEmpty()) {
             getMyInfo();
@@ -190,7 +195,7 @@ public class AccountFragment extends Fragment {
 
         showBookedTab();
         tvTabBooked.setOnClickListener(v -> showBookedTab());
-        tvTabInfoMember.setOnClickListener(v -> showMemberInfoTab());
+        tvServiceInfo.setOnClickListener(v -> showMemberInfoTab());
 
         if (sessionManager.getToken() != null && !sessionManager.getToken().isEmpty()) {
             getMyInfo();
@@ -250,10 +255,7 @@ public class AccountFragment extends Fragment {
         popupMenu.getMenuInflater().inflate(R.menu.filter_menu, popupMenu.getMenu());
         popupMenu.setOnMenuItemClickListener(item -> {
             int itemId = item.getItemId();
-            if (itemId == R.id.filter_all) {
-                filterOrders("all");
-                return true;
-            } else if (itemId == R.id.filter_by_date) {
+            if (itemId == R.id.filter_by_date) {
                 showDatePickerDialog();
                 return true;
             } else if (itemId == R.id.filter_by_status) {
@@ -324,20 +326,20 @@ public class AccountFragment extends Fragment {
                 public void onResponse(Call<List<Orders>> call, Response<List<Orders>> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         orderList.addAll(response.body());
-                        filteredOrderList.addAll(response.body());
                     }
                     callsRemaining[0]--;
                     if (callsRemaining[0] == 0) {
-                        orderAdapter.notifyDataSetChanged();
-                        recyclerOrder.setVisibility(View.VISIBLE);
+                        filterOrdersByType(); // Lọc đơn hàng sau khi lấy hết dữ liệu
+                        showBookedTab(); // Mặc định hiển thị tab "Lịch đã đặt"
                     }
                 }
+
                 @Override
                 public void onFailure(Call<List<Orders>> call, Throwable t) {
                     callsRemaining[0]--;
                     if (callsRemaining[0] == 0) {
-                        orderAdapter.notifyDataSetChanged();
-                        recyclerOrder.setVisibility(View.VISIBLE);
+                        filterOrdersByType();
+                        showBookedTab();
                     }
                 }
             });
@@ -376,16 +378,22 @@ public class AccountFragment extends Fragment {
 
     private void showBookedTab() {
         tvTabBooked.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
-        tvTabInfoMember.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.darker_gray));
+        tvServiceInfo.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.darker_gray));
+        filteredOrderList.clear();
+        filteredOrderList.addAll(bookedOrders); // Hiển thị đơn "Đơn cố định" và "Đơn ngày"
+        orderAdapter.notifyDataSetChanged();
         recyclerOrder.setVisibility(View.VISIBLE);
-        tvMemberInfo.setVisibility(View.GONE);
+        tvServiceOrderInfo.setVisibility(View.GONE);
     }
 
     private void showMemberInfoTab() {
         tvTabBooked.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.darker_gray));
-        tvTabInfoMember.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
-        recyclerOrder.setVisibility(View.GONE);
-        tvMemberInfo.setVisibility(View.VISIBLE);
+        tvServiceInfo.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
+        filteredOrderList.clear();
+        filteredOrderList.addAll(serviceOrders); // Hiển thị đơn "Đơn dịch vụ"
+        orderAdapter.notifyDataSetChanged();
+        recyclerOrder.setVisibility(View.VISIBLE);
+        tvServiceOrderInfo.setVisibility(View.GONE);
     }
 
     private void getMyInfo() {
@@ -478,9 +486,8 @@ public class AccountFragment extends Fragment {
                     List<Orders> orders = response.body();
                     orderList.clear();
                     orderList.addAll(orders);
-                    filteredOrderList.clear();
-                    filteredOrderList.addAll(orders);
-                    orderAdapter.notifyDataSetChanged();
+                    filterOrdersByType(); // Lọc đơn hàng theo loại
+                    showBookedTab(); // Mặc định hiển thị tab "Lịch đã đặt"
                 } else {
                     Toast.makeText(getContext(), "Không có đơn đặt sân nào", Toast.LENGTH_SHORT).show();
                 }
@@ -652,5 +659,17 @@ public class AccountFragment extends Fragment {
             }
         }
         badge.setNumber(unreadCount);
+    }
+    private void filterOrdersByType() {
+        bookedOrders.clear();
+        serviceOrders.clear();
+        for (Orders order : orderList) {
+            String orderType = order.getOrderType();
+            if ("Đơn cố định".equals(orderType) || "Đơn ngày".equals(orderType)) {
+                bookedOrders.add(order);
+            } else if ("Đơn dịch vụ".equals(orderType)) {
+                serviceOrders.add(order);
+            }
+        }
     }
 }

@@ -1,4 +1,4 @@
-package SEP490.G9;
+package Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,6 +7,8 @@ import android.widget.Button;
 import android.widget.ImageButton;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import SEP490.G9.R;
 
 public class PaymentFailedActivity extends AppCompatActivity {
     private ImageButton btnBack;

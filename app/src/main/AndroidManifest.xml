@@ -21,40 +21,40 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".BookingRegularTableActivity"
+            android:name="Activity.BookingRegularTableActivity"
             android:exported="false" />
 
         <activity
             android:name=".ChangePassword"
             android:exported="false" />
         <activity
-            android:name=".ImageZoomActivity"
+            android:name="Activity.ImageZoomActivity"
             android:exported="false" />
         <activity
-            android:name=".PaymentFailedActivity"
+            android:name="Activity.PaymentFailedActivity"
             android:exported="false" />
         <activity
-            android:name=".NotificationActivity"
+            android:name="Activity.NotificationActivity"
             android:exported="false" />
         <activity
-            android:name=".EditInformationActivity"
+            android:name="Activity.EditInformationActivity"
             android:exported="false" />
         <activity
-            android:name=".ForgotPasswordActivity"
+            android:name="Activity.ForgotPasswordActivity"
             android:exported="false" />
         <activity
-            android:name=".BookingTableActivity"
+            android:name="Activity.BookingTableActivity"
             android:exported="false" />
         <!-- <activity -->
         <!-- android:name=".ClubDetailFragment" -->
         <!-- android:exported="false" /> &lt;!&ndash; hyp &ndash;&gt; -->
         <activity
-            android:name=".LoginActivity"
+            android:name="Activity.LoginActivity"
             android:exported="false"
             android:label="@string/title_activity_main"
             android:theme="@style/Theme.PickleballCourtManagementSystem" />
         <activity
-            android:name=".MainActivity"
+            android:name="Activity.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -63,24 +63,26 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".DetailPriceCourtActivity"
+            android:name="Activity.DetailPriceCourtActivity"
             android:exported="true" />
         <activity
-            android:name=".ConfirmActivity"
+            android:name="Activity.ConfirmActivity"
             android:exported="false" />
         <activity
-            android:name=".QRCodeActivity"
+            android:name="Activity.QRCodeActivity"
             android:exported="true" />
         <activity
-            android:name=".SignUpActivity"
+            android:name="Activity.SignUpActivity"
             android:exported="true" />
         <activity
-            android:name=".PaymentSuccessActivity"
+            android:name="Activity.PaymentSuccessActivity"
             android:exported="true" />
         <activity
-            android:name=".DetailBookingActivity"
+            android:name="Activity.DetailBookingActivity"
             android:exported="true" />
-
+        <activity
+            android:name="Activity.ImageZoomInOutActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <service
             android:name=".MyFirebaseMessagingService"
             android:exported="false">
