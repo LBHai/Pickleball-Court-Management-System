@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.textfield.TextInputEditText;
 
+import org.json.JSONObject;
+
 import Data.Network.ApiService;
 import Data.Network.NetworkUtils;
 import Data.Network.RetrofitClient;
@@ -30,7 +32,7 @@ public class LoginActivity extends AppCompatActivity {
     private SessionManager sessionManager;
     private String userId = null;
     private TextView tvForgotPassword;
-
+    private static final String TAG = "LoginActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,21 +45,20 @@ public class LoginActivity extends AppCompatActivity {
         edtPassword = findViewById(R.id.edtPassword);
         btnLogin = findViewById(R.id.btnLogin);
         tvForgotPassword = findViewById(R.id.tvForgotPassword);
+
         tvForgotPassword.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
             startActivity(intent);
         });
-        // Xử lý nút Login
+
         btnLogin.setOnClickListener(v -> login());
 
-        // Xử lý nút Sign Up
         TextView tvSignUp = findViewById(R.id.btnSignup);
         tvSignUp.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
             startActivity(intent);
         });
 
-        // Cho phép bấm Enter trên bàn phím để login
         edtPassword.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_GO) {
                 btnLogin.performClick();
@@ -65,15 +66,13 @@ public class LoginActivity extends AppCompatActivity {
             }
             return false;
         });
-        ImageView btnHome = findViewById(R.id.btnHome);
 
-        // Thiết lập sự kiện click cho nút Home
+        ImageView btnHome = findViewById(R.id.btnHome);
         btnHome.setOnClickListener(v -> {
-            // Chuyển về MainActivity
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intent);
-            finish(); // Đóng LoginActivity
+            finish();
         });
     }
 
@@ -82,72 +81,85 @@ public class LoginActivity extends AppCompatActivity {
         String password = edtPassword.getText().toString().trim();
 
         if (username.isEmpty() || password.isEmpty()) {
-            Toast.makeText(LoginActivity.this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Login failed: username or password is empty");
+            Toast.makeText(LoginActivity.this, "Username or password cannot be empty", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        Log.d(TAG, "Attempting to login with username: " + username);
         User user = new User(username, password);
         ApiService apiService = RetrofitClient.getApiService(LoginActivity.this);
         Call<GetToken> call = apiService.getToken(user);
 
-        // Dùng NetworkUtils để bắt lỗi parse JSON & hiển thị Toast
         NetworkUtils.callApi(call, this, new NetworkUtils.ApiCallback<GetToken>() {
             @Override
             public void onSuccess(GetToken data) {
-                try {
-                    // Inside the onSuccess of the token call
-                    if (data != null && data.getResult() != null) {
-                        if (data.getResult().isAuthenticated()) {
-                            String token = data.getResult().getToken();
-                            if (token != null && !token.isEmpty()) {
-                                sessionManager.saveToken(token);
-                                ApiService apiService = RetrofitClient.getApiService(LoginActivity.this);
-                                String authHeader = "Bearer " + token;
-                                // Use LoginActivity.this as the context here
-                                NetworkUtils.callApi(apiService.getMyInfo(authHeader), LoginActivity.this, new NetworkUtils.ApiCallback<MyInfoResponse>() {
-                                    @Override
-                                    public void onSuccess(MyInfoResponse r) {
-                                        if (r != null && r.getResult() != null) {
-                                            userId = r.getResult().getId();
-                                            sessionManager.saveUserId(userId);
-                                            Log.d("userId2", userId);
-
-                                            // Sau khi cập nhật userId, chuyển sang MainActivity
-                                            Toast.makeText(LoginActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                            startActivity(intent);
-                                            finish();
-                                        }
+                if (data != null && data.getResult() != null) {
+                    if (data.getResult().isAuthenticated()) {
+                        String token = data.getResult().getToken();
+                        if (token != null && !token.isEmpty()) {
+                            Log.d(TAG, "Login successful, token received");
+                            sessionManager.saveToken(token);
+                            // Hiển thị message từ API
+                            Toast.makeText(LoginActivity.this, data.getMessage(), Toast.LENGTH_SHORT).show();
+                            ApiService apiService = RetrofitClient.getApiService(LoginActivity.this);
+                            String authHeader = "Bearer " + token;
+                            NetworkUtils.callApi(apiService.getMyInfo(authHeader), LoginActivity.this, new NetworkUtils.ApiCallback<MyInfoResponse>() {
+                                @Override
+                                public void onSuccess(MyInfoResponse r) {
+                                    if (r != null && r.getResult() != null) {
+                                        userId = r.getResult().getId();
+                                        sessionManager.saveUserId(userId);
+                                        Log.d(TAG, "User info retrieved, userId: " + userId);
+                                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                        startActivity(intent);
+                                        finish();
+                                    } else {
+                                        // Giả sử API trả về message khi lỗi
+                                        String errorMsg = r != null && r.getMessage() != null ? r.getMessage() : "Failed to retrieve user info";
+                                        Toast.makeText(LoginActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
                                     }
-                                    @Override
-                                    public void onError(String e) {
-                                        Toast.makeText(LoginActivity.this, "Lấy thông tin thất bại!", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
+                                }
 
-
-                                Toast.makeText(LoginActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                startActivity(intent);
-                                finish();
-                            } else {
-                                Toast.makeText(LoginActivity.this, "Token không hợp lệ", Toast.LENGTH_SHORT).show();
-                            }
+                                @Override
+                                public void onError(String e) {
+                                    String message = extractMessageFromError(e);
+                                    Toast.makeText(LoginActivity.this, message != null ? message : "Error retrieving user info", Toast.LENGTH_SHORT).show();
+                                }
+                            });
                         } else {
-                            Toast.makeText(LoginActivity.this, "Sai tài khoản hoặc mật khẩu", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, data.getMessage() != null ? data.getMessage() : "Invalid token", Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        Toast.makeText(LoginActivity.this, "Dữ liệu trả về không hợp lệ", Toast.LENGTH_SHORT).show();
+                        // Hiển thị message từ API khi không authenticated
+                        Toast.makeText(LoginActivity.this, data.getMessage() != null ? data.getMessage() : "Authentication failed", Toast.LENGTH_SHORT).show();
                     }
-
-                } catch (Exception e) {
-                    Toast.makeText(LoginActivity.this, "Lỗi xử lý dữ liệu", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(LoginActivity.this, data.getMessage() != null ? data.getMessage() : "Invalid response data", Toast.LENGTH_SHORT).show();
                 }
             }
+
             @Override
             public void onError(String errorMessage) {
-                // errorMessage đã được Toast, bạn có thể log thêm hoặc xử lý tuỳ ý
+                Log.e(TAG, "Login API error: " + errorMessage);
+                String message = extractMessageFromError(errorMessage);
+                Toast.makeText(LoginActivity.this, message != null ? message : "An error occurred", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private String extractMessageFromError(String errorMessage) {
+        try {
+            int jsonStart = errorMessage.indexOf("{");
+            int jsonEnd = errorMessage.lastIndexOf("}");
+            if (jsonStart != -1 && jsonEnd != -1 && jsonEnd > jsonStart) {
+                String jsonString = errorMessage.substring(jsonStart, jsonEnd + 1);
+                JSONObject jsonObject = new JSONObject(jsonString);
+                return jsonObject.getString("message");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error parsing error message: " + e.getMessage());
+        }
+        return null;
     }
 }
