@@ -160,8 +160,8 @@ public class DetailBookingActivity extends AppCompatActivity {
         // Hiển thị thông tin
         tvName.setText("Khách Hàng: " + (customerName != null ? customerName : "N/A"));
         tvPhonenumber.setText("SDT: " + (phoneNumber != null ? phoneNumber : "N/A"));
-        if ("Đơn cố định".equals(orderType)) {
-            tvNote.setText("Khách hàng ghi chú: " + (note != null && !note.isEmpty() ? note : "Không có"));
+        if ("Đơn cố định".equals(orderType) || "Đơn dịch vụ".equals(orderType) || "Đơn ngày".equals(orderType)) {
+            tvNote.setText("Khách hàng ghi chú: " + (note != null ? note : "Không có"));
         } else {
             tvNote.setText("Khách hàng ghi chú: " + (note != null ? note : "Không có"));
         }
@@ -206,14 +206,14 @@ public class DetailBookingActivity extends AppCompatActivity {
                             List<Transaction> transactions = response.body();
                             double totalPaid = 0;
                             for (Transaction t : transactions) {
-                                if ("Đã thanh toán".equals(t.getPaymentStatus())) {
+                                if ("Đã thanh toán".equals(t.getPaymentStatus()) || "Đã đặt cọc".equals(t.getPaymentStatus())) {
                                     totalPaid += t.getAmount();
                                 }
                             }
                             int finalTotalPaid = (int) totalPaid;
                             runOnUiThread(() -> {
                                 // Kiểm tra paymentStatus từ Orders
-                                if ("Đã thanh toán".equals(paymentStatus)) {
+                                if ("Đã thanh toán".equals(paymentStatus) || "Đã đặt cọc".equals(paymentStatus)) {
                                     tvAmountPaid.setText("Số tiền đã trả: " + formatMoney(finalTotalPaid));
                                 } else {
                                     tvAmountPaid.setText("Số tiền đã trả: 0đ");

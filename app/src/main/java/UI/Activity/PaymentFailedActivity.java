@@ -12,7 +12,7 @@ import SEP490.G9.R;
 
 public class PaymentFailedActivity extends AppCompatActivity {
     private ImageButton btnBack;
-    private Button btnHistory;
+    private Button btnHistory,btnReturn;
     private String orderId, totalTime, selectedDate, orderStatus, courtId, orderType, serviceDetailsJson;
     private int totalPrice;
 
@@ -23,7 +23,7 @@ public class PaymentFailedActivity extends AppCompatActivity {
 
         btnBack = findViewById(R.id.btnBack);
         btnHistory = findViewById(R.id.btnHistory);
-
+        btnReturn = findViewById(R.id.btnReturn);
         // Lấy dữ liệu từ Intent
         orderId = getIntent().getStringExtra("orderId");
         totalTime = getIntent().getStringExtra("totalTime");
@@ -41,7 +41,7 @@ public class PaymentFailedActivity extends AppCompatActivity {
         Log.d("PaymentFailedActivity", "serviceDetailsJson: " + serviceDetailsJson);
 
         btnBack.setOnClickListener(v -> goBackToMainActivity());
-
+        btnReturn.setOnClickListener(v -> goBackToMainActivity());
         btnHistory.setOnClickListener(v -> {
             Intent intent = new Intent(PaymentFailedActivity.this, DetailBookingActivity.class);
             intent.putExtra("orderId", orderId);

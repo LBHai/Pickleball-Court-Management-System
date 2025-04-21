@@ -1,5 +1,6 @@
 package UI.Activity;
 
+import Data.Model.Role;
 import Data.Network.ApiService;
 import Data.Network.NetworkUtils;
 import Data.Network.RetrofitClient;
@@ -139,7 +140,7 @@ public class BookingTableActivity extends AppCompatActivity {
         });
     }
 
-    /** Lấy thông tin người dùng từ API để xác định isStudent */
+
     private void fetchUserInfo() {
         SessionManager sessionManager = new SessionManager(this);
         String token = sessionManager.getToken();
@@ -156,12 +157,18 @@ public class BookingTableActivity extends AppCompatActivity {
             public void onResponse(Call<MyInfoResponse> call, Response<MyInfoResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     MyInfo myInfo = response.body().getResult();
-                    if (myInfo != null) {
-                        isStudent = myInfo.isStudent();
+                    if (myInfo != null && myInfo.getRoles() != null) {
+                        isStudent = false; // Mặc định là false
+                        for (Role role : myInfo.getRoles()) {
+                            if ("STUDENT".equals(role.getName())) {
+                                isStudent = true; // Tìm thấy STUDENT thì đặt true
+                                break; // Thoát vòng lặp ngay khi tìm thấy
+                            }
+                        }
                     } else {
-                        isStudent = false;
+                        isStudent = false; // Không có dữ liệu roles thì đặt false
                     }
-                    fetchBookingSlots(courtId, selectedDate);
+                    fetchBookingSlots(courtId, selectedDate); // Tiếp tục lấy slot
                 } else {
                     Toast.makeText(BookingTableActivity.this, "Không thể lấy thông tin người dùng", Toast.LENGTH_SHORT).show();
                     isStudent = false;
@@ -177,7 +184,6 @@ public class BookingTableActivity extends AppCompatActivity {
             }
         });
     }
-
     /** Hiển thị dialog chọn ngày */
     private void showDatePickerDialog() {
         Calendar cal = Calendar.getInstance();
