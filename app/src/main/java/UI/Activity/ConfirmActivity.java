@@ -740,6 +740,7 @@ public class ConfirmActivity extends AppCompatActivity {
                     i.putExtra("customerName", name);
                     i.putExtra("phoneNumber", phone);
                     i.putExtra("note", note);
+                    i.putStringArrayListExtra("selectedCourtSlots", new ArrayList<>(selectedCourtSlots)); // Thêm dòng này
                     startActivity(i);
                     finish();
                 } else {
@@ -753,7 +754,6 @@ public class ConfirmActivity extends AppCompatActivity {
             }
         });
     }
-
     private void processOrder(boolean isDeposit) {
         String name = etName.getText().toString().trim();
         String phone = etPhone.getText().toString().trim();

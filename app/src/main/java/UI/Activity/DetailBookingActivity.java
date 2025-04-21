@@ -160,7 +160,11 @@ public class DetailBookingActivity extends AppCompatActivity {
         // Hiển thị thông tin
         tvName.setText("Khách Hàng: " + (customerName != null ? customerName : "N/A"));
         tvPhonenumber.setText("SDT: " + (phoneNumber != null ? phoneNumber : "N/A"));
-        tvNote.setText("Khách hàng ghi chú: " + (note != null ? note : "Không có"));
+        if ("Đơn cố định".equals(orderType)) {
+            tvNote.setText("Khách hàng ghi chú: " + (note != null && !note.isEmpty() ? note : "Không có"));
+        } else {
+            tvNote.setText("Khách hàng ghi chú: " + (note != null ? note : "Không có"));
+        }
     }
 
     private void fetchOrderDetails(String orderId) {
@@ -449,11 +453,20 @@ public class DetailBookingActivity extends AppCompatActivity {
             Log.d("DetailBookingActivity", "slotPrices từ Intent là null hoặc rỗng");
             slotPrices = DataHolder.getInstance().getSlotPrices();
             Log.d("DetailBookingActivity", "slotPrices từ DataHolder: " + slotPrices);
+            if (slotPrices == null || slotPrices.isEmpty()) {
+                slotPrices = new ArrayList<>(getSlotPricesFromOrder(order));
+                Log.d("DetailBookingActivity", "slotPrices từ Orders: " + slotPrices);
+            }
         } else {
             Log.d("DetailBookingActivity", "slotPrices từ Intent: " + slotPrices);
         }
 
         if ("Đơn cố định".equals(order.getOrderType())) {
+            // Lấy tên sân từ order.getCourtName()
+            String courtName = order.getCourtName() != null ? order.getCourtName() : "Sân không xác định";
+            // Lấy selectedCourtSlots từ Intent nếu có
+            ArrayList<String> selectedCourtSlots = getIntent().getStringArrayListExtra("selectedCourtSlots");
+
             Map<String, List<OrderDetail>> slotsByDate = new HashMap<>();
             for (OrderDetail detail : order.getOrderDetails()) {
                 if (detail.getBookingDates() != null) {
@@ -464,7 +477,7 @@ public class DetailBookingActivity extends AppCompatActivity {
             }
 
             Set<String> sortedDates = new TreeSet<>(slotsByDate.keySet());
-            int priceIndex = 0;
+            int courtIndex = 0; // Chỉ số để ánh xạ selectedCourtSlots
             for (String date : sortedDates) {
                 TextView tvDayHeader = new TextView(this);
                 tvDayHeader.setTextColor(Color.WHITE);
@@ -480,20 +493,25 @@ public class DetailBookingActivity extends AppCompatActivity {
                     tvSlot.setTextColor(Color.WHITE);
                     tvSlot.setTextSize(14);
 
-                    int slotPrice = (slotPrices != null && priceIndex < slotPrices.size()) ? slotPrices.get(priceIndex++) : detail.getPrice();
-                    if (slotPrice == 0) {
-                        Log.w("DetailBookingActivity", "slotPrice là 0, kiểm tra slotPrices hoặc detail.getPrice()");
+                    // Xác định tên sân
+                    String courtSlotName;
+                    if (selectedCourtSlots != null && courtIndex < selectedCourtSlots.size()) {
+                        courtSlotName = selectedCourtSlots.get(courtIndex++); // Dùng tên từ selectedCourtSlots nếu có
+                    } else {
+                        courtSlotName = courtName; // Sử dụng courtName từ order nếu không có selectedCourtSlots
                     }
-                    String slotInfo = "   - " + detail.getCourtSlotName() + ": " +
+
+                    // Không hiển thị giá mỗi slot cho Đơn cố định
+                    String slotInfo = "   - " + courtSlotName + ": " +
                             detail.getStartTime().substring(0, 5) + " - " +
-                            detail.getEndTime().substring(0, 5) + " | " +
-                            formatMoney(slotPrice);
+                            detail.getEndTime().substring(0, 5);
                     tvSlot.setText(slotInfo);
                     layoutBookingSlots.addView(tvSlot);
                     Log.d("DetailBookingActivity", "Slot hiển thị: " + slotInfo);
                 }
             }
         } else {
+            // Logic cũ cho các loại đơn khác (Đơn ngày, Đơn dịch vụ)
             Map<String, List<OrderDetail>> slotsByDate = new HashMap<>();
             for (OrderDetail detail : order.getOrderDetails()) {
                 if (detail.getBookingDates() != null) {
