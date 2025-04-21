@@ -2,6 +2,7 @@ package Data.Model;
 
 public class MyInfoResponse {
     private String code;
+    private String message; // Thêm trường message
     private MyInfo result;
 
     public String getCode() {
@@ -9,6 +10,12 @@ public class MyInfoResponse {
     }
     public void setCode(String code) {
         this.code = code;
+    }
+    public String getMessage() {
+        return message;
+    }
+    public void setMessage(String message) {
+        this.message = message;
     }
     public MyInfo getResult() {
         return result;
