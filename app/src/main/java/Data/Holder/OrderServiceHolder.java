@@ -5,7 +5,8 @@ import java.util.Map;
 
 public class OrderServiceHolder {
     private static OrderServiceHolder instance;
-    private Map<String, String> orderDetails = new HashMap<>(); // Lưu orderId và serviceDetailsJson
+    private Map<String, String> serviceDetailsMap = new HashMap<>();
+    private Map<String, String> serviceListMap = new HashMap<>();
 
     private OrderServiceHolder() {}
 
@@ -16,15 +17,16 @@ public class OrderServiceHolder {
         return instance;
     }
 
-    public void addOrderDetail(String orderId, String serviceDetailsJson) {
-        orderDetails.put(orderId, serviceDetailsJson);
+    public void addOrderDetail(String orderId, String serviceDetailsJson, String serviceListJson) {
+        serviceDetailsMap.put(orderId, serviceDetailsJson);
+        serviceListMap.put(orderId, serviceListJson);
     }
 
     public String getServiceDetailsJson(String orderId) {
-        return orderDetails.get(orderId);
+        return serviceDetailsMap.get(orderId);
     }
 
-    public void clearOrderDetails() {
-        orderDetails.clear();
+    public String getServiceListJson(String orderId) {
+        return serviceListMap.get(orderId);
     }
 }

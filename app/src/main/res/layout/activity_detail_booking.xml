@@ -265,15 +265,6 @@
                         android:textSize="14sp" />
 
                     <TextView
-                        android:id="@+id/tvPaymentAmount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="Số tiền cần thanh toán: 0 đ"
-                        android:textColor="#E44D39"
-                        android:textSize="14sp" />
-
-                    <TextView
                         android:id="@+id/tvRefundAmount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

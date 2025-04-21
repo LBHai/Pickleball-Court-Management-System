@@ -151,64 +151,20 @@ public class AccountFragment extends Fragment {
             intent.putExtra("totalPrice", order.getTotalAmount());
             intent.putExtra("courtId", order.getCourtId());
             intent.putExtra("orderType", order.getOrderType());
-            intent.putExtra("customerName", order.getCustomerName());  // Truyền từ Orders
-            intent.putExtra("phoneNumber", order.getPhoneNumber());    // Truyền từ Orders
-            intent.putExtra("note", order.getNote());                  // Truyền từ Orders
+            intent.putExtra("customerName", order.getCustomerName());
+            intent.putExtra("phoneNumber", order.getPhoneNumber());
+            intent.putExtra("note", order.getNote());
             String serviceDetailsJson = OrderServiceHolder.getInstance().getServiceDetailsJson(order.getId());
+            String serviceListJson = OrderServiceHolder.getInstance().getServiceListJson(order.getId());
             if (serviceDetailsJson != null) {
                 intent.putExtra("serviceDetailsJson", serviceDetailsJson);
             }
-            Log.d("AccountFragment", "Truyền customerName: " + order.getCustomerName() + ", phoneNumber: " + order.getPhoneNumber());
-
-            startActivity(intent);
-        });
-
-
-        // Kiểm tra trạng thái đăng nhập và hiển thị UI phù hợp
-        if (sessionManager.getToken() == null || sessionManager.getToken().isEmpty()) {
-            // Người dùng chưa đăng nhập, hiển thị nút login và register
-            btnOptions.setVisibility(View.GONE);
-            authButtonsContainer.setVisibility(View.VISIBLE);
-
-            // Thiết lập sự kiện click cho nút Login
-            btnLogin.setOnClickListener(v -> {
-                Intent intent = new Intent(getActivity(), LoginActivity.class);
-                startActivity(intent);
-            });
-
-            // Thiết lập sự kiện click cho nút Register
-            btnRegister.setOnClickListener(v -> {
-                Intent intent = new Intent(getActivity(), SignUpActivity.class);
-                startActivity(intent);
-            });
-        } else {
-            // Người dùng đã đăng nhập, hiển thị nút options
-            btnOptions.setVisibility(View.VISIBLE);
-            authButtonsContainer.setVisibility(View.GONE);
-        }
-
-        btnNoti.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), NotificationActivity.class);
-            startActivity(intent);
-        });
-
-        btnOptions.setOnClickListener(this::showPopupMenu);
-
-        btnFilter.setOnClickListener(this::showFilterMenu);
-
-        showBookedTab();
-        tvTabBooked.setOnClickListener(v -> showBookedTab());
-        tvServiceInfo.setOnClickListener(v -> showMemberInfoTab());
-
-        if (sessionManager.getToken() != null && !sessionManager.getToken().isEmpty()) {
-            getMyInfo();
-        } else {
-            if (!sessionManager.hasShownGuestDialog()) {
-                showGuestDialog();
-                sessionManager.setHasShownGuestDialog(true);
+            if (serviceListJson != null) {
+                intent.putExtra("serviceListJson", serviceListJson);
             }
-            getAllOrderListForGuest();
-        }
+            Log.d("AccountFragment", "Truyền customerName: " + order.getCustomerName() + ", phoneNumber: " + order.getPhoneNumber());
+            startActivity(intent);
+        });
 
         // Rest of the code remains the same
 
@@ -324,7 +280,12 @@ public class AccountFragment extends Fragment {
             @Override
             public void onResponse(Call<List<Orders>> call, Response<List<Orders>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    orderList.addAll(response.body());
+                    List<Orders> allOrders = response.body();
+                    for (Orders order : allOrders) {
+                        if ("Đang xử lý".equals(order.getOrderStatus())) {
+                            orderList.add(order); // Chỉ thêm đơn hàng "Đang xử lý"
+                        }
+                    }
                     filterOrdersByType();
                     showBookedTab();
                 } else {

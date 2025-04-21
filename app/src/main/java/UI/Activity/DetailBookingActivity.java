@@ -30,15 +30,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import Data.Model.OrderDetail;
+import Data.Model.Orders;
+import Data.Model.Service;
+import Data.Model.ServiceDetail;
+import Data.Model.Transaction;
 import Data.Network.ApiService;
 import Data.Network.NetworkUtils;
 import Data.Network.RetrofitClient;
 import Data.Holder.DataHolder;
 import Data.Holder.OrderServiceHolder;
-import Data.Model.OrderDetail;
-import Data.Model.Orders;
-import Data.Model.ServiceDetail;
-import Data.Model.Transaction;
 import SEP490.G9.R;
 import Data.Session.SessionManager;
 import retrofit2.Call;
@@ -83,7 +84,6 @@ public class DetailBookingActivity extends AppCompatActivity {
         tvPhonenumber = findViewById(R.id.tvPhonenumber);
         tvNote = findViewById(R.id.tvNote);
         tvAmountPaid = findViewById(R.id.tvAmountPaid);
-        tvPaymentAmount = findViewById(R.id.tvPaymentAmount);
         tvRefundAmount = findViewById(R.id.tvRefundAmount);
         btnCancelBooking = findViewById(R.id.btnCancelBooking);
         btnChangeBooking = findViewById(R.id.btnChangeBooking);
@@ -149,7 +149,6 @@ public class DetailBookingActivity extends AppCompatActivity {
             fetchOrderDetails(orderId);
             handler.postDelayed(checkOrderStatusRunnable, 10000);
         };
-
     }
 
     private void fetchUserInfo() {
@@ -162,82 +161,6 @@ public class DetailBookingActivity extends AppCompatActivity {
         tvName.setText("Khách Hàng: " + (customerName != null ? customerName : "N/A"));
         tvPhonenumber.setText("SDT: " + (phoneNumber != null ? phoneNumber : "N/A"));
         tvNote.setText("Khách hàng ghi chú: " + (note != null ? note : "Không có"));
-    }
-
-    private void displayServiceDetails(String serviceDetailsJson) {
-        Log.d("DetailBookingActivity", "serviceDetailsJson trong displayServiceDetails: " + serviceDetailsJson);
-        if (serviceDetailsJson != null && !serviceDetailsJson.isEmpty()) {
-            Gson gson = new Gson();
-            List<ServiceDetail> serviceDetails = gson.fromJson(serviceDetailsJson, new TypeToken<List<ServiceDetail>>(){}.getType());
-            layoutBookingSlots.removeAllViews();
-            for (ServiceDetail detail : serviceDetails) {
-                TextView tvService = new TextView(this);
-                //detail.getCourtServiceName() +
-                String serviceText = " x" + detail.getQuantity() + " : " + formatMoney((int) (detail.getPrice() * detail.getQuantity()));
-                tvService.setText(serviceText);
-                tvService.setTextColor(Color.WHITE);
-                tvService.setTextSize(14);
-                layoutBookingSlots.addView(tvService);
-                Log.d("DetailBookingActivity", "Hiển thị dịch vụ: " + serviceText);
-            }
-        } else {
-            TextView tvNoService = new TextView(this);
-            tvNoService.setText("Không có thông tin dịch vụ");
-            tvNoService.setTextColor(Color.WHITE);
-            tvNoService.setTextSize(14);
-            layoutBookingSlots.addView(tvNoService);
-            Log.d("DetailBookingActivity", "Không có thông tin dịch vụ để hiển thị");
-        }
-    }
-
-    private void handlePaymentForServiceOrder(String orderId) {
-        String serviceDetailsJson = getIntent().getStringExtra("serviceDetailsJson");
-        if (serviceDetailsJson == null || serviceDetailsJson.isEmpty()) {
-            serviceDetailsJson = OrderServiceHolder.getInstance().getServiceDetailsJson(orderId);
-        }
-        final String finalServiceDetailsJson = serviceDetailsJson;
-
-        Call<Orders> call = RetrofitClient.getApiService(this).getOrderById(orderId);
-        NetworkUtils.callApi(call, this, new NetworkUtils.ApiCallback<Orders>() {
-            @Override
-            public void onSuccess(Orders order) {
-                if (order == null) {
-                    Log.e("DetailBookingActivity", "Order is null from API");
-                    runOnUiThread(() -> Toast.makeText(DetailBookingActivity.this, "Không thể tải dữ liệu đơn hàng", Toast.LENGTH_SHORT).show());
-                    return;
-                }
-
-                String customerName = order.getCustomerName();
-                String phoneNumber = order.getPhoneNumber();
-                String note = order.getNote();
-
-                Intent intent = new Intent(DetailBookingActivity.this, QRCodeActivity.class);
-                intent.putExtra("orderId", orderId);
-                intent.putExtra("totalPrice", order.getTotalAmount());
-                intent.putExtra("courtId", courtId);
-                intent.putExtra("customerName", customerName);
-                intent.putExtra("phoneNumber", phoneNumber);
-                intent.putExtra("note", note);
-                intent.putExtra("serviceDetailsJson", finalServiceDetailsJson);
-                startActivity(intent);
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-                Log.e("DetailBookingActivity", "Lỗi khi lấy dữ liệu: " + errorMessage);
-                runOnUiThread(() -> Toast.makeText(DetailBookingActivity.this, "Lỗi khi lấy dữ liệu đơn hàng", Toast.LENGTH_SHORT).show());
-            }
-        });
-    }
-
-    private List<Integer> getSlotPricesFromOrder(Orders order) {
-        List<Integer> slotPrices = new ArrayList<>();
-        if (order.getOrderDetails() != null) {
-            for (OrderDetail detail : order.getOrderDetails()) {
-                slotPrices.add(detail.getPrice());
-            }
-        }
-        return slotPrices;
     }
 
     private void fetchOrderDetails(String orderId) {
@@ -261,17 +184,15 @@ public class DetailBookingActivity extends AppCompatActivity {
                 Log.d("DetailBookingActivity", "API Response - orderType: " + orderType +
                         ", paymentStatus: " + paymentStatus +
                         ", orderStatus: " + updatedOrderStatus);
-                // Lấy slotPrices từ Intent hoặc từ Orders
+
                 slotPrices = getIntent().getIntegerArrayListExtra("slotPrices");
                 if (slotPrices == null || slotPrices.isEmpty()) {
-                    ArrayList<Integer> slotPrices = new ArrayList<>(getSlotPricesFromOrder(order));
+                    slotPrices = new ArrayList<>(getSlotPricesFromOrder(order));
                     Log.d("DetailBookingActivity", "slotPrices từ Orders: " + slotPrices);
-
                 } else {
                     Log.d("DetailBookingActivity", "slotPrices từ Intent: " + slotPrices);
                 }
 
-                // Gọi API getTransactionHistory
                 ApiService apiService = RetrofitClient.getApiService(DetailBookingActivity.this);
                 Call<List<Transaction>> transactionCall = apiService.getTransactionHistory(orderId);
                 transactionCall.enqueue(new Callback<List<Transaction>>() {
@@ -281,18 +202,23 @@ public class DetailBookingActivity extends AppCompatActivity {
                             List<Transaction> transactions = response.body();
                             double totalPaid = 0;
                             for (Transaction t : transactions) {
-                                if ("Thành công".equals(t.getStatus())) {
+                                if ("Đã thanh toán".equals(t.getPaymentStatus())) {
                                     totalPaid += t.getAmount();
                                 }
                             }
                             int finalTotalPaid = (int) totalPaid;
                             runOnUiThread(() -> {
-                                tvAmountPaid.setText("Số tiền đã trả: " + formatMoney(finalTotalPaid));
+                                // Kiểm tra paymentStatus từ Orders
+                                if ("Đã thanh toán".equals(paymentStatus)) {
+                                    tvAmountPaid.setText("Số tiền đã trả: " + formatMoney(finalTotalPaid));
+                                } else {
+                                    tvAmountPaid.setText("Số tiền đã trả: 0đ");
+                                }
+                                tvPaymentStatus.setText("Trạng thái thanh toán: " + (paymentStatus != null ? paymentStatus : "N/A"));
+
                                 tvStadiumName.setText("Tên sân: " + (courtName != null ? courtName : "N/A"));
                                 tvAddress.setText("Địa chỉ: " + (address != null ? address : "N/A"));
-                                tvPaymentStatus.setText("Trạng thái thanh toán: " + (paymentStatus != null ? paymentStatus : "N/A"));
                                 tvTotalPrice.setText("Tổng tiền: " + formatMoney(order.getTotalAmount()));
-                                tvPaymentAmount.setText("Số tiền cần thanh toán: " + formatMoney(paymentAmount));
 
                                 if (!"Đơn dịch vụ".equals(orderType)) {
                                     buildBookingSlotsUI(order);
@@ -312,14 +238,20 @@ public class DetailBookingActivity extends AppCompatActivity {
                             });
                         } else {
                             Log.d("DetailBookingActivity", "API transaction trả về rỗng hoặc lỗi");
-                            runOnUiThread(() -> tvAmountPaid.setText("Số tiền đã trả: " + formatMoney(0)));
+                            runOnUiThread(() -> {
+                                tvAmountPaid.setText("Số tiền đã trả: 0đ");
+                                tvPaymentStatus.setText("Trạng thái thanh toán: " + (paymentStatus != null ? paymentStatus : "N/A"));
+                            });
                         }
                     }
 
                     @Override
                     public void onFailure(Call<List<Transaction>> call, Throwable t) {
                         Log.e("DetailBookingActivity", "Lỗi gọi API transaction: " + t.getMessage());
-                        runOnUiThread(() -> tvAmountPaid.setText("Số tiền đã trả: " + formatMoney(0)));
+                        runOnUiThread(() -> {
+                            tvAmountPaid.setText("Số tiền đã trả: 0đ");
+                            tvPaymentStatus.setText("Trạng thái thanh toán: " + (paymentStatus != null ? paymentStatus : "N/A"));
+                        });
                     }
                 });
             }
@@ -330,6 +262,63 @@ public class DetailBookingActivity extends AppCompatActivity {
                 runOnUiThread(() -> Toast.makeText(DetailBookingActivity.this, "Lỗi khi lấy dữ liệu đơn hàng", Toast.LENGTH_LONG).show());
             }
         });
+    }
+
+    private void displayServiceDetails(String serviceDetailsJson) {
+        Log.d("DetailBookingActivity", "serviceDetailsJson trong displayServiceDetails: " + serviceDetailsJson);
+        if (serviceDetailsJson != null && !serviceDetailsJson.isEmpty()) {
+            Gson gson = new Gson();
+            List<ServiceDetail> serviceDetails = gson.fromJson(serviceDetailsJson, new TypeToken<List<ServiceDetail>>(){}.getType());
+
+            String serviceListJson = getIntent().getStringExtra("serviceListJson");
+            if (serviceListJson == null || serviceListJson.isEmpty()) {
+                serviceListJson = OrderServiceHolder.getInstance().getServiceListJson(orderId);
+            }
+
+            List<Service> serviceList = new ArrayList<>();
+            if (serviceListJson != null && !serviceListJson.isEmpty()) {
+                serviceList = gson.fromJson(serviceListJson, new TypeToken<List<Service>>(){}.getType());
+            } else {
+                Log.w("DetailBookingActivity", "serviceListJson không có, hiển thị tên mặc định");
+            }
+
+            layoutBookingSlots.removeAllViews();
+            for (ServiceDetail detail : serviceDetails) {
+                TextView tvService = new TextView(this);
+                String serviceName = "Dịch vụ không xác định";
+                if (!serviceList.isEmpty()) {
+                    for (Service service : serviceList) {
+                        if (service.getId() != null && service.getId().equals(detail.getCourtServiceId())) {
+                            serviceName = service.getName();
+                            break;
+                        }
+                    }
+                }
+                String serviceText = serviceName + " x" + detail.getQuantity() + " : " + formatMoney((int) (detail.getPrice() * detail.getQuantity()));
+                tvService.setText(serviceText);
+                tvService.setTextColor(Color.WHITE);
+                tvService.setTextSize(14);
+                layoutBookingSlots.addView(tvService);
+                Log.d("DetailBookingActivity", "Hiển thị dịch vụ: " + serviceText);
+            }
+        } else {
+            TextView tvNoService = new TextView(this);
+            tvNoService.setText("Không có thông tin dịch vụ");
+            tvNoService.setTextColor(Color.WHITE);
+            tvNoService.setTextSize(14);
+            layoutBookingSlots.addView(tvNoService);
+            Log.d("DetailBookingActivity", "Không có thông tin dịch vụ để hiển thị");
+        }
+    }
+
+    private List<Integer> getSlotPricesFromOrder(Orders order) {
+        List<Integer> slotPrices = new ArrayList<>();
+        if (order.getOrderDetails() != null) {
+            for (OrderDetail detail : order.getOrderDetails()) {
+                slotPrices.add(detail.getPrice());
+            }
+        }
+        return slotPrices;
     }
 
     private void updateButtonsBasedOnStatus(String status) {
@@ -495,8 +484,7 @@ public class DetailBookingActivity extends AppCompatActivity {
                     if (slotPrice == 0) {
                         Log.w("DetailBookingActivity", "slotPrice là 0, kiểm tra slotPrices hoặc detail.getPrice()");
                     }
-                    //
-                    String slotInfo ="   - " + detail.getCourtSlotName() + ": " +
+                    String slotInfo = "   - " + detail.getCourtSlotName() + ": " +
                             detail.getStartTime().substring(0, 5) + " - " +
                             detail.getEndTime().substring(0, 5) + " | " +
                             formatMoney(slotPrice);
@@ -537,8 +525,7 @@ public class DetailBookingActivity extends AppCompatActivity {
                     if (slotPrice == 0) {
                         Log.w("DetailBookingActivity", "slotPrice là 0, kiểm tra slotPrices hoặc detail.getPrice()");
                     }
-                    //
-                    String slotInfo ="   - " + detail.getCourtSlotName() + ": " +
+                    String slotInfo = "   - " + detail.getCourtSlotName() + ": " +
                             detail.getStartTime().substring(0, 5) + " - " +
                             detail.getEndTime().substring(0, 5) + " | " +
                             formatMoney(slotPrice);
@@ -581,7 +568,6 @@ public class DetailBookingActivity extends AppCompatActivity {
             return;
         }
 
-        // Chỉ kiểm tra orderDetails cho các loại đơn hàng không phải "Đơn dịch vụ"
         if (!"Đơn dịch vụ".equals(orderType)) {
             if (order.getOrderDetails() == null || order.getOrderDetails().isEmpty()) {
                 btnCancelBooking.setVisibility(View.GONE);
@@ -633,11 +619,51 @@ public class DetailBookingActivity extends AppCompatActivity {
                 updateButtonsBasedOnStatus(order.getOrderStatus());
             }
         } else {
-            // Đối với "Đơn dịch vụ", không ẩn nút dựa trên orderDetails, gọi trực tiếp updateButtonsBasedOnStatus
             Log.d("DetailBookingActivity", "Không ẩn nút cho Đơn dịch vụ");
             updateButtonsBasedOnStatus(order.getOrderStatus());
         }
     }
+
+    private void handlePaymentForServiceOrder(String orderId) {
+        String serviceDetailsJson = getIntent().getStringExtra("serviceDetailsJson");
+        if (serviceDetailsJson == null || serviceDetailsJson.isEmpty()) {
+            serviceDetailsJson = OrderServiceHolder.getInstance().getServiceDetailsJson(orderId);
+        }
+        final String finalServiceDetailsJson = serviceDetailsJson;
+
+        Call<Orders> call = RetrofitClient.getApiService(this).getOrderById(orderId);
+        NetworkUtils.callApi(call, this, new NetworkUtils.ApiCallback<Orders>() {
+            @Override
+            public void onSuccess(Orders order) {
+                if (order == null) {
+                    Log.e("DetailBookingActivity", "Order is null from API");
+                    runOnUiThread(() -> Toast.makeText(DetailBookingActivity.this, "Không thể tải dữ liệu đơn hàng", Toast.LENGTH_SHORT).show());
+                    return;
+                }
+
+                String customerName = order.getCustomerName();
+                String phoneNumber = order.getPhoneNumber();
+                String note = order.getNote();
+
+                Intent intent = new Intent(DetailBookingActivity.this, QRCodeActivity.class);
+                intent.putExtra("orderId", orderId);
+                intent.putExtra("totalPrice", order.getTotalAmount());
+                intent.putExtra("courtId", courtId);
+                intent.putExtra("customerName", customerName);
+                intent.putExtra("phoneNumber", phoneNumber);
+                intent.putExtra("note", note);
+                intent.putExtra("serviceDetailsJson", finalServiceDetailsJson);
+                startActivity(intent);
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                Log.e("DetailBookingActivity", "Lỗi khi lấy dữ liệu: " + errorMessage);
+                runOnUiThread(() -> Toast.makeText(DetailBookingActivity.this, "Lỗi khi lấy dữ liệu đơn hàng", Toast.LENGTH_SHORT).show());
+            }
+        });
+    }
+
     private String formatMoney(int amount) {
         DecimalFormat formatter = new DecimalFormat("#,###");
         return formatter.format(amount) + " ₫";

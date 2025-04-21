@@ -247,7 +247,7 @@ public class ConfirmActivity extends AppCompatActivity {
             }
         }
 
-        // Xử lý sự kiện nút thanh toán
+        // Trong ConfirmActivity.java, sửa phần xử lý nút btnPayment trong handleServiceOrder
         btnPayment.setOnClickListener(new View.OnClickListener() {
             private boolean isProcessing = false;
 
@@ -265,16 +265,6 @@ public class ConfirmActivity extends AppCompatActivity {
                 String phone = etPhone.getText().toString().trim();
                 String note = etNote.getText().toString().trim();
 
-                // Ghi log dữ liệu để debug
-                Log.d("ConfirmActivity", "Dữ liệu đầu vào - courtId: " + intent.getStringExtra("courtId") +
-                        ", userId: " + userId +
-                        ", paymentAmount: " + paymentAmount +
-                        ", customerName: " + name +
-                        ", phoneNumber: " + phone +
-                        ", note: " + note +
-                        ", serviceDetails: " + new Gson().toJson(finalServiceDetails));
-
-                // Xác thực dữ liệu đầu vào
                 if (name.isEmpty() || phone.isEmpty()) {
                     Toast.makeText(ConfirmActivity.this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
                     isProcessing = false;
@@ -294,44 +284,35 @@ public class ConfirmActivity extends AppCompatActivity {
                     return;
                 }
 
-                // Đăng ký thông báo cho khách
                 if (userId == null || userId.isEmpty()) {
                     sessionManager.setGuestPhone(phone);
                     registerNotification();
                 }
 
-                // Tạo request cho API
                 ServiceOrderRequest request = new ServiceOrderRequest();
                 request.setCourtId(intent.getStringExtra("courtId"));
                 request.setUserId(userId);
                 request.setPaymentAmount(paymentAmount);
                 request.setCustomerName(name);
                 request.setPhoneNumber(phone);
-                request.setNote(courtName); // Note bắt buộc là courtName theo yêu cầu
+                request.setNote(courtName);
                 request.setServiceDetails(finalServiceDetails);
 
-                // Gọi API tạo đơn dịch vụ
                 Call<CreateOrderResponse> call = apiService.createServiceOrder(request);
                 call.enqueue(new Callback<CreateOrderResponse>() {
                     @Override
                     public void onResponse(Call<CreateOrderResponse> call, Response<CreateOrderResponse> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             CreateOrderResponse orderResponse = response.body();
-                            Log.d("ConfirmActivity", "Tạo đơn dịch vụ thành công. OrderId: " + orderResponse.getId() +
-                                    ", QRCode: " + orderResponse.getQrcode() +
-                                    ", PaymentTimeout: " + orderResponse.getPaymentTimeout());
-
                             String orderId = orderResponse.getId();
                             String qrCodeData = orderResponse.getQrcode();
                             String paymentTimeout = orderResponse.getPaymentTimeout();
 
-                            // Lưu thông tin đơn hàng
-                            OrderServiceHolder.getInstance().addOrderDetail(orderId, serviceDetailsJson);
+                            // Lưu cả serviceDetailsJson và serviceListJson vào OrderServiceHolder
+                            OrderServiceHolder.getInstance().addOrderDetail(orderId, serviceDetailsJson, serviceListJson);
 
-                            // Tạo totalTime mặc định để tránh lỗi ở QRCodeActivity
                             String totalTime = String.format(Locale.getDefault(), "%dh%02d", 0, 0);
 
-                            // Chuyển sang QRCodeActivity
                             Intent i = new Intent(ConfirmActivity.this, QRCodeActivity.class);
                             i.putExtra("orderType", "Đơn dịch vụ");
                             i.putExtra("orderId", orderId);
@@ -340,6 +321,7 @@ public class ConfirmActivity extends AppCompatActivity {
                             i.putExtra("overallTotalPrice", (int) paymentAmount);
                             i.putExtra("paymentAmount", (int) paymentAmount);
                             i.putExtra("serviceDetailsJson", serviceDetailsJson);
+                            i.putExtra("serviceListJson", serviceListJson); // Truyền thêm serviceListJson
                             i.putExtra("isDeposit", false);
                             i.putExtra("customerName", name);
                             i.putExtra("phoneNumber", phone);
