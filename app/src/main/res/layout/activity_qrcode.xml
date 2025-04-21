@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:padding="16dp"
     android:background="#006d38"
-    tools:context="Activity.QRCodeActivity">
+    tools:context="UI.Activity.QRCodeActivity">
 
     <RelativeLayout
         android:id="@+id/layoutHeader"

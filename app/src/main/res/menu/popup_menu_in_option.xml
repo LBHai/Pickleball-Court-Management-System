@@ -20,13 +20,4 @@
         android:title="@string/menu_logout"
         android:icon="@drawable/logout" />
 
-    <item
-        android:id="@+id/menu_version"
-        android:title="@string/menu_version"
-        android:icon="@drawable/version" />
-
-    <item
-        android:id="@+id/menu_deleteaccount"
-        android:title="@string/menu_deleteaccount"
-        android:icon="@drawable/delete" />
 </menu>

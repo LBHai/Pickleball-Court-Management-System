@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#006d38"
-    tools:context="Activity.NotificationActivity">
+    tools:context="UI.Activity.NotificationActivity">
 
     <!-- Thanh toolbar tùy chỉnh -->
 <LinearLayout
