@@ -166,7 +166,23 @@ public class AccountFragment extends Fragment {
             startActivity(intent);
         });
 
-        // Rest of the code remains the same
+        if (sessionManager.getToken() == null || sessionManager.getToken().isEmpty()) {
+            btnOptions.setVisibility(View.GONE);
+            authButtonsContainer.setVisibility(View.VISIBLE);
+
+            btnLogin.setOnClickListener(v -> {
+                Intent intent = new Intent(getActivity(), LoginActivity.class);
+                startActivity(intent);
+            });
+
+            btnRegister.setOnClickListener(v -> {
+                Intent intent = new Intent(getActivity(), SignUpActivity.class);
+                startActivity(intent);
+            });
+        } else {
+            btnOptions.setVisibility(View.VISIBLE);
+            authButtonsContainer.setVisibility(View.GONE);
+        }
 
         return view;
 
@@ -229,18 +245,6 @@ public class AccountFragment extends Fragment {
         popupMenu.show();
     }
 
-
-//    private void filterOrdersByDate(String selectedDate) {
-//        filteredOrderList.clear();
-//        for (Orders order : orderList) {
-//            String orderDate = order.getCreatedAt().substring(0, 10); // Lấy yyyy-MM-dd từ createdAt
-//            if (orderDate.equals(selectedDate)) {
-//                filteredOrderList.add(order);
-//            }
-//        }
-//        orderAdapter.notifyDataSetChanged();
-//    }
-
     private void showStatusFilterDialog() {
         String[] statuses = {"Đang xử lý", "Đã hoàn thành", "Hủy đặt lịch", "Đặt lịch thành công", "Thay đổi lịch đặt thành công", "Hủy đặt lịch do quá giờ thanh toán","Đặt dịch vụ tại sân"
         };
@@ -280,12 +284,7 @@ public class AccountFragment extends Fragment {
             @Override
             public void onResponse(Call<List<Orders>> call, Response<List<Orders>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<Orders> allOrders = response.body();
-                    for (Orders order : allOrders) {
-                        if ("Đang xử lý".equals(order.getOrderStatus())) {
-                            orderList.add(order); // Chỉ thêm đơn hàng "Đang xử lý"
-                        }
-                    }
+                    orderList.addAll(response.body());
                     filterOrdersByType();
                     showBookedTab();
                 } else {
@@ -626,18 +625,6 @@ public class AccountFragment extends Fragment {
         }
     }
 
-    // Nếu không có trường unreadCount từ API, tính toán dựa trên danh sách thông báo:
-//    private void updateBadge() {
-//        int unreadCount = 0;
-//        if (notificationList != null) {
-//            for (NotificationItem item : notificationList) {
-//                if (!"read".equalsIgnoreCase(item.getStatus())) {
-//                    unreadCount++;
-//                }
-//            }
-//        }
-//        badge.setNumber(unreadCount);
-//    }
     private void filterOrdersByType() {
         bookedOrders.clear();
         serviceOrders.clear();

@@ -65,15 +65,15 @@ public class BookingTableActivity extends AppCompatActivity {
     private ArrayList<String> selectedBookingsList = new ArrayList<>();
     private ArrayAdapter<String> selectedBookingsAdapter;
     private List<String> allTimesCurrentDay = new ArrayList<>();
+    private List<String> startTimesCurrentDay = new ArrayList<>();
 
-    private boolean isStudent = false; // Biến xác định người dùng có phải sinh viên không
+    private boolean isStudent = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_booking_table);
 
-        // Khởi tạo các view
         tableLayout = findViewById(R.id.tableLayout);
         btnSelectDate = findViewById(R.id.btnSelectDate);
         spinnerCourt = findViewById(R.id.spinnerCourt);
@@ -81,11 +81,9 @@ public class BookingTableActivity extends AppCompatActivity {
         lvSelectedBookings = findViewById(R.id.lvSelectedBookings);
         btnBack = findViewById(R.id.btnBack);
 
-        // Thiết lập adapter cho danh sách slot đã chọn
         selectedBookingsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, selectedBookingsList);
         lvSelectedBookings.setAdapter(selectedBookingsAdapter);
 
-        // Lấy courtId từ Intent
         courtId = getIntent().getStringExtra("club_id");
         tvPhone = getIntent().getStringExtra("tvPhone");
 
@@ -95,21 +93,16 @@ public class BookingTableActivity extends AppCompatActivity {
             return;
         }
 
-        // Thiết lập ngày mặc định
         Calendar c = Calendar.getInstance();
         selectedDate = sdf.format(c.getTime());
         btnSelectDate.setText("Ngày: " + selectedDate);
 
-        // Khởi tạo selectedOrdersByDate cho ngày mặc định
         selectedOrdersByDate.put(selectedDate, new HashMap<>());
 
-        // Lấy thông tin người dùng trước khi tải slot
         fetchUserInfo();
 
-        // Sự kiện nút chọn ngày
         btnSelectDate.setOnClickListener(v -> showDatePickerDialog());
 
-        // Sự kiện chọn sân từ spinner
         spinnerCourt.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, android.view.View view, int position, long id) {
@@ -120,7 +113,6 @@ public class BookingTableActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        // Sự kiện xem chi tiết sân và giá
         TextView tvViewCourtsAndPrices = findViewById(R.id.tvViewCourtsAndPrices);
         tvViewCourtsAndPrices.setOnClickListener(v -> {
             Intent intent = new Intent(BookingTableActivity.this, DetailPriceCourtActivity.class);
@@ -128,10 +120,8 @@ public class BookingTableActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // Sự kiện nút tiếp tục
         btnNext.setOnClickListener(v -> goToNextScreen());
 
-        // Sự kiện nút quay lại
         btnBack.setOnClickListener(v -> {
             Intent intent = new Intent(BookingTableActivity.this, MainActivity.class);
             intent.putExtra("showFragment", "courts");
@@ -139,7 +129,6 @@ public class BookingTableActivity extends AppCompatActivity {
             finish();
         });
     }
-
 
     private void fetchUserInfo() {
         SessionManager sessionManager = new SessionManager(this);
@@ -158,17 +147,11 @@ public class BookingTableActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     MyInfo myInfo = response.body().getResult();
                     if (myInfo != null && myInfo.getRoles() != null) {
-                        isStudent = false; // Mặc định là false
-                        for (Role role : myInfo.getRoles()) {
-                            if ("STUDENT".equals(role.getName())) {
-                                isStudent = true; // Tìm thấy STUDENT thì đặt true
-                                break; // Thoát vòng lặp ngay khi tìm thấy
-                            }
-                        }
+                        isStudent = myInfo.getRoles().stream().anyMatch(role -> "STUDENT".equals(role.getName()));
                     } else {
-                        isStudent = false; // Không có dữ liệu roles thì đặt false
+                        isStudent = false;
                     }
-                    fetchBookingSlots(courtId, selectedDate); // Tiếp tục lấy slot
+                    fetchBookingSlots(courtId, selectedDate);
                 } else {
                     Toast.makeText(BookingTableActivity.this, "Không thể lấy thông tin người dùng", Toast.LENGTH_SHORT).show();
                     isStudent = false;
@@ -184,7 +167,7 @@ public class BookingTableActivity extends AppCompatActivity {
             }
         });
     }
-    /** Hiển thị dialog chọn ngày */
+
     private void showDatePickerDialog() {
         Calendar cal = Calendar.getInstance();
         try {
@@ -215,7 +198,6 @@ public class BookingTableActivity extends AppCompatActivity {
         datePickerDialog.show();
     }
 
-    /** Lấy dữ liệu slot từ API */
     private void fetchBookingSlots(String clubId, String dateBooking) {
         ApiService apiService = RetrofitClient.getApiService(this);
         NetworkUtils.callApi(
@@ -226,7 +208,7 @@ public class BookingTableActivity extends AppCompatActivity {
                     public void onSuccess(List<CourtSlot> courtSlots) {
                         if (courtSlots != null) {
                             courtsByDate.put(dateBooking, courtSlots);
-                            collectAllStartTimesForCurrentDay(courtSlots);
+                            collectAllTimesForCurrentDay(courtSlots);
                             setupCourtSpinner(courtSlots);
                             buildTableForDate(dateBooking);
                             updateSelectedBookings();
@@ -241,16 +223,21 @@ public class BookingTableActivity extends AppCompatActivity {
         );
     }
 
-    /** Thu thập tất cả thời gian bắt đầu */
-    private void collectAllStartTimesForCurrentDay(List<CourtSlot> courtList) {
-        HashMap<String, Boolean> timeMap = new HashMap<>();
+    /** Thu thập tất cả thời gian (startTime và endTime) cho tiêu đề, và chỉ startTime cho ô tương tác */
+    private void collectAllTimesForCurrentDay(List<CourtSlot> courtList) {
+        HashMap<String, Boolean> allTimesMap = new HashMap<>();
+        HashMap<String, Boolean> startTimesMap = new HashMap<>();
         for (CourtSlot court : courtList) {
             for (BookingSlot slot : court.getBookingSlots()) {
-                timeMap.put(slot.getStartTime(), true);
+                allTimesMap.put(slot.getStartTime(), true);
+                allTimesMap.put(slot.getEndTime(), true);
+                startTimesMap.put(slot.getStartTime(), true);
             }
         }
-        allTimesCurrentDay = new ArrayList<>(timeMap.keySet());
+        allTimesCurrentDay = new ArrayList<>(allTimesMap.keySet());
+        startTimesCurrentDay = new ArrayList<>(startTimesMap.keySet());
         allTimesCurrentDay.sort((t1, t2) -> Integer.compare(toMinutes(t1), toMinutes(t2)));
+        startTimesCurrentDay.sort((t1, t2) -> Integer.compare(toMinutes(t1), toMinutes(t2)));
     }
 
     private int toMinutes(String hhmmss) {
@@ -260,7 +247,6 @@ public class BookingTableActivity extends AppCompatActivity {
         return hh * 60 + mm;
     }
 
-    /** Thiết lập spinner chọn sân */
     private void setupCourtSpinner(List<CourtSlot> courtList) {
         List<String> spinnerItems = new ArrayList<>();
         spinnerItems.add("Tất cả");
@@ -272,7 +258,7 @@ public class BookingTableActivity extends AppCompatActivity {
         spinnerCourt.setAdapter(adapter);
     }
 
-    /** Xây dựng bảng slot */
+    /** Xây dựng bảng với tiêu đề chứa cả endTime, nhưng chỉ hiển thị ô cho startTime */
     private void buildTableForDate(String date) {
         tableLayout.removeAllViews();
 
@@ -281,9 +267,10 @@ public class BookingTableActivity extends AppCompatActivity {
             return;
         }
 
-        // Tạo hàng tiêu đề
+        // Tạo hàng tiêu đề với tất cả thời gian (bao gồm endTime)
         TableRow headerRow = new TableRow(this);
         headerRow.addView(createCell("Court", true, true));
+        // Chỉ hiển thị tiêu đề cho các startTime và endTime, nhưng không tạo cột cho endTime
         for (String time : allTimesCurrentDay) {
             String displayTime = time.substring(0, 5);
             headerRow.addView(createCell(displayTime, true, false));
@@ -298,7 +285,7 @@ public class BookingTableActivity extends AppCompatActivity {
 
         String selectedCourtName = spinnerCourt.getSelectedItem().toString();
 
-        if (courtSlots.isEmpty() || allTimesCurrentDay.isEmpty()) {
+        if (courtSlots.isEmpty() || startTimesCurrentDay.isEmpty()) {
             TextView tvEmpty = new TextView(this);
             tvEmpty.setText("Không có dữ liệu");
             tableLayout.addView(tvEmpty);
@@ -318,79 +305,83 @@ public class BookingTableActivity extends AppCompatActivity {
                 slotMap.put(slot.getStartTime(), slot);
             }
 
-            for (String time : allTimesCurrentDay) {
-                TextView cell = createCell("", false, false);
-                cell.setBackground(createCellBackground());
+            // Chỉ hiển thị ô tương tác cho startTime
+            for (int i = 0; i < allTimesCurrentDay.size(); i++) {
+                String time = allTimesCurrentDay.get(i);
+                if (startTimesCurrentDay.contains(time)) {
+                    TextView cell = createCell("", false, false);
+                    cell.setBackground(createCellBackground());
 
-                BookingSlot slot = slotMap.get(time);
-                if (slot != null) {
-                    final String finalKey = court.getCourtSlotId() + "_" + slot.getStartTime();
-                    final TextView finalCell = cell;
-                    final CourtSlot finalCourt = court;
-                    final BookingSlot finalSlot = slot;
-                    final String finalDate = date;
-                    final Map<String, ConfirmOrder> finalSelectedOrdersForThisDate = selectedOrdersForThisDate;
+                    BookingSlot slot = slotMap.get(time);
+                    if (slot != null) {
+                        final String finalKey = court.getCourtSlotId() + "_" + slot.getStartTime();
+                        final TextView finalCell = cell;
+                        final CourtSlot finalCourt = court;
+                        final BookingSlot finalSlot = slot;
+                        final String finalDate = date;
+                        final Map<String, ConfirmOrder> finalSelectedOrdersForThisDate = selectedOrdersForThisDate;
 
-                    if (isSlotEntirelyPast(finalDate, finalSlot.getEndTime())) {
-                        switch (slot.getStatus()) {
-                            case "LOCK_BOOKED":
-                                setCellColor(cell, Color.parseColor("#b24646"));
-                                break;
-                            case "AVAILABLE":
-                            case "LOCKED":
-                                setCellColor(cell, Color.parseColor("#b2b2b2"));
-                                break;
-                            default:
-                                setCellColor(cell, Color.parseColor("#E0E0E0"));
-                                break;
-                        }
-                        cell.setOnClickListener(null);
-                    } else {
-                        switch (slot.getStatus()) {
-                            case "AVAILABLE":
-                                cell.setOnClickListener(v -> {
-                                    if (finalSelectedOrdersForThisDate.containsKey(finalKey)) {
-                                        finalSelectedOrdersForThisDate.remove(finalKey);
-                                        setCellColor(finalCell, Color.WHITE);
+                        if (isSlotEntirelyPast(finalDate, finalSlot.getEndTime())) {
+                            switch (slot.getStatus()) {
+                                case "LOCK_BOOKED":
+                                    setCellColor(cell, Color.parseColor("#b24646"));
+                                    break;
+                                case "AVAILABLE":
+                                case "LOCKED":
+                                    setCellColor(cell, Color.parseColor("#b2b2b2"));
+                                    break;
+                                default:
+                                    setCellColor(cell, Color.parseColor("#E0E0E0"));
+                                    break;
+                            }
+                            cell.setOnClickListener(null);
+                        } else {
+                            switch (slot.getStatus()) {
+                                case "AVAILABLE":
+                                    cell.setOnClickListener(v -> {
+                                        if (finalSelectedOrdersForThisDate.containsKey(finalKey)) {
+                                            finalSelectedOrdersForThisDate.remove(finalKey);
+                                            setCellColor(finalCell, Color.WHITE);
+                                        } else {
+                                            ConfirmOrder order = new ConfirmOrder();
+                                            order.setCourtSlotId(finalCourt.getCourtSlotId());
+                                            order.setCourtSlotName(finalCourt.getCourtSlotName());
+                                            order.setStartTime(finalSlot.getStartTime());
+                                            order.setEndTime(finalSlot.getEndTime());
+                                            double price = isStudent ? finalSlot.getStudentPrice() : finalSlot.getDailyPrice();
+                                            order.setDailyPrice(price);
+                                            order.setDayBooking(finalDate);
+                                            finalSelectedOrdersForThisDate.put(finalKey, order);
+                                            setCellColor(finalCell, Color.parseColor("#A5D6A7"));
+                                        }
+                                        updateSelectedBookings();
+                                    });
+                                    if (selectedOrdersForThisDate.containsKey(finalKey)) {
+                                        setCellColor(cell, Color.parseColor("#A5D6A7"));
                                     } else {
-                                        ConfirmOrder order = new ConfirmOrder();
-                                        order.setCourtSlotId(finalCourt.getCourtSlotId());
-                                        order.setCourtSlotName(finalCourt.getCourtSlotName());
-                                        order.setStartTime(finalSlot.getStartTime());
-                                        order.setEndTime(finalSlot.getEndTime());
-                                        double price = isStudent ? finalSlot.getStudentPrice() : finalSlot.getDailyPrice();
-                                        order.setDailyPrice(price);
-                                        order.setDayBooking(finalDate);
-                                        finalSelectedOrdersForThisDate.put(finalKey, order);
-                                        setCellColor(finalCell, Color.parseColor("#A5D6A7"));
+                                        setCellColor(cell, Color.WHITE);
                                     }
-                                    updateSelectedBookings();
-                                });
-                                if (selectedOrdersForThisDate.containsKey(finalKey)) {
-                                    setCellColor(cell, Color.parseColor("#A5D6A7"));
-                                } else {
-                                    setCellColor(cell, Color.WHITE);
-                                }
-                                break;
-                            case "BOOKED":
-                                setCellColor(cell, Color.parseColor("#ff6464"));
-                                cell.setOnClickListener(null);
-                                break;
-                            case "LOCKED":
-                                setCellColor(cell, Color.parseColor("#b2b2b2"));
-                                cell.setOnClickListener(null);
-                                break;
-                            default:
-                                setCellColor(cell, Color.parseColor("#E0E0E0"));
-                                cell.setOnClickListener(null);
-                                break;
+                                    break;
+                                case "BOOKED":
+                                    setCellColor(cell, Color.parseColor("#ff6464"));
+                                    cell.setOnClickListener(null);
+                                    break;
+                                case "LOCKED":
+                                    setCellColor(cell, Color.parseColor("#b2b2b2"));
+                                    cell.setOnClickListener(null);
+                                    break;
+                                default:
+                                    setCellColor(cell, Color.parseColor("#E0E0E0"));
+                                    cell.setOnClickListener(null);
+                                    break;
+                            }
                         }
+                    } else {
+                        setCellColor(cell, Color.parseColor("#E0E0E0"));
+                        cell.setOnClickListener(null);
                     }
-                } else {
-                    setCellColor(cell, Color.parseColor("#E0E0E0"));
-                    cell.setOnClickListener(null);
+                    row.addView(cell);
                 }
-                row.addView(cell);
             }
             tableLayout.addView(row, new TableLayout.LayoutParams(
                     TableLayout.LayoutParams.MATCH_PARENT,
@@ -431,9 +422,13 @@ public class BookingTableActivity extends AppCompatActivity {
         int padding = dpToPx(4);
         tv.setPadding(padding, padding, padding, padding);
         tv.setText(text);
-        tv.setGravity(Gravity.CENTER);
         tv.setSingleLine(true);
         tv.setEllipsize(TextUtils.TruncateAt.END);
+        if (isHeader && !isFirstColumn) {
+            tv.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+        } else {
+            tv.setGravity(Gravity.CENTER);
+        }
 
         if (isHeader) {
             tv.setTypeface(null, Typeface.BOLD);
@@ -463,7 +458,6 @@ public class BookingTableActivity extends AppCompatActivity {
         bg.setColor(color);
     }
 
-    /** Cập nhật danh sách slot đã chọn */
     private void updateSelectedBookings() {
         selectedBookingsList.clear();
         for (String date : selectedOrdersByDate.keySet()) {

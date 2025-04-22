@@ -40,8 +40,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import Data.Network.ApiService;
 import Data.Network.RetrofitClient;
@@ -81,6 +83,9 @@ public class EditInformationActivity extends AppCompatActivity {
     private Uri photoUri; // URI for camera-captured image
     private SessionManager sessionManager;
 
+    private static final String NAME_PATTERN = "^[\\p{L} ]{2,}$";
+    private static final String PHONE_PATTERN = "^(\\+84|0)(3|5|7|8|9)[0-9]{8}$";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -109,13 +114,17 @@ public class EditInformationActivity extends AppCompatActivity {
         // Set click listeners
         btnBack.setOnClickListener(v -> finish());
         btnEditAvatar.setOnClickListener(v -> showImagePickerDialog());
-        btnSave.setOnClickListener(v -> saveUserInfo());
         btnCancel.setOnClickListener(v -> finish());
 
         setupSpinners();
+        setupValidationListeners();
         loadIntentData();
         loadUserInfo();
-
+        btnSave.setOnClickListener(v -> {
+            if (validateInputs()) {
+                saveUserInfo();                   // only save if inputs valid
+            }
+        });
 
         checkAndRequestPermissions();
     }
@@ -313,30 +322,30 @@ public class EditInformationActivity extends AppCompatActivity {
     /** Show dialog to pick image from gallery or camera */
     private void showImagePickerDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Chọn ảnh");
+        builder.setTitle("Select photo");
 
         PackageManager packageManager = getPackageManager();
         boolean hasCamera = packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
 
         List<String> optionsList = new ArrayList<>();
-        optionsList.add("Chọn từ thư viện");
+        optionsList.add("Select from library");
         if (hasCamera) {
-            optionsList.add("Máy ảnh");
+            optionsList.add("Camera");
         }
 
         String[] options = optionsList.toArray(new String[0]);
         builder.setItems(options, (dialog, which) -> {
-            if (options[which].equals("Chọn từ thư viện")) {
+            if (options[which].equals("Select from library")) {
                 Intent pickIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(pickIntent, REQUEST_IMAGE_PICK);
-            } else if (options[which].equals("Máy ảnh")) {
+            } else if (options[which].equals("Camera")) {
                 Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
                     File photoFile = null;
                     try {
                         photoFile = createImageFile();
                     } catch (IOException ex) {
-                        Toast.makeText(this, "Lỗi khi tạo file ảnh", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Error creating image file", Toast.LENGTH_SHORT).show();
                     }
                     if (photoFile != null) {
                         photoUri = FileProvider.getUriForFile(this, "SEP490.G9.fileprovider", photoFile);
@@ -366,7 +375,7 @@ public class EditInformationActivity extends AppCompatActivity {
                     imgAvatar.setImageURI(selectedImageUri);
                     uploadAvatar(selectedImageUri);
                 } else {
-                    Toast.makeText(this, "Không thể lấy ảnh từ thư viện", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Cannot get photo from gallery", Toast.LENGTH_SHORT).show();
                 }
             } else if (requestCode == REQUEST_IMAGE_CAPTURE) {
                 if (photoUri != null) {
@@ -374,7 +383,7 @@ public class EditInformationActivity extends AppCompatActivity {
                     imgAvatar.setImageURI(selectedImageUri);
                     uploadAvatar(selectedImageUri);
                 } else {
-                    Toast.makeText(this, "Không thể lấy ảnh từ camera", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Cannot get large size images", Toast.LENGTH_SHORT).show();
                 }
             }
         }
@@ -521,7 +530,7 @@ public class EditInformationActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<MyInfoResponse> call, Throwable t) {
                 imgAvatar.setImageResource(R.drawable.avatar);
-                Toast.makeText(EditInformationActivity.this, "Không thể tải thông tin người dùng", Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditInformationActivity.this, "Unable to load user information", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -540,7 +549,7 @@ public class EditInformationActivity extends AppCompatActivity {
                 String input = s.toString();
                 for (int i = 0; i < input.length(); i++) {
                     if (Character.isISOControl(input.charAt(i))) {
-                        editText.setError("Không được nhập ký tự điều khiển");
+                        editText.setError("No control characters allowed");
                         return;
                     }
                 }
@@ -593,5 +602,83 @@ public class EditInformationActivity extends AppCompatActivity {
                 break;
         }
     }
+    private void setupValidationListeners() {
+        etFirstName.setOnFocusChangeListener((v, hasFocus) -> { if (!hasFocus) validateFirstName(); });
+        etLastName.setOnFocusChangeListener((v, hasFocus) -> { if (!hasFocus) validateLastName(); });
+        etPhoneNumber.setOnFocusChangeListener((v, hasFocus) -> { if (!hasFocus) validatePhoneNumber(); });
+        spDay.setOnFocusChangeListener((v, hasFocus) -> { /* spinner focus change not common */ });
+    }
 
+    /** Validate all fields before saving */
+    private boolean validateInputs() {
+        return  validateFirstName()
+                & validateLastName()
+                & validatePhoneNumber()
+                & validateDOB();
+    }
+
+    private boolean validateFirstName() {
+        String n = etFirstName.getText().toString().trim();
+        if (n.isEmpty()) {
+            etFirstName.setError("Please enter name");
+            return false;
+        }
+        if (!Pattern.matches(NAME_PATTERN, n)) {
+            etFirstName.setError("Invalid first name (letters and spaces only, ≥2 characters)");
+            return false;
+        }
+        etFirstName.setError(null);
+        return true;
+    }
+
+    private boolean validateLastName() {
+        String n = etLastName.getText().toString().trim();
+        if (n.isEmpty()) {
+            etLastName.setError("Please enter your last name");
+            return false;
+        }
+        if (!Pattern.matches(NAME_PATTERN, n)) {
+            etLastName.setError("Invalid last name (letters and spaces only, ≥2 characters)");
+            return false;
+        }
+        etLastName.setError(null);
+        return true;
+    }
+
+    private boolean validatePhoneNumber() {
+        String pn = etPhoneNumber.getText().toString().trim();
+        if (pn.isEmpty()) {
+            etPhoneNumber.setError("Please enter phone number");
+            return false;
+        }
+        if (!Pattern.matches(PHONE_PATTERN, pn)) {
+            etPhoneNumber.setError("Invalid phone number");
+            return false;
+        }
+        etPhoneNumber.setError(null);
+        return true;
+    }
+
+    private boolean validateDOB() {
+        String d = spDay.getSelectedItem().toString();
+        String m = spMonth.getSelectedItem().toString();
+        String y = spYear.getSelectedItem().toString();
+        try {
+            Calendar c = Calendar.getInstance();
+            c.setLenient(false);
+            c.set(Integer.parseInt(y), Integer.parseInt(m) - 1, Integer.parseInt(d));
+            c.getTime();
+            Calendar t = Calendar.getInstance();
+            int age = t.get(Calendar.YEAR) - Integer.parseInt(y);
+            if (t.get(Calendar.DAY_OF_YEAR) < c.get(Calendar.DAY_OF_YEAR)) age--;
+            if (age < 10) {
+                Toast.makeText(this, "You must be 10 years or older", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+            return true;
+        } catch (Exception ex) {
+            Toast.makeText(this, "Invalid date of birth", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+    }
 }

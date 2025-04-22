@@ -34,7 +34,7 @@
             android:drawablePadding="8dp"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:text="Chọn ngày"
+            android:text="@string/selectdate"
             android:textColor="#FFFFFF"
             android:textSize="16sp" />
     </LinearLayout>
@@ -45,7 +45,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:layout_marginTop="4dp"
-        android:text="Xem sân &amp; bảng giá"
+        android:text="@string/viewcourtandprice"
         android:textStyle="bold"
         android:textColor="#FFC107"
         android:padding="8dp" />
@@ -82,7 +82,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20sp"
                 android:layout_marginLeft="4dp"
-                android:text="Trống"
+                android:text="@string/slotavailable"
                 android:textColor="@android:color/white" />
         </LinearLayout>
 
@@ -103,7 +103,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20sp"
                 android:layout_marginLeft="4dp"
-                android:text="Đang chọn"
+                android:text="@string/slotselecting"
                 android:textColor="@android:color/white" />
         </LinearLayout>
 
@@ -124,7 +124,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20sp"
                 android:layout_marginLeft="4dp"
-                android:text="Đã đặt"
+                android:text="@string/slotbooked"
                 android:textColor="@android:color/white" />
         </LinearLayout>
 
@@ -145,7 +145,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20sp"
                 android:layout_marginLeft="4dp"
-                android:text="Khóa"
+                android:text="@string/slotlock"
                 android:textColor="@android:color/white" />
         </LinearLayout>
     </LinearLayout>
@@ -176,7 +176,7 @@
         android:id="@+id/tvSelectedListHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Danh sách đã chọn"
+        android:text="@string/slotselected"
         android:textSize="16sp"
         android:textStyle="bold"
         android:padding="8dp" />
@@ -194,7 +194,7 @@
         android:id="@+id/btnNext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Tiếp theo"
+        android:text="@string/btnnext"
         android:textAllCaps="false"
         android:textSize="18sp"
         android:textColor="#000"

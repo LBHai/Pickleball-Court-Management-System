@@ -119,9 +119,9 @@ public class SignUpActivity extends AppCompatActivity {
 
     private boolean validateUsername() {
         String u = edtUsername.getText().toString().trim();
-        if (u.isEmpty())      { tilUsername.setError("Vui lòng nhập tên đăng nhập"); return false; }
+        if (u.isEmpty())      { tilUsername.setError("Please enter username"); return false; }
         if (!Pattern.matches(USERNAME_PATTERN, u)) {
-            tilUsername.setError("Tên đăng nhập cần ít nhất 4 ký tự và không chứa ký tự đặc biệt");
+            tilUsername.setError("Login name must be at least 4 characters and cannot contain special characters");
             return false;
         }
         tilUsername.setError(null);
@@ -130,9 +130,9 @@ public class SignUpActivity extends AppCompatActivity {
 
     private boolean validatePassword() {
         String p = edtPassword.getText().toString().trim();
-        if (p.isEmpty())      { tilPassword.setError("Vui lòng nhập mật khẩu"); return false; }
+        if (p.isEmpty())      { tilPassword.setError("Please enter password"); return false; }
         if (!Pattern.matches(PASSWORD_PATTERN, p)) {
-            tilPassword.setError("Mật khẩu cần ít nhất 6 ký tự, chứa ít nhất 1 chữ cái và 1 chữ số");
+            tilPassword.setError("Password must be at least 6 characters, contain at least 1 letter and 1 number");
             return false;
         }
         tilPassword.setError(null);
@@ -141,9 +141,9 @@ public class SignUpActivity extends AppCompatActivity {
 
     private boolean validateFirstName() {
         String n = edtFirstName.getText().toString().trim();
-        if (n.isEmpty())      { tilFirstName.setError("Vui lòng nhập tên"); return false; }
+        if (n.isEmpty())      { tilFirstName.setError("Please enter name"); return false; }
         if (!Pattern.matches(NAME_PATTERN, n)) {
-            tilFirstName.setError("Tên không hợp lệ (chỉ chữ cái và dấu cách, ≥2 ký tự)");
+            tilFirstName.setError("Invalid name (letters and spaces only, ≥2 characters)");
             return false;
         }
         tilFirstName.setError(null);
@@ -152,9 +152,9 @@ public class SignUpActivity extends AppCompatActivity {
 
     private boolean validateLastName() {
         String n = edtLastName.getText().toString().trim();
-        if (n.isEmpty())      { tilLastName.setError("Vui lòng nhập họ"); return false; }
+        if (n.isEmpty())      { tilLastName.setError("Please enter your last name"); return false; }
         if (!Pattern.matches(NAME_PATTERN, n)) {
-            tilLastName.setError("Họ không hợp lệ (chỉ chữ cái và dấu cách, ≥2 ký tự)");
+            tilLastName.setError("Invalid last name (letters and spaces only, ≥2 characters)");
             return false;
         }
         tilLastName.setError(null);
@@ -163,9 +163,9 @@ public class SignUpActivity extends AppCompatActivity {
 
     private boolean validatePhoneNumber() {
         String pn = edtPhoneNumber.getText().toString().trim();
-        if (pn.isEmpty())     { tilPhoneNumber.setError("Vui lòng nhập số điện thoại"); return false; }
+        if (pn.isEmpty())     { tilPhoneNumber.setError("Please enter phone number"); return false; }
         if (!pn.matches("^(\\+84|0)(3|5|7|8|9)[0-9]{8}$")) {
-            tilPhoneNumber.setError("Số điện thoại không hợp lệ");
+            tilPhoneNumber.setError("Invalid phone number");
             return false;
         }
         tilPhoneNumber.setError(null);
@@ -174,13 +174,13 @@ public class SignUpActivity extends AppCompatActivity {
 
     private boolean validateEmail() {
         String e = edtEmail.getText().toString().trim();
-        if (e.isEmpty())      { tilEmail.setError("Vui lòng nhập email"); return false; }
+        if (e.isEmpty())      { tilEmail.setError("Please enter email"); return false; }
         if (!Patterns.EMAIL_ADDRESS.matcher(e).matches()) {
-            tilEmail.setError("Email không đúng định dạng");
+            tilEmail.setError("Email is not in correct format.");
             return false;
         }
         if (!e.endsWith("edu.vn") && !e.endsWith("@gmail.com")) {
-            tilEmail.setError("Vui lòng sử dụng email @gmail.com hoặc @edu.vn");
+            tilEmail.setError("Please use email @gmail.com or edu.vn");
             return false;
         }
         tilEmail.setError(null);
@@ -200,12 +200,12 @@ public class SignUpActivity extends AppCompatActivity {
             int age = t.get(Calendar.YEAR) - Integer.parseInt(y);
             if (t.get(Calendar.DAY_OF_YEAR) < c.get(Calendar.DAY_OF_YEAR)) age--;
             if (age < 10) {
-                Toast.makeText(this, "Bạn phải từ 10 tuổi trở lên", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "You must be 10 years or older", Toast.LENGTH_SHORT).show();
                 return false;
             }
             return true;
         } catch (Exception ex) {
-            Toast.makeText(this, "Ngày sinh không hợp lệ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Invalid date of birth", Toast.LENGTH_SHORT).show();
             return false;
         }
     }
@@ -235,7 +235,7 @@ public class SignUpActivity extends AppCompatActivity {
                 public void onResponse(Call<Void> call, Response<Void> resp) {
                     if (resp.isSuccessful()) {
                         Toast.makeText(SignUpActivity.this,
-                                "Đăng ký thành công! Vui lòng kiểm tra Spam.",
+                                "Registration successful! Please check your 'Spam' mail",
                                 Toast.LENGTH_SHORT).show();
                         showEduEmailVerificationDialog();
                     } else {
@@ -260,7 +260,7 @@ public class SignUpActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(Call<GetToken> call, Response<GetToken> response) {
                     if (response.isSuccessful() && response.body() != null) {
-                        Toast.makeText(SignUpActivity.this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SignUpActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
                         navigateToLogin();
                     } else {
                         // Xử lý phản hồi lỗi cho email Gmail
@@ -280,8 +280,8 @@ public class SignUpActivity extends AppCompatActivity {
 
     private void showEduEmailVerificationDialog() {
         AlertDialog.Builder b = new AlertDialog.Builder(this);
-        b.setTitle("Xác nhận email sinh viên");
-        b.setMessage("Vui lòng kiểm tra hộp thư đến và thư mục Spam để xác nhận tài khoản của bạn.");
+        b.setTitle("Confirm student email");
+        b.setMessage("Please check your inbox and 'Spam' mail to confirm your account.");
         b.setPositiveButton("Đóng", (d, w) -> navigateToLogin());
         b.create().show();
     }
@@ -298,17 +298,17 @@ public class SignUpActivity extends AppCompatActivity {
 
                     // Kiểm tra loại lỗi trùng lặp dựa trên thông báo lỗi từ server
                     if (errorBodyString.contains("email")) {
-                        Toast.makeText(this, "Email đã tồn tại", Toast.LENGTH_LONG).show();
-                        tilEmail.setError("Email đã tồn tại");
+                        Toast.makeText(this, "Email already exists", Toast.LENGTH_LONG).show();
+                        tilEmail.setError("Email already exists");
                     } else if (errorBodyString.contains("phone") || errorBodyString.contains("phoneNumber")) {
-                        Toast.makeText(this, "Số điện thoại đã tồn tại", Toast.LENGTH_LONG).show();
-                        tilPhoneNumber.setError("Số điện thoại đã tồn tại");
+                        Toast.makeText(this, "Phone number already exists", Toast.LENGTH_LONG).show();
+                        tilPhoneNumber.setError("Phone number already exists");
                     } else if (errorBodyString.contains("username")) {
-                        Toast.makeText(this, "Tên đăng nhập đã tồn tại", Toast.LENGTH_LONG).show();
-                        tilUsername.setError("Tên đăng nhập đã tồn tại");
+                        Toast.makeText(this, "Username already exists", Toast.LENGTH_LONG).show();
+                        tilUsername.setError("Username already exists");
                     } else {
                         // Nếu thông báo lỗi không xác định được loại lỗi
-                        Toast.makeText(this, "Email, số điện thoại hoặc tên đăng nhập đã tồn tại",
+                        Toast.makeText(this, "Email, phone number or username already exists",
                                 Toast.LENGTH_LONG).show();
                     }
                 }
@@ -322,5 +322,6 @@ public class SignUpActivity extends AppCompatActivity {
             Toast.makeText(this, "Đăng ký thất bại: " + response.code(), Toast.LENGTH_SHORT).show();
         }
     }
+
 
 }

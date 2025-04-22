@@ -5,13 +5,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
 import Data.Model.NotificationItem;
 import SEP490.G9.R;
 
@@ -20,88 +25,89 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     private Context context;
     private List<NotificationItem> notificationList;
     private OnNotificationItemClickListener listener;
+    private static final SimpleDateFormat ISO_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault());
+    private static final SimpleDateFormat DISPLAY_FORMAT = new SimpleDateFormat("dd/MM/yyyy, 'lúc' HH:mm", Locale.getDefault());
 
     public interface OnNotificationItemClickListener {
-        // Callback khi click vào toàn bộ item (để Activity xử lý gọi API và chuyển màn hình)
         void onItemClick(NotificationItem notification);
-        // Callback khi click nút đóng (xóa thông báo khỏi danh sách)
         void onCloseClick(NotificationItem notification);
     }
 
     public NotificationAdapter(Context context, List<NotificationItem> notificationList,
                                OnNotificationItemClickListener listener) {
         this.context = context;
-        this.notificationList = notificationList;
         this.listener = listener;
+        setNotifications(notificationList);
+    }
+
+    /**
+     * Cập nhật danh sách thông báo và sắp xếp từ mới nhất đến cũ nhất
+     */
+    public void setNotifications(List<NotificationItem> list) {
+        if (list != null) {
+            Collections.sort(list, new Comparator<NotificationItem>() {
+                @Override
+                public int compare(NotificationItem o1, NotificationItem o2) {
+                    try {
+                        Date d1 = ISO_FORMAT.parse(o1.getCreateAt());
+                        Date d2 = ISO_FORMAT.parse(o2.getCreateAt());
+                        // d2 trước d1 để mới nhất lên đầu
+                        return d2.compareTo(d1);
+                    } catch (ParseException e) {
+                        return 0;
+                    }
+                }
+            });
+        }
+        this.notificationList = list;
+        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
-    public NotificationAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_notification, parent, false);
         return new ViewHolder(view, listener);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull NotificationAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         NotificationItem notification = notificationList.get(position);
         holder.tvTitle.setText(notification.getTitle());
         holder.tvDescription.setText(notification.getDescription());
 
-        // Định dạng thời gian từ trường createAt
-        String timeString = notification.getCreateAt();
+        // Định dạng thời gian hiển thị
         try {
-            SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault());
-            Date date = isoFormat.parse(timeString);
-            SimpleDateFormat displayFormat = new SimpleDateFormat("dd/MM/yyyy, 'lúc' HH:mm", Locale.getDefault());
-            String formattedTime = displayFormat.format(date);
-            holder.tvTime.setText(formattedTime);
+            Date date = ISO_FORMAT.parse(notification.getCreateAt());
+            holder.tvTime.setText(DISPLAY_FORMAT.format(date));
         } catch (ParseException e) {
-            holder.tvTime.setText(timeString);
+            holder.tvTime.setText(notification.getCreateAt());
         }
 
-        // Kiểm tra trạng thái thông báo để cập nhật giao diện
-        if ("read".equalsIgnoreCase(notification.getStatus())) {
-            // Nếu đã đọc, làm mờ item (giảm độ mờ về 50%)
-            holder.itemView.setAlpha(0.5f);
-        } else {
-            // Nếu chưa đọc, hiển thị bình thường (độ mờ 100%)
-            holder.itemView.setAlpha(1f);
-        }
+        // Đánh dấu đã đọc
+        holder.itemView.setAlpha(
+                "read".equalsIgnoreCase(notification.getStatus()) ? 0.5f : 1f
+        );
     }
-
 
     @Override
     public int getItemCount() {
-        return notificationList.size();
+        return notificationList != null ? notificationList.size() : 0;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-
+    class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvTitle, tvDescription, tvTime;
-        // Nếu có nút đóng (x) để xóa thông báo, bạn có thể khai báo và xử lý ở đây
-        // ImageButton btnClose;
 
-        public ViewHolder(@NonNull View itemView, OnNotificationItemClickListener listener) {
+        ViewHolder(@NonNull View itemView, OnNotificationItemClickListener listener) {
             super(itemView);
             tvTitle = itemView.findViewById(R.id.tvTitle);
             tvDescription = itemView.findViewById(R.id.tvDescription);
             tvTime = itemView.findViewById(R.id.tvTime);
 
-            // Xử lý click vào toàn bộ item
-            itemView.setOnClickListener(v -> {
-                NotificationItem notification = notificationList.get(getAdapterPosition());
-                listener.onItemClick(notification);
-            });
+            itemView.setOnClickListener(v ->
+                    listener.onItemClick(notificationList.get(getAdapterPosition()))
+            );
 
-            // Nếu bạn có nút đóng để xóa thông báo thì uncomment đoạn dưới
-            /*
-            btnClose = itemView.findViewById(R.id.btnClose);
-            btnClose.setOnClickListener(v -> {
-                NotificationItem notification = notificationList.get(getAdapterPosition());
-                listener.onCloseClick(notification);
-            });
-            */
         }
     }
 }

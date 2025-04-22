@@ -136,7 +136,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
-                    Toast.makeText(ChangePasswordActivity.this, "Thay đổi mật khẩu thành công!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ChangePasswordActivity.this, "Password changed successfully!", Toast.LENGTH_SHORT).show();
                     finish();
                 } else {
                     try {
@@ -146,7 +146,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
 
                         if ("FAIL_PASS".equals(code)) {
                             Toast.makeText(ChangePasswordActivity.this,
-                                    "Mật khẩu cũ không đúng, vui lòng thử lại!", Toast.LENGTH_LONG).show();
+                                    "Old password is incorrect, please try again!", Toast.LENGTH_LONG).show();
                             etOldPassword.setText("");
                             etOldPassword.requestFocus();
                         } else if (err.has("code") && err.get("code").getAsInt() == 401) {
@@ -180,7 +180,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
     private boolean validateOldPassword() {
         String old = etOldPassword.getText().toString().trim();
         if (old.isEmpty()) {
-            etOldPassword.setError("Vui lòng nhập mật khẩu cũ");
+            etOldPassword.setError("Please enter old password");
             etOldPassword.requestFocus();
             return false;
         }
@@ -191,12 +191,12 @@ public class ChangePasswordActivity extends AppCompatActivity {
     private boolean validateNewPassword() {
         String p = etNewPassword.getText().toString().trim();
         if (p.isEmpty()) {
-            etNewPassword.setError("Vui lòng nhập mật khẩu mới");
+            etNewPassword.setError("Please enter new password");
             etNewPassword.requestFocus();
             return false;
         }
         if (!Pattern.matches(PASSWORD_PATTERN, p)) {
-            etNewPassword.setError("Mật khẩu cần ít nhất 6 ký tự, chứa ít nhất 1 chữ cái và 1 chữ số");
+            etNewPassword.setError("Password must be at least 6 characters, contain at least 1 letter and 1 number!");
             etNewPassword.requestFocus();
             return false;
         }
@@ -208,12 +208,12 @@ public class ChangePasswordActivity extends AppCompatActivity {
         String confirm = etConfirmNewPassword.getText().toString().trim();
         String newPass = etNewPassword.getText().toString().trim();
         if (confirm.isEmpty()) {
-            etConfirmNewPassword.setError("Vui lòng nhập lại mật khẩu mới");
+            etConfirmNewPassword.setError("Please re-enter new password");
             etConfirmNewPassword.requestFocus();
             return false;
         }
         if (!confirm.equals(newPass)) {
-            etConfirmNewPassword.setError("Mật khẩu không khớp");
+            etConfirmNewPassword.setError("Passwords do not match");
             etConfirmNewPassword.requestFocus();
             return false;
         }

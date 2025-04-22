@@ -98,9 +98,22 @@
     <string name="new_password">New Password</string>
     <string name="re_enter_new_password">Re-enter new password</string>
     <string name="dayorder">Day Order</string>
-    <string name="prompt_day">Ngày</string>
-    <string name="prompt_month">Tháng</string>
-    <string name="prompt_year">Năm</string>
+    <string name="prompt_day">Day</string>
+    <string name="prompt_month">Month</string>
+    <string name="prompt_year">Year</string>
     <string name="search">Search</string>
+    <string name="bookdaily">Booking daily</string>
+    <string name="desBookdaily">Quick booking in one time slot (multiple courses).</string>
+    <string name="bookregular">Booking regular</string>
+    <string name="desBookregular">Set a fixed monthly schedule to play at a certain time (multiple courses).</string>
+    <string name="methodbook">Select order type</string>
+    <string name="slotavailable">Available</string>
+    <string name="slotselecting">Selecting</string>
+    <string name="slotbooked">Booked</string>
+    <string name="slotlock">Lock</string>
+    <string name="slotselected">Selected List</string>
+    <string name="btnnext">Next</string>
+    <string name="selectdate">Select date</string>
+    <string name="viewcourtandprice">View court &amp; price list</string>
 
 </resources>

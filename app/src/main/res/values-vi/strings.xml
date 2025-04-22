@@ -39,13 +39,6 @@
     </string-array>
 
     <string name="avatar">Ảnh đại diện</string>
-    <!--    <string name="so_dien_thoai" >Số điện thoại</string>-->
-    <!--    <string name="ma_quoc_gia">Mã quốc gia</string>-->
-    <!--    <string name="nhap_so_dien_thoai">Nhập số điện thoại</string>-->
-    <!--    <string name="ten_day_du">Tên đầy đủ</string>-->
-    <!--    <string name="gioi_tinh">Giới tính</string>-->
-    <!--    <string name="ngay_sinh">Ngày sinh</string>-->
-    <!--    <string name="luu">Lưu</string>-->
 
     <!-- Mảng ngày (1-31) -->
     <string-array name="day_array">
@@ -76,9 +69,22 @@
     <string name="new_password">Mật khẩu mới</string>
     <string name="re_enter_new_password">Nhập lại mật khẩu mới</string>
     <string name="dayorder">Đơn ngày</string>
-    <string name="prompt_day">Day</string>
-    <string name="prompt_month">Month</string>
-    <string name="prompt_year">Year</string>
+    <string name="prompt_day">Ngày</string>
+    <string name="prompt_month">Tháng</string>
+    <string name="prompt_year">Năm</string>
     <string name="search">Tìm kiếm</string>
+    <string name="bookdaily">Đặt lịch hằng ngày</string>
+    <string name="desBookdaily">Đặt lịch nhanh chóng chơi trong một khung giờ (nhiều sân).</string>
+    <string name="bookregular">Đặt lịch cố định</string>
+    <string name="desBookregular">Lên lịch cố định hàng tháng chơi trong một khung giờ nhất định (nhiều sân).</string>
+    <string name="methodbook">Chọn hình thức đặt</string>
+    <string name="slotavailable">Trống</string>
+    <string name="slotselecting">Đang chọn</string>
+    <string name="slotbooked">Đã đặt</string>
+    <string name="slotlock">Khóa</string>
+    <string name="slotselected">Danh sách đã chọn</string>
+    <string name="btnnext">Tiếp theo</string>
+    <string name="selectdate">Chọn ngày</string>
+    <string name="viewcourtandprice">Xem sân &amp; bảng giá</string>
 
 </resources>
