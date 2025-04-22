@@ -18,6 +18,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.widget.AdapterView;
@@ -229,6 +230,7 @@ public class BookingTableActivity extends AppCompatActivity {
         HashMap<String, Boolean> startTimesMap = new HashMap<>();
         for (CourtSlot court : courtList) {
             for (BookingSlot slot : court.getBookingSlots()) {
+                Log.d("BookingTableActivity", "Slot: start=" + slot.getStartTime() + ", end=" + slot.getEndTime());
                 allTimesMap.put(slot.getStartTime(), true);
                 allTimesMap.put(slot.getEndTime(), true);
                 startTimesMap.put(slot.getStartTime(), true);
@@ -238,6 +240,9 @@ public class BookingTableActivity extends AppCompatActivity {
         startTimesCurrentDay = new ArrayList<>(startTimesMap.keySet());
         allTimesCurrentDay.sort((t1, t2) -> Integer.compare(toMinutes(t1), toMinutes(t2)));
         startTimesCurrentDay.sort((t1, t2) -> Integer.compare(toMinutes(t1), toMinutes(t2)));
+
+        Log.d("BookingTableActivity", "All Times for " + selectedDate + ": " + allTimesCurrentDay);
+        Log.d("BookingTableActivity", "Start Times for " + selectedDate + ": " + startTimesCurrentDay);
     }
 
     private int toMinutes(String hhmmss) {
@@ -258,19 +263,18 @@ public class BookingTableActivity extends AppCompatActivity {
         spinnerCourt.setAdapter(adapter);
     }
 
-    /** Xây dựng bảng với tiêu đề chứa cả endTime, nhưng chỉ hiển thị ô cho startTime */
     private void buildTableForDate(String date) {
         tableLayout.removeAllViews();
 
         List<CourtSlot> courtSlots = courtsByDate.get(date);
         if (courtSlots == null) {
+            Log.e("BookingTableActivity", "No court slots for date: " + date);
             return;
         }
 
         // Tạo hàng tiêu đề với tất cả thời gian (bao gồm endTime)
         TableRow headerRow = new TableRow(this);
         headerRow.addView(createCell("Court", true, true));
-        // Chỉ hiển thị tiêu đề cho các startTime và endTime, nhưng không tạo cột cho endTime
         for (String time : allTimesCurrentDay) {
             String displayTime = time.substring(0, 5);
             headerRow.addView(createCell(displayTime, true, false));
@@ -278,7 +282,8 @@ public class BookingTableActivity extends AppCompatActivity {
         tableLayout.addView(headerRow);
 
         Map<String, ConfirmOrder> selectedOrdersForThisDate = selectedOrdersByDate.get(date);
-        if (selectedOrdersForThisDate == null) {
+        if (selectedOrdersForThisDate == null);
+        {
             selectedOrdersForThisDate = new HashMap<>();
             selectedOrdersByDate.put(date, selectedOrdersForThisDate);
         }
@@ -289,14 +294,20 @@ public class BookingTableActivity extends AppCompatActivity {
             TextView tvEmpty = new TextView(this);
             tvEmpty.setText("Không có dữ liệu");
             tableLayout.addView(tvEmpty);
+            Log.w("BookingTableActivity", "No court slots or start times available");
             return;
         }
+
+        int displayedCourts = 0; // Đếm số sân được hiển thị
+        int totalCellsDisplayed = 0; // Tổng số ô được hiển thị
+        String lastTime = allTimesCurrentDay.get(allTimesCurrentDay.size() - 1); // endTime cuối cùng
 
         for (CourtSlot court : courtSlots) {
             if (!selectedCourtName.equals("Tất cả") && !court.getCourtSlotName().equals(selectedCourtName)) {
                 continue;
             }
 
+            displayedCourts++;
             TableRow row = new TableRow(this);
             row.addView(createCell(court.getCourtSlotName(), false, true));
 
@@ -305,13 +316,21 @@ public class BookingTableActivity extends AppCompatActivity {
                 slotMap.put(slot.getStartTime(), slot);
             }
 
-            // Chỉ hiển thị ô tương tác cho startTime
+            int cellsInRow = 0; // Đếm số ô trong hàng này
             for (int i = 0; i < allTimesCurrentDay.size(); i++) {
                 String time = allTimesCurrentDay.get(i);
-                if (startTimesCurrentDay.contains(time)) {
-                    TextView cell = createCell("", false, false);
-                    cell.setBackground(createCellBackground());
+                // Không vẽ ô cho endTime cuối cùng
+                if (time.equals(lastTime)) {
+                    continue;
+                }
 
+                TextView cell = createCell("", false, false);
+                cell.setBackground(createCellBackground());
+                cellsInRow++;
+                totalCellsDisplayed++;
+
+                // Nếu là startTime, vẽ ô tương tác
+                if (startTimesCurrentDay.contains(time)) {
                     BookingSlot slot = slotMap.get(time);
                     if (slot != null) {
                         final String finalKey = court.getCourtSlotId() + "_" + slot.getStartTime();
@@ -380,16 +399,35 @@ public class BookingTableActivity extends AppCompatActivity {
                         setCellColor(cell, Color.parseColor("#E0E0E0"));
                         cell.setOnClickListener(null);
                     }
-                    row.addView(cell);
+                } else {
+                    // Ô trắng cho khoảng ngắt quãng, khóa không cho chọn
+                    setCellColor(cell, Color.parseColor("#b2b2b2"));
+                    cell.setOnClickListener(null);
                 }
+                row.addView(cell);
             }
             tableLayout.addView(row, new TableLayout.LayoutParams(
                     TableLayout.LayoutParams.MATCH_PARENT,
                     TableLayout.LayoutParams.WRAP_CONTENT
             ));
+
+            // Kiểm tra số ô trong hàng
+            int expectedCellsPerRow = allTimesCurrentDay.size() - 1; // Trừ endTime cuối
+            if (cellsInRow != expectedCellsPerRow) {
+                Log.w("BookingTableActivity", "Row for court " + court.getCourtSlotName() + " has " + cellsInRow +
+                        " cells, expected " + expectedCellsPerRow);
+            }
+        }
+
+        // Kiểm tra tổng số ô
+        int expectedTotalCells = displayedCourts * (allTimesCurrentDay.size() - 1);
+        if (totalCellsDisplayed != expectedTotalCells) {
+            Log.w("BookingTableActivity", "Total cells displayed: " + totalCellsDisplayed +
+                    ", expected: " + expectedTotalCells);
+        } else {
+            Log.d("BookingTableActivity", "Total cells displayed matches expected: " + totalCellsDisplayed);
         }
     }
-
     private boolean isSlotEntirelyPast(String dateBooking, String endTime) {
         try {
             String dateTimeString = dateBooking + " " + endTime;

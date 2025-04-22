@@ -2,6 +2,7 @@ package UI.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.TextView;
 
@@ -17,12 +18,15 @@ import Data.Network.ApiService;
 import Data.Network.RetrofitClient;
 import Data.Model.ForgetPasswordRequest;
 import Data.Model.ForgetPasswordResponse;
-import SEP490.G9.R;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import SEP490.G9.R;
 
 public class ForgotPasswordActivity extends AppCompatActivity {
+
+    private static final String USERNAME_PATTERN = "^[a-zA-Z0-9]{4,}$";
+    private static final String PHONE_PATTERN = "^(\\+84|0)(3|5|7|8|9)[0-9]{8}$";
 
     private TextInputLayout tilRecoveryKey;
     private TextInputEditText edtRecoveryKey;
@@ -34,53 +38,79 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forgotpassword);
 
-        // Initialize views
         tilRecoveryKey = findViewById(R.id.tilRecoveryKey);
         edtRecoveryKey = findViewById(R.id.edtRecoveryKey);
         btnResetPassword = findViewById(R.id.btnResetPassword);
         btnBackToLogin = findViewById(R.id.btnBackToLogin);
 
-        // Set click listener for Reset Password button
-        btnResetPassword.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                resetPassword();
-            }
-        });
-
-        // Set click listener for back to login
-        btnBackToLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(ForgotPasswordActivity.this, LoginActivity.class);
-                startActivity(intent);
-                finish();
-            }
+        btnResetPassword.setOnClickListener(v -> resetPassword());
+        btnBackToLogin.setOnClickListener(v -> {
+            startActivity(new Intent(ForgotPasswordActivity.this, LoginActivity.class));
+            finish();
         });
     }
 
     private void resetPassword() {
-        String recoveryKey = edtRecoveryKey.getText().toString().trim();
-        if (recoveryKey.isEmpty()) {
-            tilRecoveryKey.setError("Vui lòng nhập username, email hoặc số điện thoại");
+        String key = edtRecoveryKey.getText().toString().trim();
+
+        // 1. Kiểm tra độ dài chung
+        if (key.length() <= 2) {
+            tilRecoveryKey.setError("Please enter at least 3 characters");
             return;
         }
-        tilRecoveryKey.setError(null);
-        showLoading(true);
 
+        // 2. Xác định loại input và validate
+        if (Patterns.EMAIL_ADDRESS.matcher(key).matches()) {
+            // Email
+            if (!validateEmailInput(key)) return;
+            callForgetPassword(key);
+
+        } else if (key.startsWith("+84") || key.startsWith("0")) {
+            // Số điện thoại (bao gồm cả trường hợp chưa đúng định dạng)
+            if (!validatePhoneInput(key)) return;
+            callForgetPassword(key);
+
+        } else {
+            // Username
+            if (!key.matches(USERNAME_PATTERN)) {
+                tilRecoveryKey.setError("Username must be at least 4 characters and not contain special characters");
+                return;
+            }
+            tilRecoveryKey.setError(null);
+            callForgetPassword(key);
+        }
+    }
+
+    private boolean validateEmailInput(String email) {
+        if (!email.endsWith("@gmail.com.vn") && !email.endsWith("edu.vn")) {
+            tilRecoveryKey.setError("Email must have the extension @gmail.com.vn or edu.vn");
+            return false;
+        }
+        tilRecoveryKey.setError(null);
+        return true;
+    }
+
+    private boolean validatePhoneInput(String pn) {
+        if (!pn.matches(PHONE_PATTERN)) {
+            tilRecoveryKey.setError("Phone number is not in correct format");
+            return false;
+        }
+        tilRecoveryKey.setError(null);
+        return true;
+    }
+
+    private void callForgetPassword(String recoveryKey) {
+        showLoading(true);
         ForgetPasswordRequest body = new ForgetPasswordRequest(recoveryKey);
         ApiService api = RetrofitClient.getApiService(this);
         Call<Void> call = api.forgetPassword(body);
-
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 showLoading(false);
                 if (response.isSuccessful()) {
-                    // HTTP 200 – xem như thành công
                     showSuccessDialog();
                 } else {
-                    // HTTP lỗi – parse JSON {"code":1005,...}
                     handleErrorResponse(response);
                 }
             }
@@ -109,15 +139,12 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         }
     }
 
-
-
     private void showSuccessDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Password Reset Sent");
         builder.setMessage("Your new password has been sent to your email address. Please check your inbox.");
         builder.setPositiveButton("GO TO LOGIN", (dialog, which) -> {
-            Intent intent = new Intent(ForgotPasswordActivity.this, LoginActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(ForgotPasswordActivity.this, LoginActivity.class));
             finish();
         });
         builder.setCancelable(false);

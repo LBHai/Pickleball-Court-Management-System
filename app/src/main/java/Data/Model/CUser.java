@@ -4,10 +4,23 @@ public class CUser {
     private String username;
     private String password;
     private String firstName;
-    private String lastName ;
+    private String lastName;
     private String dob;
     private String email;
     private String phoneNumber;
+    private String gender;
+
+    public CUser(String username, String password, String firstName, String lastName, String dob, String email, String phoneNumber, String gender) {
+        this.username = username;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.dob = dob;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.gender = gender;
+    }
+
 
     public String getUsername() {
         return username;
@@ -65,16 +78,11 @@ public class CUser {
         this.phoneNumber = phoneNumber;
     }
 
-    public CUser(String username, String password, String firstName, String lastName, String dob, String email, String phoneNumber) {
-        this.username = username;
-        this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.dob = dob;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
+    public String getGender() {
+        return gender;
     }
 
-    public CUser() {
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 }

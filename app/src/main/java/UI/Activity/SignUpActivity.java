@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Patterns;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,6 +37,7 @@ public class SignUpActivity extends AppCompatActivity {
     private TextInputEditText edtUsername, edtPassword, edtFirstName, edtLastName, edtPhoneNumber, edtEmail;
     private Spinner spinnerDay, spinnerMonth, spinnerYear;
     private Button btnSignup;
+    private RadioGroup rgGender; // Thêm RadioGroup cho giới tính
     private ArrayAdapter<String> dayAdapter, monthAdapter, yearAdapter;
 
     // Regex patterns
@@ -67,6 +69,7 @@ public class SignUpActivity extends AppCompatActivity {
         spinnerMonth = findViewById(R.id.spinnerMonth);
         spinnerYear = findViewById(R.id.spinnerYear);
         btnSignup = findViewById(R.id.btnSignup);
+        rgGender = findViewById(R.id.rgGender); // Khởi tạo RadioGroup
 
         setupSpinners();
         setupValidationListeners();
@@ -114,7 +117,7 @@ public class SignUpActivity extends AppCompatActivity {
 
     private boolean validateInputs() {
         return validateUsername() & validatePassword() & validateFirstName()
-                & validateLastName() & validateDOB() & validatePhoneNumber() & validateEmail();
+                & validateLastName() & validateDOB() & validatePhoneNumber() & validateEmail() & validateGender();
     }
 
     private boolean validateUsername() {
@@ -141,7 +144,7 @@ public class SignUpActivity extends AppCompatActivity {
 
     private boolean validateFirstName() {
         String n = edtFirstName.getText().toString().trim();
-        if (n.isEmpty())      { tilFirstName.setError("Please enter name"); return false; }
+        if (n.isEmpty())      { tilFirstName.setError("Please enter your first name"); return false; }
         if (!Pattern.matches(NAME_PATTERN, n)) {
             tilFirstName.setError("Invalid name (letters and spaces only, ≥2 characters)");
             return false;
@@ -210,6 +213,14 @@ public class SignUpActivity extends AppCompatActivity {
         }
     }
 
+    private boolean validateGender() {
+        if (rgGender.getCheckedRadioButtonId() == -1) {
+            Toast.makeText(this, "Please select your gender", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+
     private void signup() {
         String u = edtUsername.getText().toString().trim();
         String p = edtPassword.getText().toString().trim();
@@ -222,13 +233,20 @@ public class SignUpActivity extends AppCompatActivity {
         String pn = edtPhoneNumber.getText().toString().trim();
         String e = edtEmail.getText().toString().trim();
 
+        // Get gender from RadioGroup
+        int selectedId = rgGender.getCheckedRadioButtonId();
+        String gender = "";
+        if (selectedId == R.id.rbMale) {
+            gender = "MALE";
+        } else if (selectedId == R.id.rbFemale) {
+            gender = "FEMALE";
+        }
+
         ApiService apiService = RetrofitClient.getApiService(this);
 
         if (e.endsWith("edu.vn")) {
-            // Student registration flow
-            StudentRegistrationRequest req = new StudentRegistrationRequest(
-                    u, p, fn, ln, dob, e, pn
-            );
+            // Student registration
+            StudentRegistrationRequest req = new StudentRegistrationRequest(u, p, fn, ln, dob, e, pn, gender);
             Call<Void> call = apiService.registerStudent(req);
             call.enqueue(new Callback<Void>() {
                 @Override
@@ -239,7 +257,6 @@ public class SignUpActivity extends AppCompatActivity {
                                 Toast.LENGTH_SHORT).show();
                         showEduEmailVerificationDialog();
                     } else {
-                        // Xử lý phản hồi lỗi cho email edu.vn
                         handleRegistrationError(resp);
                     }
                 }
@@ -247,23 +264,23 @@ public class SignUpActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(Call<Void> call, Throwable t) {
                     Toast.makeText(SignUpActivity.this,
-                            "Không thể kết nối đến máy chủ: " + t.getMessage(),
+                            "Cannot connect to server: " + t.getMessage(),
                             Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
-            // Normal (Gmail) registration flow
-            CUser user = new CUser(u, p, fn, ln, dob, e, pn);
+            // Normal registration
+            CUser user = new CUser(u, p, fn, ln, dob, e, pn, gender);
             Call<GetToken> call = apiService.registerUser(user);
-
             call.enqueue(new Callback<GetToken>() {
                 @Override
                 public void onResponse(Call<GetToken> call, Response<GetToken> response) {
                     if (response.isSuccessful() && response.body() != null) {
-                        Toast.makeText(SignUpActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SignUpActivity.this,
+                                "Registration successful!",
+                                Toast.LENGTH_SHORT).show();
                         navigateToLogin();
                     } else {
-                        // Xử lý phản hồi lỗi cho email Gmail
                         handleRegistrationError(response);
                     }
                 }
@@ -271,7 +288,7 @@ public class SignUpActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(Call<GetToken> call, Throwable t) {
                     Toast.makeText(SignUpActivity.this,
-                            "Đăng ký thất bại: " + t.getMessage(),
+                            "Registration failed: " + t.getMessage(),
                             Toast.LENGTH_SHORT).show();
                 }
             });
@@ -282,7 +299,7 @@ public class SignUpActivity extends AppCompatActivity {
         AlertDialog.Builder b = new AlertDialog.Builder(this);
         b.setTitle("Confirm student email");
         b.setMessage("Please check your inbox and 'Spam' mail to confirm your account.");
-        b.setPositiveButton("Đóng", (d, w) -> navigateToLogin());
+        b.setPositiveButton("Close", (d, w) -> navigateToLogin());
         b.create().show();
     }
 
@@ -290,13 +307,12 @@ public class SignUpActivity extends AppCompatActivity {
         startActivity(new Intent(this, LoginActivity.class));
         finish();
     }
+
     private void handleRegistrationError(Response<?> response) {
-        if (response.code() == 409) {  // HTTP 409 Conflict - Trùng lặp dữ liệu
+        if (response.code() == 409) {
             try {
                 if (response.errorBody() != null) {
                     String errorBodyString = response.errorBody().string();
-
-                    // Kiểm tra loại lỗi trùng lặp dựa trên thông báo lỗi từ server
                     if (errorBodyString.contains("email")) {
                         Toast.makeText(this, "Email already exists", Toast.LENGTH_LONG).show();
                         tilEmail.setError("Email already exists");
@@ -307,7 +323,6 @@ public class SignUpActivity extends AppCompatActivity {
                         Toast.makeText(this, "Username already exists", Toast.LENGTH_LONG).show();
                         tilUsername.setError("Username already exists");
                     } else {
-                        // Nếu thông báo lỗi không xác định được loại lỗi
                         Toast.makeText(this, "Email, phone number or username already exists",
                                 Toast.LENGTH_LONG).show();
                     }
@@ -316,12 +331,10 @@ public class SignUpActivity extends AppCompatActivity {
                 Toast.makeText(this, "Có lỗi xảy ra khi đăng ký", Toast.LENGTH_SHORT).show();
                 e.printStackTrace();
             }
-        } else if (response.code() == 400) {  // HTTP 400 Bad Request
+        } else if (response.code() == 400) {
             Toast.makeText(this, "Thông tin đăng ký không hợp lệ", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, "Đăng ký thất bại: " + response.code(), Toast.LENGTH_SHORT).show();
         }
     }
-
-
 }
