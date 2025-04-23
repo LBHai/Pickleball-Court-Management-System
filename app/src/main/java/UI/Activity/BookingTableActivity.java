@@ -37,6 +37,8 @@ import com.google.gson.Gson;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,7 +53,6 @@ public class BookingTableActivity extends AppCompatActivity {
 
     private TableLayout tableLayout;
     private Button btnSelectDate, btnNext;
-    private Spinner spinnerCourt;
     private ListView lvSelectedBookings;
     private ImageButton btnBack;
 
@@ -77,7 +78,6 @@ public class BookingTableActivity extends AppCompatActivity {
 
         tableLayout = findViewById(R.id.tableLayout);
         btnSelectDate = findViewById(R.id.btnSelectDate);
-        spinnerCourt = findViewById(R.id.spinnerCourt);
         btnNext = findViewById(R.id.btnNext);
         lvSelectedBookings = findViewById(R.id.lvSelectedBookings);
         btnBack = findViewById(R.id.btnBack);
@@ -89,14 +89,14 @@ public class BookingTableActivity extends AppCompatActivity {
         tvPhone = getIntent().getStringExtra("tvPhone");
 
         if (courtId == null) {
-            Toast.makeText(this, "Không có club_id", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Không có club_id", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
         Calendar c = Calendar.getInstance();
         selectedDate = sdf.format(c.getTime());
-        btnSelectDate.setText("Ngày: " + selectedDate);
+        btnSelectDate.setText("Date: " + selectedDate);
 
         selectedOrdersByDate.put(selectedDate, new HashMap<>());
 
@@ -104,15 +104,6 @@ public class BookingTableActivity extends AppCompatActivity {
 
         btnSelectDate.setOnClickListener(v -> showDatePickerDialog());
 
-        spinnerCourt.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, android.view.View view, int position, long id) {
-                buildTableForDate(selectedDate);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
 
         TextView tvViewCourtsAndPrices = findViewById(R.id.tvViewCourtsAndPrices);
         tvViewCourtsAndPrices.setOnClickListener(v -> {
@@ -154,7 +145,7 @@ public class BookingTableActivity extends AppCompatActivity {
                     }
                     fetchBookingSlots(courtId, selectedDate);
                 } else {
-                    Toast.makeText(BookingTableActivity.this, "Không thể lấy thông tin người dùng", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(BookingTableActivity.this, "Không thể lấy thông tin người dùng", Toast.LENGTH_SHORT).show();
                     isStudent = false;
                     fetchBookingSlots(courtId, selectedDate);
                 }
@@ -162,7 +153,7 @@ public class BookingTableActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<MyInfoResponse> call, Throwable t) {
-                Toast.makeText(BookingTableActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(BookingTableActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 isStudent = false;
                 fetchBookingSlots(courtId, selectedDate);
             }
@@ -190,7 +181,7 @@ public class BookingTableActivity extends AppCompatActivity {
                         selectedOrdersByDate.put(newSelectedDate, new HashMap<>());
                     }
                     selectedDate = newSelectedDate;
-                    btnSelectDate.setText("Ngày: " + selectedDate);
+                    btnSelectDate.setText("Date: " + selectedDate);
                     fetchBookingSlots(courtId, selectedDate);
                 },
                 year, month, day
@@ -260,7 +251,6 @@ public class BookingTableActivity extends AppCompatActivity {
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, spinnerItems);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerCourt.setAdapter(adapter);
     }
 
     private void buildTableForDate(String date) {
@@ -288,7 +278,6 @@ public class BookingTableActivity extends AppCompatActivity {
             selectedOrdersByDate.put(date, selectedOrdersForThisDate);
         }
 
-        String selectedCourtName = spinnerCourt.getSelectedItem().toString();
 
         if (courtSlots.isEmpty() || startTimesCurrentDay.isEmpty()) {
             TextView tvEmpty = new TextView(this);
@@ -303,9 +292,7 @@ public class BookingTableActivity extends AppCompatActivity {
         String lastTime = allTimesCurrentDay.get(allTimesCurrentDay.size() - 1); // endTime cuối cùng
 
         for (CourtSlot court : courtSlots) {
-            if (!selectedCourtName.equals("Tất cả") && !court.getCourtSlotName().equals(selectedCourtName)) {
-                continue;
-            }
+
 
             displayedCourts++;
             TableRow row = new TableRow(this);
@@ -428,6 +415,7 @@ public class BookingTableActivity extends AppCompatActivity {
             Log.d("BookingTableActivity", "Total cells displayed matches expected: " + totalCellsDisplayed);
         }
     }
+
     private boolean isSlotEntirelyPast(String dateBooking, String endTime) {
         try {
             String dateTimeString = dateBooking + " " + endTime;
@@ -502,11 +490,15 @@ public class BookingTableActivity extends AppCompatActivity {
             Map<String, ConfirmOrder> ordersMap = selectedOrdersByDate.get(date);
             if (ordersMap == null) continue;
             for (ConfirmOrder order : ordersMap.values()) {
-                String info = "Ngày: " + order.getDayBooking()
-                        + ", Sân: " + order.getCourtSlotName()
-                        + ", Thời gian: " + order.getStartTime().substring(0, 5)
+                // Sử dụng NumberFormat với Locale Việt Nam
+                NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+                // Định dạng giá mà không cần ép kiểu int, đảm bảo giá trị chính xác
+                String formattedPrice = formatter.format(order.getDailyPrice());
+                String info = "Date: " + order.getDayBooking()
+                        + ", Court: " + order.getCourtSlotName()
+                        + ", Time slot: " + order.getStartTime().substring(0, 5)
                         + " - " + order.getEndTime().substring(0, 5)
-                        + ", Giá: " + String.format("%.0f", order.getDailyPrice()) + " VNĐ";
+                        + ", Price: " + formattedPrice;
                 selectedBookingsList.add(info);
             }
         }
@@ -521,7 +513,7 @@ public class BookingTableActivity extends AppCompatActivity {
             }
         }
         if (confirmOrders.isEmpty()) {
-            Toast.makeText(this, "Vui lòng chọn ít nhất 1 slot", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please select at least one timeslot!", Toast.LENGTH_SHORT).show();
             return;
         }
         Gson gson = new Gson();

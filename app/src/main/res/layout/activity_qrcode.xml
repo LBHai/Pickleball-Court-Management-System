@@ -30,7 +30,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="Quét mã QR"
+            android:text="@string/scanQR"
             android:textColor="#FFFFFF"
             android:textSize="28sp"
             android:gravity="center"
@@ -51,7 +51,7 @@
         android:layout_below="@id/layoutHeader"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="1dp"
-        android:text="Để thanh toán ngay 😍"
+        android:text="@string/topay"
         android:layout_marginBottom="20dp"
         android:textColor="#FFFFFF"
         android:textSize="22sp"
@@ -79,7 +79,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="Vui lòng chuyển khoản 0₫ để hoàn tất đặt lịch!"
+            android:text="Please transfer 0đ to complete the deposit/payment!"
             android:textColor="@android:color/white"
             android:textSize="16sp" />
     </LinearLayout>
@@ -108,7 +108,7 @@
         android:layout_below="@id/cardViewQRCode"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="30dp"
-        android:text="Thời gian thanh toán còn lại 🕛"
+        android:text="@string/timepay"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
         android:textStyle="bold" />

@@ -124,7 +124,7 @@ public class SignUpActivity extends AppCompatActivity {
         String u = edtUsername.getText().toString().trim();
         if (u.isEmpty())      { tilUsername.setError("Please enter username"); return false; }
         if (!Pattern.matches(USERNAME_PATTERN, u)) {
-            tilUsername.setError("Login name must be at least 4 characters and cannot contain special characters");
+            tilUsername.setError("Username must be at least 4 characters and cannot contain special characters");
             return false;
         }
         tilUsername.setError(null);
@@ -313,28 +313,44 @@ public class SignUpActivity extends AppCompatActivity {
             try {
                 if (response.errorBody() != null) {
                     String errorBodyString = response.errorBody().string();
-                    if (errorBodyString.contains("email")) {
-                        Toast.makeText(this, "Email already exists", Toast.LENGTH_LONG).show();
-                        tilEmail.setError("Email already exists");
-                    } else if (errorBodyString.contains("phone") || errorBodyString.contains("phoneNumber")) {
-                        Toast.makeText(this, "Phone number already exists", Toast.LENGTH_LONG).show();
-                        tilPhoneNumber.setError("Phone number already exists");
-                    } else if (errorBodyString.contains("username")) {
-                        Toast.makeText(this, "Username already exists", Toast.LENGTH_LONG).show();
+
+                    // Check for username duplication (based on the error pattern)
+                    if (errorBodyString.contains("Duplicate entry") &&
+                            errorBodyString.contains("username")) {
+                        Toast.makeText(this, "Username already exists. Please choose a different username.",
+                                Toast.LENGTH_LONG).show();
                         tilUsername.setError("Username already exists");
-                    } else {
-                        Toast.makeText(this, "Email, phone number or username already exists",
+                    }
+                    // Check for email duplication
+                    else if (errorBodyString.contains("Duplicate entry") &&
+                            errorBodyString.contains("email")) {
+                        Toast.makeText(this, "Email address already exists. Please use a different email.",
+                                Toast.LENGTH_LONG).show();
+                        tilEmail.setError("Email already exists");
+                    }
+                    // Check for phone number duplication
+                    else if (errorBodyString.contains("Duplicate entry") &&
+                            errorBodyString.contains("phone_number")) {
+                        Toast.makeText(this, "Phone number already exists. Please use a different phone number.",
+                                Toast.LENGTH_LONG).show();
+                        tilPhoneNumber.setError("Phone number already exists");
+                    }
+                    // Generic duplication error
+                    else {
+                        Toast.makeText(this, "Registration failed: A user with some of these details already exists.",
                                 Toast.LENGTH_LONG).show();
                     }
                 }
             } catch (Exception e) {
-                Toast.makeText(this, "Có lỗi xảy ra khi đăng ký", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "An error occurred during registration", Toast.LENGTH_SHORT).show();
                 e.printStackTrace();
             }
         } else if (response.code() == 400) {
-            Toast.makeText(this, "Thông tin đăng ký không hợp lệ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Registration information has existed. Please check the username & email & phone number",
+                    Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "Đăng ký thất bại: " + response.code(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Registration failed with error code: " + response.code(),
+                    Toast.LENGTH_SHORT).show();
         }
     }
 }

@@ -82,8 +82,8 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     }
 
     private boolean validateEmailInput(String email) {
-        if (!email.endsWith("@gmail.com.vn") && !email.endsWith("edu.vn")) {
-            tilRecoveryKey.setError("Email must have the extension @gmail.com.vn or edu.vn");
+        if (!email.endsWith("@gmail.com") && !email.endsWith("edu.vn")) {
+            tilRecoveryKey.setError("Email must have the extension @gmail.com or edu.vn");
             return false;
         }
         tilRecoveryKey.setError(null);

@@ -215,18 +215,18 @@ public class QRCodeActivity extends AppCompatActivity {
         if ("Đơn cố định".equals(orderType)) {
             if (isDeposit) {
                 String formattedTotalPriceFixedOrder = decimalFormat.format(totalPriceFixedOrder);
-                tvWarning.setText("Vui lòng chuyển khoản " + formattedTotalPriceFixedOrder + "₫ để hoàn tất đặt cọc!");
+                tvWarning.setText("Please transfer " + formattedTotalPriceFixedOrder + "₫ to complete the deposit!");
             } else {
                 String formattedTotalPriceFixedOrder = decimalFormat.format(totalPriceFixedOrder);
-                tvWarning.setText("Vui lòng chuyển khoản " + formattedTotalPriceFixedOrder + "₫ để hoàn tất thanh toán!");
+                tvWarning.setText("Please transfer " + formattedTotalPriceFixedOrder + "₫ complete the payment!");
             }
         } else {
             if (isDeposit) {
                 String formattedDeposit = decimalFormat.format(depositAmount);
-                tvWarning.setText("Vui lòng chuyển khoản " + formattedDeposit + "₫ để hoàn tất đặt cọc!");
+                tvWarning.setText("Please transfer " + formattedDeposit + "₫ to complete the deposit!");
             } else {
                 String formattedPaymentAmount = decimalFormat.format(paymentAmount > 0 ? paymentAmount : totalPrice);
-                tvWarning.setText("Vui lòng chuyển khoản " + formattedPaymentAmount + "₫ để hoàn tất thanh toán!");
+                tvWarning.setText("Please transfer " + formattedPaymentAmount + "₫ complete the payment!");
             }
         }
     }

@@ -164,12 +164,40 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
 
     @Override
     public void onCloseClick(NotificationItem notification) {
-        deletedNotificationIds.add(notification.getId());
-        sharedPreferences.edit().putStringSet("deletedIds", deletedNotificationIds).apply();
-        notificationList.remove(notification);
-        notificationAdapter.notifyDataSetChanged();
-        Toast.makeText(this, "Đã xóa thông báo", Toast.LENGTH_SHORT).show();
+        // Gọi API mark-as-read
+        ApiService apiService = RetrofitClient.getApiService(this);
+        apiService.markAsRead(notification.getId()).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Log.d("Notification", "markAsRead SUCCESS for id=" + notification.getId());
+                } else {
+                    Log.e("Notification", "markAsRead FAILED for id=" + notification.getId()
+                            + "  code=" + response.code());
+                }
+                // Dù thành công hay không, ta cũng tiếp tục xóa local
+                deletedNotificationIds.add(notification.getId());
+                sharedPreferences.edit()
+                        .putStringSet("deletedIds", deletedNotificationIds)
+                        .apply();
+                notificationList.remove(notification);
+                notificationAdapter.notifyDataSetChanged();
+                Toast.makeText(NotificationActivity.this, "Đã xóa và đánh dấu đã đọc", Toast.LENGTH_SHORT).show();
+            }
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                // Nếu lỗi kết nối, bạn vẫn có thể xóa local và báo lỗi
+                deletedNotificationIds.add(notification.getId());
+                sharedPreferences.edit()
+                        .putStringSet("deletedIds", deletedNotificationIds)
+                        .apply();
+                notificationList.remove(notification);
+                notificationAdapter.notifyDataSetChanged();
+                Toast.makeText(NotificationActivity.this, "Xóa thành công (server offline)", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
+
 
     private void clearAllNotifications() {
         Set<String> idsToDelete = new HashSet<>();

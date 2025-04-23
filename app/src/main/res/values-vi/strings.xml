@@ -86,5 +86,22 @@
     <string name="btnnext">Tiếp theo</string>
     <string name="selectdate">Chọn ngày</string>
     <string name="viewcourtandprice">Xem sân &amp; bảng giá</string>
+    <string name="bookingsuccesfully">Đặt lịch thành công</string>
+    <string name="detailsucessfully">Lịch đặt của bạn đã hoàn tất.\nVui lòng kiểm tra lại chi tiết lịch đã đặt...</string>
+    <string name="viewdetailbooking">XEM LỊCH ĐẶT CHI TIẾT</string>
+    <string name="goback">QUAY VỀ</string>
+    <string name="schedulebook">Lịch đặt sân</string>
+    <string name="deposit">ĐẶT CỌC</string>
+    <string name="payment">THANH TOÁN</string>
+    <string name="bookingfail">Đặt lịch thất bại 😓</string>
+    <string name="desbookingfail">Đơn đã quá giờ thanh toán.\nVui lòng tạo đơn mới</string>
+    <string name="viewhistory">Lịch sử hủy</string>
+    <string name="gobacknor">Quay về</string>
+    <string name="scanQR">Quét mã QR</string>
+    <string name="topay">Để thanh toán ngay 😍</string>
+    <string name="timepay">Thời gian thanh toán còn lại 🕛</string>
+
+
+
 
 </resources>

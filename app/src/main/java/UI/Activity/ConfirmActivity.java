@@ -1,5 +1,6 @@
 package UI.Activity;
 
+import android.content.Context;
 import android.content.Intent;
 
 import android.os.Bundle;
@@ -15,13 +16,19 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,9 +37,11 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import javax.crypto.Mac;
@@ -64,8 +73,9 @@ import retrofit2.Response;
 public class ConfirmActivity extends AppCompatActivity {
 
     private TextView tvHeader, tvStadiumName, tvAddress, tvDate, tvTotalPriceLine, tvTotalTimeLine, tvContact;
+    private TextInputLayout tilPhone,tilName, tilNote;
     private LinearLayout layoutConfirmOrders;
-    private EditText etName, etPhone, etNote;
+    private TextInputEditText etName, etPhone, etNote;
     private Button btnPayment, btnDeposit;
     private ImageButton btnBack;
     private int overallTotalPrice = 0;
@@ -103,6 +113,10 @@ public class ConfirmActivity extends AppCompatActivity {
         btnDeposit = findViewById(R.id.btnDeposit);
         btnBack = findViewById(R.id.btnBack);
         tvContact = findViewById(R.id.tvContact);
+        tilPhone = findViewById(R.id.tilPhone);
+        tilName = findViewById(R.id.tilName);
+        tilNote = findViewById(R.id.tilNote);
+
         sessionManager = new SessionManager(this);
 
         Intent intent = getIntent();
@@ -261,28 +275,19 @@ public class ConfirmActivity extends AppCompatActivity {
                 isProcessing = true;
                 btnPayment.setEnabled(false);
 
+                boolean isNameValid = validateName();
+                boolean isPhoneValid = validatePhoneNumber();
+                boolean isNoteValid = validateNote();
+                // Proceed only if both validations pass
+                if (!isNameValid || !isPhoneValid) {
+                    isProcessing = false;
+                    btnPayment.setEnabled(true);
+                    return;
+                }
+
                 String name = etName.getText().toString().trim();
                 String phone = etPhone.getText().toString().trim();
                 String note = etNote.getText().toString().trim();
-
-                if (name.isEmpty() || phone.isEmpty()) {
-                    Toast.makeText(ConfirmActivity.this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
-                    isProcessing = false;
-                    btnPayment.setEnabled(true);
-                    return;
-                }
-                if (!name.matches("^[\\p{L}\\s]+$") || name.length() < 2) {
-                    Toast.makeText(ConfirmActivity.this, "Tên chỉ chứa chữ cái và khoảng trắng, ít nhất 2 ký tự", Toast.LENGTH_SHORT).show();
-                    isProcessing = false;
-                    btnPayment.setEnabled(true);
-                    return;
-                }
-                if (!phone.matches("0\\d{9}")) {
-                    Toast.makeText(ConfirmActivity.this, "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0", Toast.LENGTH_SHORT).show();
-                    isProcessing = false;
-                    btnPayment.setEnabled(true);
-                    return;
-                }
 
                 if (userId == null || userId.isEmpty()) {
                     sessionManager.setGuestPhone(phone);
@@ -466,54 +471,30 @@ public class ConfirmActivity extends AppCompatActivity {
         }
 
         btnPayment.setOnClickListener(v -> {
+            boolean isNameValid = validateName();
+            boolean isPhoneValid = validatePhoneNumber();
+            boolean isNoteValid = validateNote();
+            // Proceed only if both validations pass
+            if (!isNameValid || !isPhoneValid) {
+                return;
+            }
             String name = etName.getText().toString().trim();
             String phone = etPhone.getText().toString().trim();
             String note = etNote.getText().toString().trim();
-
-            if (token == null || token.isEmpty()) {
-                if (name.isEmpty() || phone.isEmpty()) {
-                    Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-            }
-            if (name.isEmpty() || phone.isEmpty()) {
-                Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (!name.matches("^[\\p{L}\\s]+$") || name.length() < 2) {
-                Toast.makeText(this, "Tên chỉ chứa chữ cái và khoảng trắng, ít nhất 2 ký tự", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (!phone.matches("0\\d{9}")) {
-                Toast.makeText(this, "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0", Toast.LENGTH_SHORT).show();
-                return;
-            }
             createFixedOrder(false, totalPriceFixedOrder);
         });
 
         btnDeposit.setOnClickListener(v -> {
+            boolean isNameValid = validateName();
+            boolean isPhoneValid = validatePhoneNumber();
+            boolean isNoteValid = validateNote();
+            // Proceed only if both validations pass
+            if (!isNameValid || !isPhoneValid) {
+                return;
+            }
             String name = etName.getText().toString().trim();
             String phone = etPhone.getText().toString().trim();
             String note = etNote.getText().toString().trim();
-
-            if (token == null || token.isEmpty()) {
-                if (name.isEmpty() || phone.isEmpty()) {
-                    Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-            }
-            if (name.isEmpty() || phone.isEmpty()) {
-                Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (!name.matches("^[\\p{L}\\s]+$") || name.length() < 2) {
-                Toast.makeText(this, "Tên chỉ chứa chữ cái và khoảng trắng, ít nhất 2 ký tự", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (!phone.matches("0\\d{9}")) {
-                Toast.makeText(this, "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0", Toast.LENGTH_SHORT).show();
-                return;
-            }
             createFixedOrder(true, totalPriceFixedOrder);
         });
 
@@ -577,28 +558,16 @@ public class ConfirmActivity extends AppCompatActivity {
         buildConfirmOrdersUI();
 
         btnPayment.setOnClickListener(v -> {
+            boolean isNameValid = validateName();
+            boolean isPhoneValid = validatePhoneNumber();
+            boolean isNoteValid = validateNote();
+            // Proceed only if both validations pass
+            if (!isNameValid || !isPhoneValid) {
+                return;
+            }
             String name = etName.getText().toString().trim();
             String phone = etPhone.getText().toString().trim();
             String note = etNote.getText().toString().trim();
-
-            if (token == null || token.isEmpty()) {
-                if (name.isEmpty() || phone.isEmpty()) {
-                    Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-            }
-            if (name.isEmpty() || phone.isEmpty()) {
-                Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (!name.matches("^[\\p{L}\\s]+$") || name.length() < 2) {
-                Toast.makeText(this, "Tên chỉ chứa chữ cái và khoảng trắng, ít nhất 2 ký tự", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (!phone.matches("0\\d{9}")) {
-                Toast.makeText(this, "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0", Toast.LENGTH_SHORT).show();
-                return;
-            }
             if (userId == null || userId.isEmpty()) {
                 sessionManager.setGuestPhone(phone);
                 registerNotification();
@@ -607,28 +576,17 @@ public class ConfirmActivity extends AppCompatActivity {
         });
 
         btnDeposit.setOnClickListener(v -> {
+            boolean isNameValid = validateName();
+            boolean isPhoneValid = validatePhoneNumber();
+            boolean isNoteValid = validateNote();
+            // Proceed only if both validations pass
+            if (!isNameValid || !isPhoneValid) {
+                return;
+            }
             String name = etName.getText().toString().trim();
             String phone = etPhone.getText().toString().trim();
             String note = etNote.getText().toString().trim();
 
-            if (token == null || token.isEmpty()) {
-                if (name.isEmpty() || phone.isEmpty()) {
-                    Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-            }
-            if (name.isEmpty() || phone.isEmpty()) {
-                Toast.makeText(this, "Vui lòng nhập đủ Tên và Số điện thoại", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (!name.matches("^[\\p{L}\\s]+$") || name.length() < 2) {
-                Toast.makeText(this, "Tên chỉ chứa chữ cái và khoảng trắng, ít nhất 2 ký tự", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (!phone.matches("0\\d{9}")) {
-                Toast.makeText(this, "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0", Toast.LENGTH_SHORT).show();
-                return;
-            }
             if (userId == null || userId.isEmpty()) {
                 sessionManager.setGuestPhone(phone);
                 registerNotification();
@@ -1031,10 +989,13 @@ public class ConfirmActivity extends AppCompatActivity {
     }
 
     private String formatMoney(int amount) {
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.getDefault());
-        symbols.setGroupingSeparator('.');
-        DecimalFormat formatter = new DecimalFormat("#,###", symbols);
-        return formatter.format(amount) + "đ";
+        // Sử dụng NumberFormat với Locale Việt Nam
+        NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+        // Định dạng số tiền
+        String formattedAmount = formatter.format(amount);
+        // Thay thế để đảm bảo định dạng "₫ 80.000"
+        formattedAmount = formattedAmount.replace(" ₫", "").replace("₫", "₫ ");
+        return formattedAmount;
     }
 
     public static String genSignature(String totalAmount, String paymentAmount, String depositAmount, String bookingDate) {
@@ -1150,5 +1111,156 @@ public class ConfirmActivity extends AppCompatActivity {
             amount += detail.getPrice() * detail.getQuantity();
         }
         return amount;
+    }
+
+    public static class BadWordsLoader {
+        private static Set<String> englishBadWords = null;
+        private static Set<String> vietnameseBadWords = null;
+
+        public static Set<String> loadEnglishBadWords(Context context) {
+            if (englishBadWords != null) {
+                return englishBadWords;
+            }
+
+            englishBadWords = new HashSet<>();
+            try {
+                InputStream inputStream = context.getResources().openRawResource(R.raw.bad_words_en);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    line = line.trim();
+                    if (!line.isEmpty() && !line.startsWith("#")) {
+                        englishBadWords.add(line.toLowerCase());
+                    }
+                }
+                reader.close();
+            } catch (Exception e) {
+                Log.e("BadWordsLoader", "Lỗi khi tải danh sách từ tục tĩu tiếng Anh: " + e.getMessage());
+            }
+            return englishBadWords;
+        }
+
+        public static Set<String> loadVietnameseBadWords(Context context) {
+            if (vietnameseBadWords != null) {
+                return vietnameseBadWords;
+            }
+
+            vietnameseBadWords = new HashSet<>();
+            try {
+                InputStream inputStream = context.getResources().openRawResource(R.raw.vn_offensive_words);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    line = line.trim();
+                    if (!line.isEmpty() && !line.startsWith("#")) {
+                        vietnameseBadWords.add(line.toLowerCase());
+                    }
+                }
+                reader.close();
+            } catch (Exception e) {
+                Log.e("BadWordsLoader", "Lỗi khi tải danh sách từ tục tĩu tiếng Việt: " + e.getMessage());
+            }
+            return vietnameseBadWords;
+        }
+    }
+
+    private boolean containsBadWords(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            return false;
+        }
+
+        Set<String> badWordsEn = BadWordsLoader.loadEnglishBadWords(this);
+        Set<String> badWordsVi = BadWordsLoader.loadVietnameseBadWords(this);
+        Set<String> allBadWords = new HashSet<>();
+        allBadWords.addAll(badWordsEn);
+        allBadWords.addAll(badWordsVi);
+
+        String lowerInput = input.toLowerCase();
+        String[] words = lowerInput.split("\\s+");
+
+        for (String word : words) {
+            if (allBadWords.contains(word)) {
+                return true;
+            }
+        }
+
+        for (String badWord : allBadWords) {
+            if (lowerInput.contains(badWord)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean validateName() {
+        String name = etName.getText().toString().trim();
+
+        // Kiểm tra bad words trước tiên
+        if (containsBadWords(name)) {
+            tilName.setError("Name contains sensitive content, please try again!");
+            return false;
+        }
+
+        // Kiểm tra tên trống
+        if (name.isEmpty()) {
+            tilName.setError("Please enter your name");
+            return false;
+        }
+
+        // Kiểm tra ký tự hợp lệ và độ dài
+        String namePattern = "^[a-zA-Z][a-zA-Z ]{1,29}$";
+        if (!name.matches(namePattern)) {
+            tilName.setError("Invalid name (letters and spaces only, 2-30 characters)");
+            return false;
+        }
+
+        tilName.setError(null);
+        return true;
+    }
+
+    private boolean validateNote() {
+        String note = etNote.getText().toString().trim();
+
+        // Bỏ qua kiểm tra cho đơn dịch vụ
+        if ("Đơn dịch vụ".equals(orderType)) {
+            return true; // Note được đặt tự động, không cần kiểm tra
+        }
+
+        // Kiểm tra bad words trước tiên
+        if (containsBadWords(note)) {
+            tilNote.setError("Note contains sensitive content, please try again!");
+            return false;
+        }
+
+        // Note có thể trống, không cần báo lỗi nếu trống
+        if (note.isEmpty()) {
+            tilNote.setError(null);
+            return true;
+        }
+
+        // Kiểm tra ký tự hợp lệ và độ dài
+        String notePattern = "^[a-zA-Z0-9\\s.,!?]{0,100}$";
+        if (!note.matches(notePattern)) {
+            tilNote.setError("Invalid note (letters, numbers, spaces, and basic punctuation only, ≤100 characters)");
+            return false;
+        }
+
+        tilNote.setError(null);
+        return true;
+    }
+
+    private boolean validatePhoneNumber() {
+        String phone = etPhone.getText().toString().trim();
+        if (phone.isEmpty()) {
+            tilPhone.setError("Please enter your phone number");
+            return false;
+        }
+        if (!phone.matches("^(\\+84|0)(3|5|7|8|9)[0-9]{8}$")) {
+            tilPhone.setError("Invalid phone number");
+            return false;
+        }
+        tilPhone.setError(null);
+        return true;
     }
 }

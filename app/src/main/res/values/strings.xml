@@ -115,5 +115,20 @@
     <string name="btnnext">Next</string>
     <string name="selectdate">Select date</string>
     <string name="viewcourtandprice">View court &amp; price list</string>
+    <string name="bookingsuccesfully">Booking successful</string>
+    <string name="detailsucessfully">Your booking has been completed.\nPlease review the details of your booking...</string>
+    <string name="viewdetailbooking">VIEW BOOKING DETAILS</string>
+    <string name="goback">GO BACK</string>
+    <string name="schedulebook">Court booking schedule</string>
+    <string name="deposit">DEPOSIT</string>
+    <string name="payment">PAYMENT</string>
+    <string name="bookingfail">Booking failed 😓</string>
+    <string name="desbookingfail">The order has exceeded the payment time.\nPlease create a new order</string>
+    <string name="viewhistory">Cancel history</string>
+    <string name="gobacknor">Go back</string>
+    <string name="scanQR">Scan QR</string>
+    <string name="topay">To pay now 😍</string>
+    <string name="timepay">Remaining payment time 🕛</string>
+
 
 </resources>
