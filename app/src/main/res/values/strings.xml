@@ -106,7 +106,6 @@
     <string name="desBookdaily">Quick booking in one time slot (multiple courses).</string>
     <string name="bookregular">Booking regular</string>
     <string name="desBookregular">Set a fixed monthly schedule to play at a certain time (multiple courses).</string>
-    <string name="methodbook">Select order type</string>
     <string name="slotavailable">Available</string>
     <string name="slotselecting">Selecting</string>
     <string name="slotbooked">Booked</string>
@@ -129,6 +128,7 @@
     <string name="scanQR">Scan QR</string>
     <string name="topay">To pay now 😍</string>
     <string name="timepay">Remaining payment time 🕛</string>
+    <string name="methodbook">Select booking type</string>
 
 
 </resources>
