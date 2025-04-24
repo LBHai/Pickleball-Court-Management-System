@@ -90,11 +90,11 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceViewHolder> {
             Glide.with(context)
                     .load(service.getImageUrl())
                     .apply(new RequestOptions()
-                            .placeholder(R.drawable.sting)
-                            .error(R.drawable.sting))
+                            .placeholder(R.drawable.revive)
+                            .error(R.drawable.revive))
                     .into(holder.ivDrink);
         } else {
-            holder.ivDrink.setImageResource(R.drawable.sting);
+            holder.ivDrink.setImageResource(R.drawable.revive);
         }
 
         final String finalServiceId = serviceId;

@@ -253,6 +253,7 @@ public class DetailBookingActivity extends AppCompatActivity {
                     public void onFailure(Call<List<Transaction>> call, Throwable t) {
                         Log.e("DetailBookingActivity", "Lỗi gọi API transaction: " + t.getMessage());
                         runOnUiThread(() -> {
+                            updateButtonsBasedOnStatus(updatedOrderStatus);
                             tvAmountPaid.setText("Số tiền đã trả: 0đ");
                             tvPaymentStatus.setText("Trạng thái thanh toán: " + (paymentStatus != null ? paymentStatus : "N/A"));
                         });
@@ -339,19 +340,17 @@ public class DetailBookingActivity extends AppCompatActivity {
         }
 
         if ("Đơn dịch vụ".equals(orderType)) {
-            if ("Chưa thanh toán".equals(paymentStatus)) {
-                Log.d("DetailBookingActivity", "Hiển thị nút cho Đơn dịch vụ, Chưa thanh toán");
+            // Kiểm tra trạng thái Hủy trước
+            if ("Hủy đặt lịch".equals(status) || "Hủy đặt lịch do quá giờ thanh toán".equals(status)) {
+                btnCancelBooking.setVisibility(View.GONE);
+                btnChangeBooking.setVisibility(View.GONE);
+            } else if ("Chưa thanh toán".equals(paymentStatus)) {
                 btnCancelBooking.setText("Hủy đặt dịch vụ");
                 btnCancelBooking.setVisibility(View.VISIBLE);
                 btnChangeBooking.setText("Thanh toán");
                 btnChangeBooking.setVisibility(View.VISIBLE);
                 btnChangeBooking.setOnClickListener(v -> handlePaymentForServiceOrder(orderId));
-            } else if ("Hủy đặt lịch".equals(status) || "Hủy đặt lịch do quá giờ thanh toán".equals(status)) {
-                Log.d("DetailBookingActivity", "Ẩn nút do status: " + status);
-                btnCancelBooking.setVisibility(View.GONE);
-                btnChangeBooking.setVisibility(View.GONE);
             } else {
-                Log.d("DetailBookingActivity", "Ẩn nút cho Đơn dịch vụ, paymentStatus không khớp: " + paymentStatus);
                 btnCancelBooking.setVisibility(View.GONE);
                 btnChangeBooking.setVisibility(View.GONE);
             }

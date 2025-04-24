@@ -66,11 +66,6 @@
                 android:textSize="18sp"
                 android:textStyle="bold" />
         </LinearLayout>
-
-        <!-- Notification Icons Container - Đặt luôn hiển thị -->
-
-        <!-- Expanded Search Bar (cardSearch) -->
-
         <LinearLayout
             android:id="@+id/notificationContainer"
             android:layout_width="wrap_content"

@@ -45,14 +45,14 @@
         android:textSize="18sp"/>
 
     <!-- Nút xóa tất cả hoặc chức năng khác -->
-        <ImageButton
-        android:id="@+id/btnClearAll"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/bin"
-    android:background="?attr/selectableItemBackgroundBorderless"
-    android:contentDescription="Xóa tất cả"
-    tools:ignore="TouchTargetSizeCheck"/>
+<!--        <ImageButton-->
+<!--        android:id="@+id/btnClearAll"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:src="@drawable/bin"-->
+<!--    android:background="?attr/selectableItemBackgroundBorderless"-->
+<!--    android:contentDescription="Xóa tất cả"-->
+<!--    tools:ignore="TouchTargetSizeCheck"/>-->
     </LinearLayout>
 
     <!-- Danh sách thông báo -->

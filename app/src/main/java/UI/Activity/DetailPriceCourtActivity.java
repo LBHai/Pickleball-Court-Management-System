@@ -75,10 +75,9 @@ public class DetailPriceCourtActivity extends AppCompatActivity {
 
     private void fillTimeSlots(TableLayout tableLayout, List<TimeSlot> slots) {
         TableRow headerRow = new TableRow(this);
-        // Ô "Khung giờ" có trọng số lớn hơn (ví dụ 3f) để mở rộng theo chiều ngang
-        headerRow.addView(createCell("Khung giờ", true, 1.5f));
-        headerRow.addView(createCell("Học sinh", true, 1.2f));
-        headerRow.addView(createCell("Người lớn", true, 1.2f));
+        headerRow.addView(createCell("Khung giờ", true, 1.2f));
+        headerRow.addView(createCell("Học sinh", true, 1f));
+        headerRow.addView(createCell("Người lớn", true, 1f));
         tableLayout.addView(headerRow);
 
         if (slots == null || slots.isEmpty()) {

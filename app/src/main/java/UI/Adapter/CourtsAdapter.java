@@ -79,12 +79,12 @@ public class CourtsAdapter extends RecyclerView.Adapter<CourtViewHolder> {
         if (backgroundUrl != null && !backgroundUrl.isEmpty()) {
             Glide.with(context)
                     .load(backgroundUrl)
-                    .placeholder(R.drawable.vn_flag)
-                    .error(R.drawable.vn_flag)
+                    .placeholder(R.drawable.anh_pickleball)
+                    .error(R.drawable.anh_pickleball)
                     .into(holder.getImgCourt());
         } else {
             // nếu không có URL, giữ ảnh mặc định hoặc đặt ảnh khác
-            holder.getImgCourt().setImageResource(R.drawable.vn_flag);
+            holder.getImgCourt().setImageResource(R.drawable.anh_pickleball);
         }
 
         // Callback khi click vào item

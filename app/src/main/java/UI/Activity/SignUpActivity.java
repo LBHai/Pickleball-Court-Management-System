@@ -19,6 +19,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import Data.Network.ApiService;
@@ -27,6 +28,7 @@ import Data.Model.CUser;
 import Data.Model.GetToken;
 import Data.Model.StudentRegistrationRequest;
 import SEP490.G9.R;
+import UI.Component.BadWordsLoader;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -144,10 +146,14 @@ public class SignUpActivity extends AppCompatActivity {
 
     private boolean validateFirstName() {
         String n = edtFirstName.getText().toString().trim();
-        if (n.isEmpty())      { tilFirstName.setError("Please enter your first name"); return false; }
+        if (n.isEmpty()) { tilFirstName.setError("Please enter your first name"); return false; }
+        Set<String> badWords = BadWordsLoader.loadEnglishBadWords(this);
+        badWords.addAll(BadWordsLoader.loadVietnameseBadWords(this));
+        if (badWords.stream().anyMatch(n.toLowerCase()::contains)) {
+            tilFirstName.setError("First name contains sensitive content, please try again!"); return false;
+        }
         if (!Pattern.matches(NAME_PATTERN, n)) {
-            tilFirstName.setError("Invalid name (letters and spaces only, ≥2 characters)");
-            return false;
+            tilFirstName.setError("Invalid first name (letters and spaces only, ≥2 characters)"); return false;
         }
         tilFirstName.setError(null);
         return true;
@@ -155,14 +161,19 @@ public class SignUpActivity extends AppCompatActivity {
 
     private boolean validateLastName() {
         String n = edtLastName.getText().toString().trim();
-        if (n.isEmpty())      { tilLastName.setError("Please enter your last name"); return false; }
+        if (n.isEmpty()) { tilLastName.setError("Please enter your last name"); return false; }
+        Set<String> badWords = BadWordsLoader.loadEnglishBadWords(this);
+        badWords.addAll(BadWordsLoader.loadVietnameseBadWords(this));
+        if (badWords.stream().anyMatch(n.toLowerCase()::contains)) {
+            tilLastName.setError("Last name contains sensitive content, please try again!"); return false;
+        }
         if (!Pattern.matches(NAME_PATTERN, n)) {
-            tilLastName.setError("Invalid last name (letters and spaces only, ≥2 characters)");
-            return false;
+            tilLastName.setError("Invalid last name (letters and spaces only, ≥2 characters)"); return false;
         }
         tilLastName.setError(null);
         return true;
     }
+
 
     private boolean validatePhoneNumber() {
         String pn = edtPhoneNumber.getText().toString().trim();
@@ -323,14 +334,14 @@ public class SignUpActivity extends AppCompatActivity {
                     }
                     // Check for email duplication
                     else if (errorBodyString.contains("Duplicate entry") &&
-                            errorBodyString.contains("email")) {
+                                    errorBodyString.contains("email")) {
                         Toast.makeText(this, "Email address already exists. Please use a different email.",
                                 Toast.LENGTH_LONG).show();
                         tilEmail.setError("Email already exists");
                     }
                     // Check for phone number duplication
                     else if (errorBodyString.contains("Duplicate entry") &&
-                            errorBodyString.contains("phone_number")) {
+                                    errorBodyString.contains("phone_number")) {
                         Toast.makeText(this, "Phone number already exists. Please use a different phone number.",
                                 Toast.LENGTH_LONG).show();
                         tilPhoneNumber.setError("Phone number already exists");

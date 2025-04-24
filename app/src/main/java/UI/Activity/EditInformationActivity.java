@@ -42,7 +42,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import Data.Network.ApiService;
@@ -53,6 +55,7 @@ import Data.Model.Role;
 import Data.Model.UpdateMyInfor;
 import SEP490.G9.R;
 import Data.Session.SessionManager;
+import UI.Component.BadWordsLoader;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -442,11 +445,11 @@ public class EditInformationActivity extends AppCompatActivity {
 
                 @Override
                 public void onFailure(Call<String> call, Throwable t) {
-                    Toast.makeText(EditInformationActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(EditInformationActivity.this, "No network connection please try again", Toast.LENGTH_SHORT).show();
                 }
             });
         } catch (IOException e) {
-            Toast.makeText(this, "Lỗi khi đọc ảnh: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No network connection please try again", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -620,9 +623,21 @@ public class EditInformationActivity extends AppCompatActivity {
     private boolean validateFirstName() {
         String n = etFirstName.getText().toString().trim();
         if (n.isEmpty()) {
-            etFirstName.setError("Please enter name");
+            etFirstName.setError("Please enter your first name");
             return false;
         }
+        // Load cả 2 danh sách bad-words
+        Set<String> badWords = new HashSet<>();
+        badWords.addAll(BadWordsLoader.loadEnglishBadWords(this));
+        badWords.addAll(BadWordsLoader.loadVietnameseBadWords(this));
+        String lower = n.toLowerCase();
+        for (String bad : badWords) {
+            if (lower.contains(bad)) {
+                etFirstName.setError("First name contains sensitive content, please try again!");
+                return false;
+            }
+        }
+        // Kiểm tra ký tự hợp lệ và độ dài (>=2 ký tự, chỉ chữ và dấu cách)
         if (!Pattern.matches(NAME_PATTERN, n)) {
             etFirstName.setError("Invalid first name (letters and spaces only, ≥2 characters)");
             return false;
@@ -637,6 +652,18 @@ public class EditInformationActivity extends AppCompatActivity {
             etLastName.setError("Please enter your last name");
             return false;
         }
+        // Load cả 2 danh sách bad-words
+        Set<String> badWords = new HashSet<>();
+        badWords.addAll(BadWordsLoader.loadEnglishBadWords(this));
+        badWords.addAll(BadWordsLoader.loadVietnameseBadWords(this));
+        String lower = n.toLowerCase();
+        for (String bad : badWords) {
+            if (lower.contains(bad)) {
+                etLastName.setError("Last name contains sensitive content, please try again!");
+                return false;
+            }
+        }
+        // Kiểm tra ký tự hợp lệ và độ dài (>=2 ký tự, chỉ chữ và dấu cách)
         if (!Pattern.matches(NAME_PATTERN, n)) {
             etLastName.setError("Invalid last name (letters and spaces only, ≥2 characters)");
             return false;
@@ -644,6 +671,7 @@ public class EditInformationActivity extends AppCompatActivity {
         etLastName.setError(null);
         return true;
     }
+
 
     private boolean validatePhoneNumber() {
         String pn = etPhoneNumber.getText().toString().trim();

@@ -40,12 +40,12 @@ public class ImageSliderAdapter extends RecyclerView.Adapter<ImageSliderAdapter.
         if (service.getImageUrl() != null && !service.getImageUrl().isEmpty()) {
             Glide.with(context)
                     .load(service.getImageUrl())
-                    .placeholder(R.drawable.vn_flag) // Hình mặc định khi load
-                    .error(R.drawable.vn_flag)       // Hình hiển thị khi có lỗi
+                    .placeholder(R.drawable.nuoc_uong_the_thao) // Hình mặc định khi load
+                    .error(R.drawable.nuoc_uong_the_thao)       // Hình hiển thị khi có lỗi
                     .into(holder.getImageView());
         } else {
             // Nếu không có imageUrl, hiển thị hình mặc định
-            holder.getImageView().setImageResource(R.drawable.vn_flag);
+            holder.getImageView().setImageResource(R.drawable.nuoc_uong_the_thao);
         }
     }
 

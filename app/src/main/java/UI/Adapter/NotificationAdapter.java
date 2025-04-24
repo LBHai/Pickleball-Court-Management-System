@@ -40,9 +40,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         setNotifications(notificationList);
     }
 
-    /**
-     * Cập nhật danh sách thông báo và sắp xếp từ mới nhất đến cũ nhất
-     */
     public void setNotifications(List<NotificationItem> list) {
         if (list != null) {
             Collections.sort(list, new Comparator<NotificationItem>() {

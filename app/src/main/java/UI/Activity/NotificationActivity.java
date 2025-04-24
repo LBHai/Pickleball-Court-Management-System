@@ -10,14 +10,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
+
 import UI.Adapter.NotificationAdapter;
 import Data.Network.ApiService;
 import Data.Network.RetrofitClient;
-import Data.Model.NotificationData;
 import Data.Model.NotificationItem;
 import Data.Model.NotificationResponse;
 import SEP490.G9.R;
@@ -33,8 +39,18 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
     private SessionManager sessionManager;
     private SharedPreferences sharedPreferences;
     private Set<String> deletedNotificationIds;
-    private ImageButton btnClearAll;
-
+//    private ImageButton btnClearAll;
+    private String orderId;
+    private String totalTime;
+    private String selectedDate;
+    private double totalPrice;
+    private String courtId;
+    private String orderType;
+    private String customerName;
+    private String phoneNumber;
+    private String note;
+    private String serviceDetailsJson;
+    private String serviceListJson;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,7 +58,7 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
 
         // Ánh xạ giao diện
         rvNotifications = findViewById(R.id.rvNotifications);
-        btnClearAll = findViewById(R.id.btnClearAll);
+//        btnClearAll = findViewById(R.id.btnClearAll);
 
         // Cấu hình RecyclerView
         rvNotifications.setLayoutManager(new LinearLayoutManager(this));
@@ -58,7 +74,30 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
 
         sessionManager = new SessionManager(this);
         String userId = sessionManager.getUserId();
+        Intent intent = getIntent();
+        orderId = intent.getStringExtra("orderId");
+        totalTime = intent.getStringExtra("totalTime");
+        selectedDate = intent.getStringExtra("selectedDate");
+        totalPrice = intent.getDoubleExtra("totalPrice", 0.0);
+        courtId = intent.getStringExtra("courtId");
+        orderType = intent.getStringExtra("orderType");
+        customerName = intent.getStringExtra("customerName");
+        phoneNumber = intent.getStringExtra("phoneNumber");
+        note = intent.getStringExtra("note");
+        serviceDetailsJson = intent.getStringExtra("serviceDetailsJson");
+        serviceListJson = intent.getStringExtra("serviceListJson");
 
+//        Log.d("NotificationActivity", "Received from AccountFragment: " +
+//                "orderId=" + orderId +
+//                ", totalTime=" + totalTime +
+//                ", selectedDate=" + selectedDate +
+//                ", totalPrice=" + totalPrice +
+//                ", courtId=" + courtId +
+//                ", orderType=" + orderType +
+//                ", customerName=" + customerName +
+//                ", phoneNumber=" + phoneNumber +
+//                ", note=" + note
+//        );
         if (userId != null && !userId.isEmpty()) {
             // Nếu có userId, lấy thông báo theo userId
             getNotifications(userId);
@@ -68,13 +107,12 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
             String guestPhone = sessionManager.getGuestPhone();
             if (guestPhone != null && !guestPhone.isEmpty()) {
                 getNotifications(guestPhone);
-                Log.d("Notification", "Đang lấy thông báo cho guest phone: " + guestPhone);
+//                Log.d("Notification", "Đang lấy thông báo cho guest phone: " + guestPhone);
             } else {
                 Toast.makeText(this, "Không có thông tin người dùng", Toast.LENGTH_SHORT).show();
-                Log.e("Notification", "Không tìm thấy user ID hoặc guest phone");
+//                Log.e("Notification", "Không tìm thấy user ID hoặc guest phone");
             }
         }
-
         // Xử lý vuốt để xóa thông báo
         ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0,
                 ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
@@ -96,26 +134,16 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
         // Xử lý nút "Xóa tất cả"
-        btnClearAll.setOnClickListener(v -> clearAllNotifications());
-
-        // Nhận extra data từ intent (nếu có)
-        Intent intent = getIntent();
-        String orderId = intent.getStringExtra("orderId");
-        // Các extra khác...
+//        btnClearAll.setOnClickListener(v -> clearAllNotifications());
     }
 
-    /**
-     * Phương thức thống nhất để lấy thông báo cho cả user và guest
-     * @param value Có thể là userId hoặc số điện thoại
-     */
     private void getNotifications(String value) {
         Log.d("Notification", "Đang lấy thông báo với value: " + value);
         ApiService apiService = RetrofitClient.getApiService(this);
         apiService.getNotifications(value).enqueue(new Callback<NotificationResponse>() {
             @Override
             public void onResponse(Call<NotificationResponse> call, Response<NotificationResponse> response) {
-                // Thêm log để kiểm tra response
-                Log.d("Notification", "Response code: " + response.code());
+//                Log.d("Notification", "Response code: " + response.code());
 
                 if (!response.isSuccessful()) {
                     try {
@@ -124,14 +152,12 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
                         Log.e("Notification", "Cannot read error body");
                     }
                 }
-
                 handleNotificationResponse(response);
             }
-
             @Override
             public void onFailure(Call<NotificationResponse> call, Throwable t) {
-                Log.e("Notification", "Lỗi API: " + t.getMessage(), t);
-                Toast.makeText(NotificationActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+//                Log.e("Notification", "Lỗi API: " + t.getMessage(), t);
+//                Toast.makeText(NotificationActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -141,26 +167,30 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
             List<NotificationItem> allNotifications = response.body().getNotifications();
             Log.d("Notification", "Đã nhận được " +
                     (allNotifications != null ? allNotifications.size() : 0) + " thông báo");
-
             // Cập nhật danh sách đã xóa từ SharedPreferences
             deletedNotificationIds = new HashSet<>(sharedPreferences.getStringSet("deletedIds", new HashSet<>()));
             notificationList.clear();
 
             if (allNotifications != null) {
+                // Lọc các thông báo chưa xóa
                 for (NotificationItem notification : allNotifications) {
                     if (!deletedNotificationIds.contains(notification.getId())) {
                         notificationList.add(notification);
                     }
                 }
+
+                // Sắp xếp thông báo từ mới nhất đến cũ nhất
+                sortNotificationsByDate(notificationList);
             }
 
-            Log.d("Notification", "Sau khi lọc, hiển thị " + notificationList.size() + " thông báo");
+            Log.d("Notification", "Sau khi lọc và sắp xếp, hiển thị " + notificationList.size() + " thông báo");
             notificationAdapter.notifyDataSetChanged();
         } else {
             Log.e("Notification", "Response không thành công hoặc body null");
             Toast.makeText(NotificationActivity.this, "Không thể lấy danh sách thông báo", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     @Override
     public void onCloseClick(NotificationItem notification) {
@@ -175,7 +205,6 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
                     Log.e("Notification", "markAsRead FAILED for id=" + notification.getId()
                             + "  code=" + response.code());
                 }
-                // Dù thành công hay không, ta cũng tiếp tục xóa local
                 deletedNotificationIds.add(notification.getId());
                 sharedPreferences.edit()
                         .putStringSet("deletedIds", deletedNotificationIds)
@@ -221,30 +250,19 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
         }
     }
 
-    /**
-     * Gọi API để đánh dấu thông báo với ID tương ứng là "read".
-     */
     private void markNotificationAsRead(NotificationItem notification) {
         ApiService apiService = RetrofitClient.getApiService(NotificationActivity.this);
         apiService.markAsRead(notification.getId()).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
-                    // Cập nhật trạng thái thông báo cục bộ
                     notification.setStatus("read");
-
-                    // Cập nhật lại giao diện cho item này. Nếu biết vị trí của item, bạn có thể dùng:
                     int index = notificationList.indexOf(notification);
                     if (index != -1) {
                         notificationAdapter.notifyItemChanged(index);
                     } else {
-                        // Nếu không biết vị trí, có thể cập nhật toàn bộ danh sách
                         notificationAdapter.notifyDataSetChanged();
                     }
-
-                    // (Tùy chọn) Cập nhật số thông báo chưa đọc, ví dụ: giảm số hiển thị trên badge
-
-                    // Sau đó mở màn hình chi tiết
                     openNotificationDetail(notification);
                 } else {
                     Toast.makeText(NotificationActivity.this, "Không thể đánh dấu đã đọc", Toast.LENGTH_SHORT).show();
@@ -256,31 +274,52 @@ public class NotificationActivity extends AppCompatActivity implements Notificat
             }
         });
     }
-
-
-    /**
-     * Mở màn hình DetailBookingActivity với thông tin của thông báo được chọn.
-     */
     private void openNotificationDetail(NotificationItem notification) {
         Intent intent = new Intent(NotificationActivity.this, DetailBookingActivity.class);
-        String orderId = notification.getId(); // Hoặc notification.getNotificationData().getOrderId();
         intent.putExtra("orderId", orderId);
-        intent.putExtra("notificationTitle", notification.getTitle());
-        intent.putExtra("notificationDescription", notification.getDescription());
-        intent.putExtra("notificationTime", notification.getCreateAt());
-        intent.putExtra("notificationStatus", notification.getStatus());
+        intent.putExtra("totalTime", totalTime);
+        intent.putExtra("selectedDate", selectedDate);
+        intent.putExtra("totalPrice", totalPrice);
+        intent.putExtra("courtId", courtId);
+        intent.putExtra("orderType", orderType);
+        intent.putExtra("customerName", customerName);
+        intent.putExtra("phoneNumber", phoneNumber);
+        intent.putExtra("note", note);
 
-        NotificationData data = notification.getNotificationData();
-        if (data != null) {
-            intent.putExtra("orderId", data.getOrderId());
-            intent.putExtra("totalTime", data.getTotalTime());
-            intent.putExtra("totalPrice", data.getTotalPrice());
-            intent.putExtra("orderStatus", data.getOrderStatus());
-            intent.putExtra("courtId", data.getCourtId());
-            intent.putExtra("dateBooking", data.getDateBooking());
-            intent.putExtra("slotPrices", data.getSlotPrices());
+        if (serviceDetailsJson != null) {
+            intent.putExtra("serviceDetailsJson", serviceDetailsJson);
         }
+        if (serviceListJson != null) {
+            intent.putExtra("serviceListJson", serviceListJson);
+        }
+
+
         startActivity(intent);
+    }
+    /**
+     * Sắp xếp danh sách thông báo từ mới nhất đến cũ nhất dựa trên thời gian tạo (createAt)
+     * @param notifications Danh sách thông báo cần sắp xếp
+     */
+    private void sortNotificationsByDate(List<NotificationItem> notifications) {
+        if (notifications != null && !notifications.isEmpty()) {
+            Collections.sort(notifications, (notification1, notification2) -> {
+                try {
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault());
+                    Date date1 = dateFormat.parse(notification1.getCreateAt());
+                    Date date2 = dateFormat.parse(notification2.getCreateAt());
+
+                    // Sắp xếp giảm dần (mới nhất trước)
+                    if (date1 != null && date2 != null) {
+                        return date2.compareTo(date1);
+                    }
+                } catch (ParseException e) {
+                    Log.e("NotificationActivity", "Lỗi khi phân tích ngày: " + e.getMessage());
+                }
+
+                // Nếu có lỗi khi phân tích ngày, so sánh chuỗi trực tiếp
+                return notification2.getCreateAt().compareTo(notification1.getCreateAt());
+            });
+        }
     }
 
 }

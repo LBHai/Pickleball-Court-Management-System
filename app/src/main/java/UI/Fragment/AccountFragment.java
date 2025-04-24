@@ -164,6 +164,38 @@ public class AccountFragment extends Fragment {
             }
             Log.d("AccountFragment", "Truyền customerName: " + order.getCustomerName() + ", phoneNumber: " + order.getPhoneNumber());
             startActivity(intent);
+
+        });
+
+        btnNoti.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), NotificationActivity.class);
+
+            // Kiểm tra xem orderList có dữ liệu hay không
+            if (!orderList.isEmpty()) {
+                Orders order = orderList.get(0); // Lấy đơn hàng đầu tiên (hoặc chọn theo logic của bạn)
+                intent.putExtra("orderId", order.getId());
+                intent.putExtra("totalTime", order.getTotalTime());
+                intent.putExtra("selectedDate", order.getCreatedAt().substring(0, 10));
+                intent.putExtra("totalPrice", order.getTotalAmount());
+                intent.putExtra("courtId", order.getCourtId());
+                intent.putExtra("orderType", order.getOrderType());
+                intent.putExtra("customerName", order.getCustomerName());
+                intent.putExtra("phoneNumber", order.getPhoneNumber());
+                intent.putExtra("note", order.getNote());
+
+                String serviceDetailsJson = OrderServiceHolder.getInstance().getServiceDetailsJson(order.getId());
+                String serviceListJson = OrderServiceHolder.getInstance().getServiceListJson(order.getId());
+                if (serviceDetailsJson != null) {
+                    intent.putExtra("serviceDetailsJson", serviceDetailsJson);
+                }
+                if (serviceListJson != null) {
+                    intent.putExtra("serviceListJson", serviceListJson);
+                }
+
+                Log.d("AccountFragment", "Truyền totalTime: " + order.getTotalTime());
+            }
+
+            startActivity(intent);
         });
 
         if (sessionManager.getToken() == null || sessionManager.getToken().isEmpty()) {
@@ -186,6 +218,16 @@ public class AccountFragment extends Fragment {
 
         return view;
 
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (sessionManager.getToken() != null && !sessionManager.getToken().isEmpty()) {
+            getMyInfo(); // Gọi lại phương thức để tải thông tin người dùng
+            getNotifications(); // Tải lại thông báo nếu cần
+        } else {
+            getAllOrderListForGuest();
+        }
     }
     private void showDatePickerDialog() {
         // Create a MaterialDatePicker for selecting a date range

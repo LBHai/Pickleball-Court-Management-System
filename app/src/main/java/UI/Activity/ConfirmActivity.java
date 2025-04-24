@@ -1209,7 +1209,7 @@ public class ConfirmActivity extends AppCompatActivity {
         }
 
         // Kiểm tra ký tự hợp lệ và độ dài
-        String namePattern = "^[a-zA-Z][a-zA-Z ]{1,29}$";
+        String namePattern = "^[\\p{L}][\\p{L}\\s]{1,29}$";
         if (!name.matches(namePattern)) {
             tilName.setError("Invalid name (letters and spaces only, 2-30 characters)");
             return false;
