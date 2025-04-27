@@ -1,8 +1,10 @@
 package UI.Activity;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-
+import Utils.DebouncedOnClickListener;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
@@ -262,11 +264,11 @@ public class ConfirmActivity extends AppCompatActivity {
         }
 
         // Trong ConfirmActivity.java, sửa phần xử lý nút btnPayment trong handleServiceOrder
-        btnPayment.setOnClickListener(new View.OnClickListener() {
+        btnPayment.setOnClickListener(new DebouncedOnClickListener(1000) {
             private boolean isProcessing = false;
 
             @Override
-            public void onClick(View v) {
+            public void onDebouncedClick(View v) {
                 if (isProcessing) {
                     Toast.makeText(ConfirmActivity.this, "Đang xử lý, vui lòng chờ...", Toast.LENGTH_SHORT).show();
                     return;
@@ -345,7 +347,7 @@ public class ConfirmActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(Call<CreateOrderResponse> call, Throwable t) {
                         Log.e("ConfirmActivity", "Lỗi mạng khi tạo đơn dịch vụ: " + t.getMessage(), t);
-                        Toast.makeText(ConfirmActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        ///Toast.makeText(ConfirmActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                         isProcessing = false;
                         btnPayment.setEnabled(true);
                     }
@@ -398,10 +400,29 @@ public class ConfirmActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<Double> call, Response<Double> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    totalPriceFixedOrder = response.body().intValue();
-                    int numberOfCourts = finalSelectedCourtSlots.size();
-                    int finalTotalPrice = totalPriceFixedOrder * numberOfCourts;
-                    tvTotalPriceLine.setText(Html.fromHtml("Tổng tiền: <b>" + formatMoney(finalTotalPrice) + "</b>"));
+                    double paymentValue = response.body();
+                    if (paymentValue == 0) {
+                        // Hiển thị dialog thông báo lỗi
+                        AlertDialog.Builder builder = new AlertDialog.Builder(ConfirmActivity.this);
+                        builder.setTitle("Thông báo");
+                        builder.setMessage("Yêu cầu của quý khách không đúng, vui lòng chọn lại!!!");
+                        builder.setPositiveButton("Chọn lại", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                // Quay về BookingRegularTableActivity
+                                Intent intent = new Intent(ConfirmActivity.this, BookingRegularTableActivity.class);
+                                startActivity(intent);
+                                finish();
+                            }
+                        });
+                        builder.setCancelable(false); // Không cho phép đóng dialog bằng nút back
+                        builder.show();
+                    } else {
+                        totalPriceFixedOrder = response.body().intValue();
+                        int numberOfCourts = finalSelectedCourtSlots.size();
+                        int finalTotalPrice = totalPriceFixedOrder * numberOfCourts;
+                        tvTotalPriceLine.setText(Html.fromHtml("Tổng tiền: <b>" + formatMoney(finalTotalPrice) + "</b>"));
+                    }
                 } else {
                     Toast.makeText(ConfirmActivity.this, "Lỗi khi lấy tổng tiền", Toast.LENGTH_SHORT).show();
                     tvTotalPriceLine.setText("Tổng tiền: Lỗi");
@@ -410,8 +431,8 @@ public class ConfirmActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<Double> call, Throwable t) {
-                Toast.makeText(ConfirmActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                tvTotalPriceLine.setText("Tổng tiền: Lỗi mạng");
+                //Toast.makeText(ConfirmActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                //tvTotalPriceLine.setText("Tổng tiền: Lỗi mạng");
             }
         });
 
@@ -470,32 +491,36 @@ public class ConfirmActivity extends AppCompatActivity {
             }
         }
 
-        btnPayment.setOnClickListener(v -> {
-            boolean isNameValid = validateName();
-            boolean isPhoneValid = validatePhoneNumber();
-            boolean isNoteValid = validateNote();
-            // Proceed only if both validations pass
-            if (!isNameValid || !isPhoneValid) {
-                return;
+        btnPayment.setOnClickListener(new DebouncedOnClickListener(1000) {
+            @Override
+            public void onDebouncedClick(View v) {
+                boolean isNameValid = validateName();
+                boolean isPhoneValid = validatePhoneNumber();
+                boolean isNoteValid = validateNote();
+                if (!isNameValid || !isPhoneValid) {
+                    return;
+                }
+                String name = etName.getText().toString().trim();
+                String phone = etPhone.getText().toString().trim();
+                String note = etNote.getText().toString().trim();
+                createFixedOrder(false, totalPriceFixedOrder);
             }
-            String name = etName.getText().toString().trim();
-            String phone = etPhone.getText().toString().trim();
-            String note = etNote.getText().toString().trim();
-            createFixedOrder(false, totalPriceFixedOrder);
         });
 
-        btnDeposit.setOnClickListener(v -> {
-            boolean isNameValid = validateName();
-            boolean isPhoneValid = validatePhoneNumber();
-            boolean isNoteValid = validateNote();
-            // Proceed only if both validations pass
-            if (!isNameValid || !isPhoneValid) {
-                return;
+        btnDeposit.setOnClickListener(new DebouncedOnClickListener(1000) {
+            @Override
+            public void onDebouncedClick(View v) {
+                boolean isNameValid = validateName();
+                boolean isPhoneValid = validatePhoneNumber();
+                boolean isNoteValid = validateNote();
+                if (!isNameValid || !isPhoneValid) {
+                    return;
+                }
+                String name = etName.getText().toString().trim();
+                String phone = etPhone.getText().toString().trim();
+                String note = etNote.getText().toString().trim();
+                createFixedOrder(true, totalPriceFixedOrder);
             }
-            String name = etName.getText().toString().trim();
-            String phone = etPhone.getText().toString().trim();
-            String note = etNote.getText().toString().trim();
-            createFixedOrder(true, totalPriceFixedOrder);
         });
 
         btnBack.setOnClickListener(v -> finish());
@@ -551,47 +576,53 @@ public class ConfirmActivity extends AppCompatActivity {
             finish();
             return;
         }
-
+// Thêm log để kiểm tra giá trị dailyPrice ngay sau khi parse confirmOrders
+        for (ConfirmOrder o : confirmOrders) {
+            Log.d("ConfirmActivity", "ConfirmOrder - Slot: " + o.getCourtSlotName() + ", DailyPrice: " + o.getDailyPrice());
+        }
         if (clubId != null && !clubId.isEmpty()) {
             fetchCourtDetails(clubId);
         }
         buildConfirmOrdersUI();
 
-        btnPayment.setOnClickListener(v -> {
-            boolean isNameValid = validateName();
-            boolean isPhoneValid = validatePhoneNumber();
-            boolean isNoteValid = validateNote();
-            // Proceed only if both validations pass
-            if (!isNameValid || !isPhoneValid) {
-                return;
+        btnPayment.setOnClickListener(new DebouncedOnClickListener(1000) {
+            @Override
+            public void onDebouncedClick(View v) {
+                boolean isNameValid = validateName();
+                boolean isPhoneValid = validatePhoneNumber();
+                boolean isNoteValid = validateNote();
+                if (!isNameValid || !isPhoneValid) {
+                    return;
+                }
+                String name = etName.getText().toString().trim();
+                String phone = etPhone.getText().toString().trim();
+                String note = etNote.getText().toString().trim();
+                if (userId == null || userId.isEmpty()) {
+                    sessionManager.setGuestPhone(phone);
+                    registerNotification();
+                }
+                processOrder(false);
             }
-            String name = etName.getText().toString().trim();
-            String phone = etPhone.getText().toString().trim();
-            String note = etNote.getText().toString().trim();
-            if (userId == null || userId.isEmpty()) {
-                sessionManager.setGuestPhone(phone);
-                registerNotification();
-            }
-            processOrder(false);
         });
 
-        btnDeposit.setOnClickListener(v -> {
-            boolean isNameValid = validateName();
-            boolean isPhoneValid = validatePhoneNumber();
-            boolean isNoteValid = validateNote();
-            // Proceed only if both validations pass
-            if (!isNameValid || !isPhoneValid) {
-                return;
+        btnDeposit.setOnClickListener(new DebouncedOnClickListener(1000) {
+            @Override
+            public void onDebouncedClick(View v) {
+                boolean isNameValid = validateName();
+                boolean isPhoneValid = validatePhoneNumber();
+                boolean isNoteValid = validateNote();
+                if (!isNameValid || !isPhoneValid) {
+                    return;
+                }
+                String name = etName.getText().toString().trim();
+                String phone = etPhone.getText().toString().trim();
+                String note = etNote.getText().toString().trim();
+                if (userId == null || userId.isEmpty()) {
+                    sessionManager.setGuestPhone(phone);
+                    registerNotification();
+                }
+                processOrder(true);
             }
-            String name = etName.getText().toString().trim();
-            String phone = etPhone.getText().toString().trim();
-            String note = etNote.getText().toString().trim();
-
-            if (userId == null || userId.isEmpty()) {
-                sessionManager.setGuestPhone(phone);
-                registerNotification();
-            }
-            processOrder(true);
         });
 
         btnBack.setOnClickListener(v -> finish());
@@ -640,7 +671,12 @@ public class ConfirmActivity extends AppCompatActivity {
                 TextView tvSlot = new TextView(this);
                 tvSlot.setTextColor(getResources().getColor(android.R.color.white));
                 tvSlot.setTextSize(14);
-                String detail = "   - " + o.getCourtSlotName() + ": " + o.getStartTime().substring(0, 5) + " - " + o.getEndTime().substring(0, 5) + " | " + formatMoney((int) o.getDailyPrice());
+                // Thêm log trước khi hiển thị giá
+                int price = (int) o.getDailyPrice();
+                Log.d("ConfirmActivity", "Slot: " + o.getCourtSlotName() + ", Price before format: " + price);
+                String formattedPrice = formatMoney(price);
+                Log.d("ConfirmActivity", "Slot: " + o.getCourtSlotName() + ", Formatted price: " + formattedPrice);
+                String detail = "   - " + o.getCourtSlotName() + ": " + o.getStartTime().substring(0, 5) + " - " + o.getEndTime().substring(0, 5) + " | " + formattedPrice;
                 tvSlot.setText(detail);
                 layoutConfirmOrders.addView(tvSlot);
             }
@@ -651,7 +687,6 @@ public class ConfirmActivity extends AppCompatActivity {
         tvTotalPriceLine.setText(Html.fromHtml("Tổng tiền: <b>" + formatMoney(overallTotalPrice) + "</b>"));
         tvTotalTimeLine.setText("Tổng thời gian chơi: " + totalTime);
     }
-
     private void createFixedOrder(boolean isDeposit, int totalPriceFixedOrder) {
         String name = etName.getText().toString().trim();
         String phone = etPhone.getText().toString().trim();
@@ -659,8 +694,6 @@ public class ConfirmActivity extends AppCompatActivity {
 
         CreateOrderRegularRequest req = new CreateOrderRegularRequest();
         req.setCourtId(courtId);
-        req.setCourtName(courtName);
-        req.setAddress(courtAddress);
         req.setUserId(userId);
         req.setCustomerName(name);
         req.setPhoneNumber(phone);
@@ -678,6 +711,24 @@ public class ConfirmActivity extends AppCompatActivity {
         int numberOfCourts = selectedCourtSlots != null ? selectedCourtSlots.size() : 0;
         int finalTotalPrice = totalPriceFixedOrder * numberOfCourts;
 
+        Log.d("CreateFixedOrder", "=== Thông tin đơn cố định ===");
+        Log.d("CreateFixedOrder", "Court ID: " + courtId);
+        Log.d("CreateFixedOrder", "User ID: " + userId);
+        Log.d("CreateFixedOrder", "Customer Name: " + name);
+        Log.d("CreateFixedOrder", "Phone Number: " + phone);
+        Log.d("CreateFixedOrder", "Note: " + note);
+        Log.d("CreateFixedOrder", "Payment Status: Chưa thanh toán");
+        Log.d("CreateFixedOrder", "Order Type: Đơn cố định");
+        Log.d("CreateFixedOrder", "Start Date: " + startDate);
+        Log.d("CreateFixedOrder", "End Date: " + endDate);
+        Log.d("CreateFixedOrder", "Start Time: " + startTime);
+        Log.d("CreateFixedOrder", "End Time: " + endTime);
+        Log.d("CreateFixedOrder", "Selected Days: " + selectedDays);
+        Log.d("CreateFixedOrder", "Selected Court Slots: " + (selectedCourtSlots != null ? selectedCourtSlots.toString() : "[]"));
+        Log.d("CreateFixedOrder", "Flexible Court Slot Fixes: " + flexibleCourtSlotFixes);
+        Log.d("CreateFixedOrder", "Number of Courts: " + numberOfCourts);
+        Log.d("CreateFixedOrder", "Total Price: " + finalTotalPrice);
+        Log.d("CreateFixedOrder", "Is Deposit: " + isDeposit);
         ApiService api = RetrofitClient.getApiService(this);
         Call<CreateOrderResponse> call = api.createFixedOrder(req);
         call.enqueue(new Callback<CreateOrderResponse>() {
@@ -708,7 +759,7 @@ public class ConfirmActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<CreateOrderResponse> call, Throwable t) {
-                Toast.makeText(ConfirmActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(ConfirmActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -824,7 +875,6 @@ public class ConfirmActivity extends AppCompatActivity {
                         if (tempRefund > maxAllowedRefund) {
                             computedPaymentAmount = -maxAllowedRefund;
                             computedRefundAmount = maxAllowedRefund;
-                            Toast.makeText(ConfirmActivity.this, "Số tiền hoàn lại tối đa là " + formatMoney(maxAllowedRefund), Toast.LENGTH_SHORT).show();
                         } else {
                             computedPaymentAmount = initialPaymentAmount;
                             computedRefundAmount = tempRefund;
@@ -845,12 +895,28 @@ public class ConfirmActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(CreateOrderResponse r) {
                             if (r != null) {
+                                Log.d("ConfirmActivity", "API changeOrder success");
+                                Log.d("ConfirmActivity", "computedPaymentAmount: " + computedPaymentAmount);
+                                Log.d("ConfirmActivity", "qrcode: " + r.getQrcode());
+                                Log.d("ConfirmActivity", "paymentTimeout: " + r.getPaymentTimeout());
+
+                                // **Sửa đổi**: Lấy paymentTimeout mới từ response
+                                String newPaymentTimeout = r.getPaymentTimeout();
+                                if (newPaymentTimeout == null || newPaymentTimeout.isEmpty()) {
+                                    Log.e("ConfirmActivity", "paymentTimeout từ changeOrder là null hoặc rỗng");
+                                    Toast.makeText(ConfirmActivity.this, "Lỗi: Timeout không hợp lệ", Toast.LENGTH_SHORT).show();
+                                    btnPayment.setEnabled(true);
+                                    btnDeposit.setEnabled(true);
+                                    return;
+                                }
+
                                 Intent i = (computedPaymentAmount > 0 && r.getQrcode() != null && !r.getQrcode().isEmpty())
                                         ? new Intent(ConfirmActivity.this, QRCodeActivity.class)
                                         : new Intent(ConfirmActivity.this, PaymentSuccessActivity.class);
                                 if (i.getComponent().getClassName().equals(QRCodeActivity.class.getName())) {
                                     i.putExtra("qrCodeData", r.getQrcode());
-                                    i.putExtra("paymentTimeout", r.getPaymentTimeout());
+                                    // **Sửa đổi**: Truyền paymentTimeout mới sang QRCodeActivity
+                                    i.putExtra("paymentTimeout", newPaymentTimeout);
                                     i.putExtra("overallTotalPrice", r.getTotalAmount());
                                     i.putExtra("paymentAmount", computedPaymentAmount);
                                     i.putExtra("amountPaid", amountPaid);
@@ -861,7 +927,15 @@ public class ConfirmActivity extends AppCompatActivity {
                                     i.putExtra("phoneNumber", phone);
                                     i.putExtra("note", note);
                                     i.putExtra("orderType", getIntent().getStringExtra("orderType"));
-                                    i.putIntegerArrayListExtra("slotPrices", new ArrayList<>(slotPricesList));
+                                    i.putIntegerArrayListExtra("slotPrices", new ArrayList<>(slotPricesList)); // Đảm bảo truyền slotPrices
+                                    if (i.getComponent().getClassName().equals(QRCodeActivity.class.getName())) {
+                                        i.putExtra("qrCodeData", r.getQrcode());
+                                        i.putExtra("paymentTimeout", r.getPaymentTimeout());
+                                        i.putExtra("paymentAmount", computedPaymentAmount);
+                                        i.putExtra("amountPaid", amountPaid);
+                                        i.putExtra("depositAmount", finalDepositAmount);
+                                        i.putExtra("isDeposit", isDeposit);
+                                    }
                                 }
                                 i.putExtra("orderId", r.getId());
                                 i.putExtra("totalTime", totalTime);
@@ -919,9 +993,10 @@ public class ConfirmActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(CreateOrderResponse r) {
                     if (r != null && r.getQrcode() != null && !r.getQrcode().isEmpty()) {
+                        String paymentTimeout = r.getPaymentTimeout();
                         Intent i = new Intent(ConfirmActivity.this, QRCodeActivity.class);
                         i.putExtra("qrCodeData", r.getQrcode());
-                        i.putExtra("paymentTimeout", r.getPaymentTimeout());
+                        i.putExtra("paymentTimeout", paymentTimeout);
                         i.putExtra("orderId", r.getId());
                         i.putExtra("overallTotalPrice", finalTotalAmount);
                         i.putExtra("depositAmount", finalDepositAmount);

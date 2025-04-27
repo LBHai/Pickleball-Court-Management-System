@@ -82,9 +82,9 @@ public class DetailPriceCourtActivity extends AppCompatActivity {
 
         if (slots == null || slots.isEmpty()) {
             TableRow emptyRow = new TableRow(this);
-            emptyRow.addView(createCell("-", false, 1.5f));
             emptyRow.addView(createCell("-", false, 1.2f));
-            emptyRow.addView(createCell("-", false, 1.2f));
+            emptyRow.addView(createCell("-", false, 1f));
+            emptyRow.addView(createCell("-", false, 1f));
             tableLayout.addView(emptyRow);
             return;
         }
@@ -92,9 +92,9 @@ public class DetailPriceCourtActivity extends AppCompatActivity {
         for (TimeSlot slot : slots) {
             TableRow row = new TableRow(this);
             String timeRange = formatTimeSlot(slot.getStartTime() + "-" + slot.getEndTime());
-            row.addView(createCell(timeRange, false, 1.5f));
-            row.addView(createCell(formatMoney(slot.getStudentPrice()), false, 1.2f));
-            row.addView(createCell(formatMoney(slot.getDailyPrice()), false, 1.2f));
+            row.addView(createCell(timeRange, false, 1.2f));
+            row.addView(createCell(formatMoney(slot.getStudentPrice()), false, 1f));
+            row.addView(createCell(formatMoney(slot.getDailyPrice()), false, 1f));
             tableLayout.addView(row);
         }
     }

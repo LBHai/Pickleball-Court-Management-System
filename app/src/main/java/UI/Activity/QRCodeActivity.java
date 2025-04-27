@@ -1,6 +1,5 @@
 package UI.Activity;
 
-import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -10,6 +9,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.zxing.BarcodeFormat;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
@@ -39,8 +40,6 @@ public class QRCodeActivity extends AppCompatActivity {
     private Runnable countdownRunnable;
 
     private long timeoutTimeMillis;
-    private long createdTimeMillis;
-    private static final long DEFAULT_TIMEOUT_DURATION;
     private String orderId;
     private boolean hasRedirected = false;
     private int overallTotalPrice, totalPrice, depositAmount, paymentAmount, totalPriceFixedOrder;
@@ -70,21 +69,6 @@ public class QRCodeActivity extends AppCompatActivity {
             timeoutHandler.postDelayed(this, 30000);
         }
     };
-
-    static {
-        String orderTypeFromIntent = null;
-        try {
-            Intent intent = new Intent();
-            orderTypeFromIntent = intent.getStringExtra("orderType");
-        } catch (Exception e) {
-            Log.e("QRCodeActivity", "Lỗi khi lấy orderType từ Intent: " + e.getMessage());
-        }
-        if ("Đơn cố định".equals(orderTypeFromIntent)) {
-            DEFAULT_TIMEOUT_DURATION = 15 * 60 * 1000; // 15 phút
-        } else {
-            DEFAULT_TIMEOUT_DURATION = 5 * 60 * 1000; // 5 phút
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,22 +148,32 @@ public class QRCodeActivity extends AppCompatActivity {
                     currentOrder = order;
                     String qrCodeData = order.getQrcode();
                     String paymentTimeoutStr = order.getPaymentTimeout();
-                    String createdAt = order.getCreatedAt();
+                    String createdAtStr = order.getCreatedAt();
+
                     if ("Chưa thanh toán".equals(order.getPaymentStatus()) || "Chưa đặt cọc".equals(order.getPaymentStatus())) {
-                        if (createdAt != null && !createdAt.isEmpty()) {
-                            try {
-                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS", Locale.getDefault());
-                                sdf.setTimeZone(TimeZone.getTimeZone("GMT+7"));
-                                Date createdDate = sdf.parse(createdAt);
-                                createdTimeMillis = createdDate.getTime();
-                                timeoutTimeMillis = createdTimeMillis + DEFAULT_TIMEOUT_DURATION;
-                            } catch (Exception e) {
-                                Log.e("QRCodeActivity", "Lỗi parse createdAt: " + e.getMessage());
-                                createdTimeMillis = System.currentTimeMillis();
-                                timeoutTimeMillis = createdTimeMillis + DEFAULT_TIMEOUT_DURATION;
+                        try {
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS", Locale.getDefault());
+                            sdf.setTimeZone(TimeZone.getTimeZone("GMT+7"));
+
+                            // Parse createdAt
+                            Date createdAtDate = sdf.parse(createdAtStr);
+                            long createdAtMillis = createdAtDate.getTime();
+
+                            // Parse paymentTimeout
+                            Date paymentTimeoutDate = sdf.parse(paymentTimeoutStr);
+                            timeoutTimeMillis = paymentTimeoutDate.getTime();
+
+                            // Kiểm tra nếu timeout nhỏ hơn createdAt (dữ liệu không hợp lệ)
+                            if (timeoutTimeMillis <= createdAtMillis) {
+                                Log.e("QRCodeActivity", "paymentTimeout nhỏ hơn hoặc bằng createdAt, dữ liệu không hợp lệ");
+                                timeoutTimeMillis = createdAtMillis + 5 * 60 * 1000; // Fallback 5 phút
                             }
+                        } catch (Exception e) {
+                            Log.e("QRCodeActivity", "Lỗi parse createdAt hoặc paymentTimeout: " + e.getMessage());
+                            timeoutTimeMillis = System.currentTimeMillis() + 5 * 60 * 1000; // Fallback 5 phút
                         }
                     }
+
                     if (qrCodeData != null && !qrCodeData.isEmpty()) {
                         processQRCodeData(qrCodeData, paymentTimeoutStr);
                     } else {
@@ -203,11 +197,30 @@ public class QRCodeActivity extends AppCompatActivity {
             Bitmap bitmap = barcodeEncoder.encodeBitmap(qrCodeData, BarcodeFormat.QR_CODE, 320, 320);
             ivQRCode.setImageBitmap(bitmap);
 
-            // Chỉ khởi động bộ đếm thời gian khi qrCodeData được xử lý thành công
+            if (paymentTimeoutStr != null && !paymentTimeoutStr.isEmpty()) {
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS", Locale.getDefault());
+                    sdf.setTimeZone(TimeZone.getTimeZone("GMT+7"));
+                    Date timeoutDate = sdf.parse(paymentTimeoutStr);
+                    timeoutTimeMillis = timeoutDate.getTime();
+
+                    // Kiểm tra nếu timeout nhỏ hơn thời gian hiện tại
+                    if (timeoutTimeMillis <= System.currentTimeMillis()) {
+                        Log.e("QRCodeActivity", "paymentTimeout đã hết hạn trước khi hiển thị");
+                        timeoutTimeMillis = System.currentTimeMillis() + 5 * 60 * 1000; // Fallback 5 phút
+                    }
+                } catch (Exception e) {
+                    Log.e("QRCodeActivity", "Lỗi parse paymentTimeout: " + e.getMessage());
+                    timeoutTimeMillis = System.currentTimeMillis() + 5 * 60 * 1000; // Fallback 5 phút
+                }
+            } else {
+                Log.e("QRCodeActivity", "paymentTimeout từ Intent là null hoặc rỗng");
+                timeoutTimeMillis = System.currentTimeMillis() + 5 * 60 * 1000; // Fallback 5 phút
+            }
+
             startCountdown();
         } catch (Exception e) {
             Toast.makeText(this, "Lỗi tạo QR Code: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            // Không khởi động bộ đếm thời gian nếu có lỗi
             return;
         }
 
@@ -232,11 +245,6 @@ public class QRCodeActivity extends AppCompatActivity {
     }
 
     private void startCountdown() {
-        if (createdTimeMillis == 0) {
-            createdTimeMillis = System.currentTimeMillis();
-            timeoutTimeMillis = createdTimeMillis + DEFAULT_TIMEOUT_DURATION;
-        }
-
         countdownRunnable = new Runnable() {
             @Override
             public void run() {
@@ -264,21 +272,20 @@ public class QRCodeActivity extends AppCompatActivity {
             public void onSuccess(Orders order) {
                 if (order != null) {
                     currentOrder = order;
-                    String createdAt = order.getCreatedAt();
-                    if (createdAt != null && !createdAt.isEmpty()) {
+                    String paymentTimeoutStr = order.getPaymentTimeout();
+                    if (paymentTimeoutStr != null && !paymentTimeoutStr.isEmpty()) {
                         try {
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS", Locale.getDefault());
                             sdf.setTimeZone(TimeZone.getTimeZone("GMT+7"));
-                            Date createdDate = sdf.parse(createdAt);
-                            long newCreatedTimeMillis = createdDate.getTime();
-                            if (newCreatedTimeMillis != createdTimeMillis) {
-                                createdTimeMillis = newCreatedTimeMillis;
-                                timeoutTimeMillis = createdTimeMillis + DEFAULT_TIMEOUT_DURATION;
+                            Date timeoutDate = sdf.parse(paymentTimeoutStr);
+                            long newTimeoutTimeMillis = timeoutDate.getTime();
+                            if (newTimeoutTimeMillis != timeoutTimeMillis) {
+                                timeoutTimeMillis = newTimeoutTimeMillis;
                                 handler.removeCallbacks(countdownRunnable);
                                 startCountdown();
                             }
                         } catch (Exception e) {
-                            Log.e("QRCodeActivity", "Lỗi parse createdAt trong update: " + e.getMessage());
+                            Log.e("QRCodeActivity", "Lỗi parse paymentTimeout trong update: " + e.getMessage());
                         }
                     }
                 }
@@ -307,9 +314,9 @@ public class QRCodeActivity extends AppCompatActivity {
             intent.putExtra("totalPrice", totalPrice);
             intent.putExtra("courtId", courtId);
             intent.putExtra("orderType", orderType);
-            intent.putExtra("customerName", getIntent().getStringExtra("customerName"));  // Truyền tiếp
-            intent.putExtra("phoneNumber", getIntent().getStringExtra("phoneNumber"));    // Truyền tiếp
-            intent.putExtra("note", getIntent().getStringExtra("note"));                  // Truyền tiếp
+            intent.putExtra("customerName", getIntent().getStringExtra("customerName"));
+            intent.putExtra("phoneNumber", getIntent().getStringExtra("phoneNumber"));
+            intent.putExtra("note", getIntent().getStringExtra("note"));
             startActivity(intent);
             finish();
         }
@@ -327,9 +334,9 @@ public class QRCodeActivity extends AppCompatActivity {
             intent.putExtra("courtId", courtId);
             intent.putExtra("orderType", orderType);
             intent.putExtra("serviceDetailsJson", getIntent().getStringExtra("serviceDetailsJson"));
-            intent.putExtra("customerName", getIntent().getStringExtra("customerName"));  // Truyền tiếp
-            intent.putExtra("phoneNumber", getIntent().getStringExtra("phoneNumber"));    // Truyền tiếp
-            intent.putExtra("note", getIntent().getStringExtra("note"));                  // Truyền tiếp
+            intent.putExtra("customerName", getIntent().getStringExtra("customerName"));
+            intent.putExtra("phoneNumber", getIntent().getStringExtra("phoneNumber"));
+            intent.putExtra("note", getIntent().getStringExtra("note"));
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             finish();

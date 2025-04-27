@@ -81,6 +81,7 @@ public class PaymentSuccessActivity extends AppCompatActivity {
                 detailIntent.putExtra("totalPrice", totalPrice);
                 detailIntent.putExtra("courtId", courtId);
                 detailIntent.putExtra("orderType", orderType);
+                detailIntent.putExtra("slotPrices", slotPrices); // Truyền slotPrices
                 detailIntent.putExtra("serviceDetailsJson", getIntent().getStringExtra("serviceDetailsJson"));
                 detailIntent.putIntegerArrayListExtra("slotPrices", getIntent().getIntegerArrayListExtra("slotPrices"));
                 detailIntent.putExtra("customerName", getIntent().getStringExtra("customerName"));  // Truyền tiếp

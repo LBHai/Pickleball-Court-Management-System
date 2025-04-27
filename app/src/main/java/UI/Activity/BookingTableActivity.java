@@ -507,9 +507,13 @@ public class BookingTableActivity extends AppCompatActivity {
 
     private void goToNextScreen() {
         List<ConfirmOrder> confirmOrders = new ArrayList<>();
+        List<Integer> slotPricesList = new ArrayList<>(); // Thêm danh sách giá
         for (Map<String, ConfirmOrder> ordersMap : selectedOrdersByDate.values()) {
             if (ordersMap != null) {
-                confirmOrders.addAll(ordersMap.values());
+                for (ConfirmOrder order : ordersMap.values()) {
+                    confirmOrders.add(order);
+                    slotPricesList.add((int) order.getDailyPrice()); // Lưu giá
+                }
             }
         }
         if (confirmOrders.isEmpty()) {
@@ -523,13 +527,13 @@ public class BookingTableActivity extends AppCompatActivity {
         intent.putExtra("confirmOrdersJson", confirmOrdersJson);
         intent.putExtra("club_id", courtId);
         intent.putExtra("selectedDate", selectedDate);
+        intent.putExtra("slotPrices", new ArrayList<>(slotPricesList)); // Thêm slotPrices
         String orderId = getIntent().getStringExtra("orderId");
         if (orderId != null && !orderId.isEmpty()) {
             intent.putExtra("orderId", orderId);
         }
         startActivity(intent);
     }
-
     private int dpToPx(int dp) {
         return (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,

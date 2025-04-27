@@ -32,7 +32,7 @@ public class TimePickerDialog {
     private final String initialTime;
     private final boolean isStartTime;
 
-    private String selectedHour = "06";
+    private String selectedHour = "00";
     private String selectedMinute = "00";
 
     public TimePickerDialog(Context context, OnTimeSelectedListener listener, String initialTime, boolean isStartTime) {
@@ -64,7 +64,7 @@ public class TimePickerDialog {
 
         // Cấu hình danh sách giờ (6-23)
         List<String> hours = new ArrayList<>();
-        for (int i = 6; i <= 20; i++) {
+        for (int i = 0; i <= 23; i++) {
             hours.add(String.format("%02d", i));
         }
 
