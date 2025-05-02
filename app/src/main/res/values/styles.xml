@@ -14,5 +14,7 @@
         <item name="android:textAlignment">center</item>
         <item name="android:background">@drawable/popup_menu_item_background</item>
     </style>
-
+    <style name="PopupMenuStyle" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:textSize">14sp</item>
+    </style>
 </resources>

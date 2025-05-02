@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#006d38"
-    tools:context=".DetailBookingActivity">
+    >
 
     <ImageButton
         android:id="@+id/btnBack"
@@ -329,6 +329,17 @@
                     android:text="Thay đổi lịch đặt"
                     android:textAllCaps="false"
                     android:backgroundTint="#e3b02c" />
+                <Button
+                    android:id="@+id/btnPayRemaining"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/btnChangeBooking"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="16dp"
+                    android:text="Thanh toán"
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="#FF5722"
+                    android:visibility="gone" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

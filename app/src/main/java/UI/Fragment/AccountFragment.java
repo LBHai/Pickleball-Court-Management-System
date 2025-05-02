@@ -1,12 +1,14 @@
 package UI.Fragment;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +17,9 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListPopupWindow;
 import android.widget.PopupMenu;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -215,6 +219,7 @@ public class AccountFragment extends Fragment {
             btnOptions.setVisibility(View.VISIBLE);
             authButtonsContainer.setVisibility(View.GONE);
         }
+
 
         return view;
 
@@ -497,42 +502,62 @@ public class AccountFragment extends Fragment {
     }
 
     private void showPopupMenu(View anchorView) {
-        PopupMenu popupMenu = new PopupMenu(getContext(), anchorView);
-        popupMenu.getMenuInflater().inflate(R.menu.popup_menu_in_option, popupMenu.getMenu());
-        forceShowPopupMenuIcons(popupMenu);
-        popupMenu.setOnMenuItemClickListener(item -> {
-            int itemId = item.getItemId();
-            if (itemId == R.id.menu_edit) {
-                Intent intent = new Intent(getActivity(), EditInformationActivity.class);
-                intent.putExtra("id", id);
-                intent.putExtra("username", username);
-                intent.putExtra("email", email);
-                intent.putExtra("firstName", firstName);
-                intent.putExtra("lastName", lastName);
-                intent.putExtra("phoneNumber", tvPhoneNumber.getText().toString());
-                intent.putExtra("userRank", userRank);
-                intent.putExtra("gender", gender);
-                intent.putExtra("dob", dob);
-                intent.putExtra("student", student);
-                startActivity(intent);
-                return true;
-            } else if (itemId == R.id.menu_changepassword) {
-                Intent intent = new Intent(getActivity(), ChangePasswordActivity.class);
-                startActivity(intent);
-                return true;
-            } else if (itemId == R.id.menu_transalate) {
-                showLanguageDialog();
-                return true;
-            } else if (itemId == R.id.menu_logout) {
-                logoutUser();
-                return true;
-            }
+        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View popupView = inflater.inflate(R.layout.popup_menu_layout, null);
 
-            return false;
+        // Đo kích thước của popup
+        popupView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        int popupWidth = popupView.getMeasuredWidth();
+        int screenWidth = getResources().getDisplayMetrics().widthPixels;
+        int[] location = new int[2];
+        anchorView.getLocationOnScreen(location);
+        int anchorX = location[0];
+
+        int xoff = 0;
+        if (anchorX + popupWidth > screenWidth) {
+            xoff = screenWidth - (anchorX + popupWidth); // Dịch trái để vừa màn hình
+        }
+
+        PopupWindow popupWindow = new PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        popupWindow.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+        popupWindow.setOutsideTouchable(true);
+
+        // Đặt sự kiện click cho các item
+        popupView.findViewById(R.id.menu_edit).setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), EditInformationActivity.class);
+            intent.putExtra("id", id);
+            intent.putExtra("username", username);
+            intent.putExtra("email", email);
+            intent.putExtra("firstName", firstName);
+            intent.putExtra("lastName", lastName);
+            intent.putExtra("phoneNumber", tvPhoneNumber.getText().toString());
+            intent.putExtra("userRank", userRank);
+            intent.putExtra("gender", gender);
+            intent.putExtra("dob", dob);
+            intent.putExtra("student", student);
+            startActivity(intent);
+            popupWindow.dismiss();
         });
-        popupMenu.show();
-    }
 
+        popupView.findViewById(R.id.menu_changepassword).setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), ChangePasswordActivity.class);
+            startActivity(intent);
+            popupWindow.dismiss();
+        });
+
+        popupView.findViewById(R.id.menu_transalate).setOnClickListener(v -> {
+            showLanguageDialog();
+            popupWindow.dismiss();
+        });
+
+        popupView.findViewById(R.id.menu_logout).setOnClickListener(v -> {
+            logoutUser();
+            popupWindow.dismiss();
+        });
+
+        // Hiển thị với vị trí điều chỉnh
+        popupWindow.showAsDropDown(anchorView, xoff, 0);
+    }
     private void forceShowPopupMenuIcons(PopupMenu popupMenu) {
         try {
             Field[] fields = popupMenu.getClass().getDeclaredFields();
@@ -541,8 +566,20 @@ public class AccountFragment extends Fragment {
                     field.setAccessible(true);
                     Object menuPopupHelper = field.get(popupMenu);
                     Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
+
+                    // Buộc hiển thị biểu tượng
                     Method setForceIcons = classPopupHelper.getMethod("setForceShowIcon", boolean.class);
                     setForceIcons.invoke(menuPopupHelper, true);
+
+                    // Giới hạn chiều rộng
+                    Field popupField = classPopupHelper.getDeclaredField("mPopup");
+                    popupField.setAccessible(true);
+                    Object listPopupWindow = popupField.get(menuPopupHelper);
+                    if (listPopupWindow instanceof ListPopupWindow) {
+                        ListPopupWindow lpw = (ListPopupWindow) listPopupWindow;
+                        int maxWidth = (int) (300 * getResources().getDisplayMetrics().density);
+                        lpw.setWidth(maxWidth);
+                    }
                     break;
                 }
             }

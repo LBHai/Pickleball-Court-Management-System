@@ -131,7 +131,7 @@ public class ConfirmActivity extends AppCompatActivity {
 
         if ("Đơn cố định".equals(orderType)) {
             btnDeposit.setVisibility(View.GONE);
-            btnPayment.setText("Thanh toán");
+            btnPayment.setText("PAYMENT");
         }
 
         if ("Đơn cố định".equals(orderType)) {
@@ -229,7 +229,7 @@ public class ConfirmActivity extends AppCompatActivity {
 
         // Ẩn nút đặt cọc và đặt tên nút thanh toán
         btnDeposit.setVisibility(View.GONE);
-        btnPayment.setText("Thanh toán");
+        btnPayment.setText("PAYMENT");
 
         // Kiểm tra thông tin người dùng
         ApiService apiService = RetrofitClient.getApiService(this);

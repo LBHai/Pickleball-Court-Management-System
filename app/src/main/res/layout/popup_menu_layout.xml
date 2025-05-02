@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/popup_background"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/menu_edit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/menu_edit"
+        android:textSize="15sp"
+        android:drawableLeft="@drawable/edit"
+        android:drawablePadding="8dp"
+        android:padding="10dp"
+        android:gravity="center_vertical" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray" />
+
+    <TextView
+        android:id="@+id/menu_changepassword"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/menu_changepassword"
+        android:textSize="15sp"
+        android:drawableLeft="@drawable/changepassword"
+        android:drawablePadding="8dp"
+        android:padding="10dp"
+        android:gravity="center_vertical" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray" />
+
+    <TextView
+        android:id="@+id/menu_transalate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/menu_translate"
+        android:textSize="15sp"
+        android:drawableLeft="@drawable/translate"
+        android:drawablePadding="8dp"
+        android:padding="10dp"
+        android:gravity="center_vertical" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray" />
+
+    <TextView
+        android:id="@+id/menu_logout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/menu_logout"
+        android:textSize="15sp"
+        android:drawableLeft="@drawable/logout"
+        android:drawablePadding="8dp"
+        android:padding="10dp"
+        android:gravity="center_vertical" />
+
+</LinearLayout>

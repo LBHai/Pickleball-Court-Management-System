@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import Data.Model.CreateOrderResponse;
 import Data.Model.OrderDetail;
 import Data.Model.Orders;
 import Data.Model.Service;
@@ -64,7 +65,7 @@ public class DetailBookingActivity extends AppCompatActivity {
     private Handler handler = new Handler();
     private Runnable checkOrderStatusRunnable;
     private SessionManager sessionManager;
-
+    private Button btnPayRemaining;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,7 +90,7 @@ public class DetailBookingActivity extends AppCompatActivity {
         btnCancelBooking = findViewById(R.id.btnCancelBooking);
         btnChangeBooking = findViewById(R.id.btnChangeBooking);
         layoutBookingSlots = findViewById(R.id.layoutBookingSlots);
-
+        btnPayRemaining = findViewById(R.id.btnPayRemaining);
         sessionManager = new SessionManager(this);
 
         btnCancelBooking.setOnClickListener(v -> {
@@ -109,7 +110,7 @@ public class DetailBookingActivity extends AppCompatActivity {
             }
         });
 
-        btnBack.setOnClickListener(v -> goBackToMainActivity());
+        btnBack.setOnClickListener(v -> finish());
 
         // Lấy dữ liệu từ Intent
         orderId = getIntent().getStringExtra("orderId");
@@ -174,14 +175,16 @@ public class DetailBookingActivity extends AppCompatActivity {
     }
 
     private void fetchOrderDetails(String orderId) {
-        Log.d("DetailBookingActivity", "Calling getOrderById with orderId: " + orderId);
         Call<Orders> call = RetrofitClient.getApiService(this).getOrderById(orderId);
         NetworkUtils.callApi(call, this, new NetworkUtils.ApiCallback<Orders>() {
             @Override
             public void onSuccess(Orders order) {
                 if (order == null) {
                     Log.e("DetailBookingActivity", "Order is null from API");
-                    runOnUiThread(() -> Toast.makeText(DetailBookingActivity.this, "Không thể tải dữ liệu đơn hàng", Toast.LENGTH_SHORT).show());
+                    runOnUiThread(() -> {
+                        updatePaymentButton();
+                        Toast.makeText(DetailBookingActivity.this, "Không thể tải dữ liệu đơn hàng", Toast.LENGTH_SHORT).show();
+                    });
                     return;
                 }
 
@@ -189,21 +192,12 @@ public class DetailBookingActivity extends AppCompatActivity {
                 String address = order.getAddress();
                 paymentStatus = order.getPaymentStatus();
                 String updatedOrderStatus = order.getOrderStatus();
-                int paymentAmount = order.getPaymentAmount();
                 orderType = order.getOrderType();
-                Log.d("DetailBookingActivity", "API Response - orderType: " + orderType +
-                        ", paymentStatus: " + paymentStatus +
-                        ", orderStatus: " + updatedOrderStatus +
-                        ", paymentAmount: " + paymentAmount);
 
                 slotPrices = getIntent().getIntegerArrayListExtra("slotPrices");
                 if (slotPrices == null || slotPrices.isEmpty()) {
                     slotPrices = new ArrayList<>(getSlotPricesFromOrder(order));
-                    Log.d("DetailBookingActivity", "slotPrices từ Orders: " + slotPrices);
-                } else {
-                    Log.d("DetailBookingActivity", "slotPrices từ Intent: " + slotPrices);
                 }
-                Log.d("DetailBookingActivity", "Full API Response: " + new Gson().toJson(order));
 
                 ApiService apiService = RetrofitClient.getApiService(DetailBookingActivity.this);
                 Call<List<Transaction>> transactionCall = apiService.getTransactionHistory(orderId);
@@ -212,15 +206,11 @@ public class DetailBookingActivity extends AppCompatActivity {
                     public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             List<Transaction> transactions = response.body();
-                            Log.d("DetailBookingActivity", "Transaction list size: " + transactions.size());
                             double totalPaid = 0;
                             double refundAmount = 0;
                             boolean hasRefund = false;
 
                             for (Transaction t : transactions) {
-                                Log.d("DetailBookingActivity",
-                                        ", Status: " + t.getPaymentStatus() +
-                                        ", Amount: " + t.getAmount());
                                 if ("Đã thanh toán".equals(t.getPaymentStatus()) || "Đã đặt cọc".equals(t.getPaymentStatus())) {
                                     totalPaid += t.getAmount();
                                 } else if ("Hoàn tiền".equals(t.getPaymentStatus())) {
@@ -231,25 +221,16 @@ public class DetailBookingActivity extends AppCompatActivity {
                             int finalTotalPaid = (int) totalPaid;
                             int finalRefundAmount = (int) refundAmount;
                             boolean finalHasRefund = hasRefund;
-                            Log.d("DetailBookingActivity", "Total Paid: " + totalPaid +
-                                    ", Refund Amount: " + refundAmount +
-                                    ", Has Refund: " + hasRefund);
 
                             runOnUiThread(() -> {
-                                Log.d("DetailBookingActivity", "Updating UI - hasRefund: " + finalHasRefund +
-                                        ", paymentStatus: " + paymentStatus);
                                 if (finalHasRefund) {
-                                    Log.d("DetailBookingActivity", "Displaying refund amount: " + finalRefundAmount);
                                     tvAmountPaid.setText("Số tiền đã hoàn trả: " + formatMoney(finalRefundAmount));
                                 } else if ("Đã thanh toán".equals(paymentStatus) || "Đã đặt cọc".equals(paymentStatus)) {
-                                    Log.d("DetailBookingActivity", "Displaying paid amount: " + finalTotalPaid);
                                     tvAmountPaid.setText("Số tiền đã trả: " + formatMoney(finalTotalPaid));
                                 } else {
-                                    Log.d("DetailBookingActivity", "Displaying default 0đ due to no refund and no paid status");
                                     tvAmountPaid.setText("Số tiền đã trả: 0đ");
                                 }
                                 tvPaymentStatus.setText("Trạng thái thanh toán: " + (paymentStatus != null ? paymentStatus : "N/A"));
-
                                 tvStadiumName.setText("Tên sân: " + (courtName != null ? courtName : "N/A"));
                                 tvAddress.setText("Địa chỉ: " + (address != null ? address : "N/A"));
                                 tvTotalPrice.setText("Tổng tiền: " + formatMoney(order.getTotalAmount()));
@@ -269,23 +250,24 @@ public class DetailBookingActivity extends AppCompatActivity {
                                     orderStatus = updatedOrderStatus;
                                     updateButtonsBasedOnStatus(orderStatus);
                                 }
+                                updatePaymentButton();
                             });
                         } else {
-                            Log.e("DetailBookingActivity", "Transaction API response empty or failed. Response code: " + response.code());
                             runOnUiThread(() -> {
                                 tvAmountPaid.setText("Số tiền đã trả: 0đ");
                                 tvPaymentStatus.setText("Trạng thái thanh toán: " + (paymentStatus != null ? paymentStatus : "N/A"));
+                                updatePaymentButton();
                             });
                         }
                     }
 
                     @Override
                     public void onFailure(Call<List<Transaction>> call, Throwable t) {
-                        Log.e("DetailBookingActivity", "Transaction API call failed: " + t.getMessage());
                         runOnUiThread(() -> {
                             updateButtonsBasedOnStatus(updatedOrderStatus);
                             tvAmountPaid.setText("Số tiền đã trả: 0đ");
                             tvPaymentStatus.setText("Trạng thái thanh toán: " + (paymentStatus != null ? paymentStatus : "N/A"));
+                            updatePaymentButton();
                         });
                     }
                 });
@@ -298,6 +280,15 @@ public class DetailBookingActivity extends AppCompatActivity {
             }
         });
     }
+    private void updatePaymentButton() {
+        if ("Đặt lịch thành công".equals(orderStatus) && "Đã đặt cọc".equals(paymentStatus)) {
+            btnPayRemaining.setVisibility(View.VISIBLE);
+            btnPayRemaining.setOnClickListener(v -> createQRForRemainingPayment(orderId));
+        } else {
+            btnPayRemaining.setVisibility(View.GONE);
+        }
+    }
+
     private void displayServiceDetails(String serviceDetailsJson) {
         Log.d("DetailBookingActivity", "serviceDetailsJson trong displayServiceDetails: " + serviceDetailsJson);
         if (serviceDetailsJson != null && !serviceDetailsJson.isEmpty()) {
@@ -629,7 +620,28 @@ public class DetailBookingActivity extends AppCompatActivity {
             }
         });
     }
+    private void createQRForRemainingPayment(String orderId) {
+        Call<CreateOrderResponse> call = RetrofitClient.getApiService(this).createPaymentForRemaining(orderId);
+        NetworkUtils.callApi(call, this, new NetworkUtils.ApiCallback<CreateOrderResponse>() {
+            @Override
+            public void onSuccess(CreateOrderResponse response) {
+                if (response != null && response.getQrcode() != null) {
+                    Intent intent = new Intent(DetailBookingActivity.this, QRCodeActivity.class);
+                    intent.putExtra("qrCodeData", response.getQrcode());
+                    intent.putExtra("orderId", orderId);
+                    intent.putExtra("isRemainingPayment", true); // Flag để phân biệt thanh toán còn lại
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(DetailBookingActivity.this, "Không thể tạo QR code", Toast.LENGTH_SHORT).show();
+                }
+            }
 
+            @Override
+            public void onError(String errorMessage) {
+                Toast.makeText(DetailBookingActivity.this, "Lỗi: " + errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
     private void checkAndHideButtons(Orders order) {
         if (order == null) {
             btnCancelBooking.setVisibility(View.GONE);
@@ -746,7 +758,7 @@ public class DetailBookingActivity extends AppCompatActivity {
     private void showConfirmCancelDialog() {
         new AlertDialog.Builder(this)
                 .setTitle("Xác nhận")
-                .setMessage("Bạn có chắc chắn là muốn hủy đặt dịch vụ không?")
+                .setMessage("Bạn có chắc chắn là muốn hủy đơn không?")
                 .setPositiveButton("Có", (dialog, which) -> cancelOrder(orderId))
                 .setNegativeButton("Không", null)
                 .show();
@@ -754,7 +766,6 @@ public class DetailBookingActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        goBackToMainActivity();
     }
 
     private void goBackToMainActivity() {

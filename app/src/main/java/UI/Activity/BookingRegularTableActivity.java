@@ -69,7 +69,7 @@ public class BookingRegularTableActivity extends AppCompatActivity {
 
         if (courtId == null) {
             Log.e(TAG, "onCreate: Không có club_id trong Intent");
-            Toast.makeText(this, "Không có club_id", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Không có club_id", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }

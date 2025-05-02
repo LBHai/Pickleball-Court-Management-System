@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -38,7 +39,7 @@ public class QRCodeActivity extends AppCompatActivity {
     private TextView tvCountdownTimer, tvWarning;
     private Handler handler = new Handler();
     private Runnable countdownRunnable;
-
+    private boolean isRemainingPayment;
     private long timeoutTimeMillis;
     private String orderId;
     private boolean hasRedirected = false;
@@ -96,12 +97,13 @@ public class QRCodeActivity extends AppCompatActivity {
         slotPrices = getIntent().getIntegerArrayListExtra("slotPrices");
         orderType = getIntent().getStringExtra("orderType");
         totalPriceFixedOrder = getIntent().getIntExtra("totalPriceFixedOrder", 0);
-
+        isRemainingPayment = getIntent().getBooleanExtra("isRemainingPayment", false);
         if (totalTime == null) {
             Log.e("QRCodeActivity", "totalTime là null, kiểm tra lại ConfirmActivity");
             totalTime = "0h00";
         }
-
+        Log.d("QRCodeActivity", "qrCodeData từ Intent: " + qrCodeData);
+        Log.d("QRCodeActivity", "orderId: " + orderId);
         DataHolder.getInstance().setSlotPrices(slotPrices);
         DataHolder.getInstance().setTotalTime(totalTime);
 
@@ -132,6 +134,7 @@ public class QRCodeActivity extends AppCompatActivity {
                 }
                 @Override
                 public void onPaymentFailure(String error) {
+                    Log.d("QRCodeActivity", "Payment failure received: " + error);
                     runOnUiThread(() -> navigateToDetailBooking());
                 }
             });
@@ -149,7 +152,8 @@ public class QRCodeActivity extends AppCompatActivity {
                     String qrCodeData = order.getQrcode();
                     String paymentTimeoutStr = order.getPaymentTimeout();
                     String createdAtStr = order.getCreatedAt();
-
+                    Log.d("QRCodeActivity", "Order status: " + order.getOrderStatus() + ", Payment status: " + order.getPaymentStatus());
+                    Log.d("QRCodeActivity", "qrCodeData từ API: " + order.getQrcode());
                     if ("Chưa thanh toán".equals(order.getPaymentStatus()) || "Chưa đặt cọc".equals(order.getPaymentStatus())) {
                         try {
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS", Locale.getDefault());
@@ -196,8 +200,10 @@ public class QRCodeActivity extends AppCompatActivity {
             BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
             Bitmap bitmap = barcodeEncoder.encodeBitmap(qrCodeData, BarcodeFormat.QR_CODE, 320, 320);
             ivQRCode.setImageBitmap(bitmap);
-
-            if (paymentTimeoutStr != null && !paymentTimeoutStr.isEmpty()) {
+            if (isRemainingPayment) {
+                tvCountdownTimer.setVisibility(View.GONE); // Ẩn bộ đếm thời gian nếu là thanh toán còn lại
+            }
+            else if (paymentTimeoutStr != null && !paymentTimeoutStr.isEmpty()) {
                 try {
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS", Locale.getDefault());
                     sdf.setTimeZone(TimeZone.getTimeZone("GMT+7"));
@@ -348,7 +354,7 @@ public class QRCodeActivity extends AppCompatActivity {
         super.onResume();
         socketHandler.post(socketCheckRunnable);
         timeoutHandler.post(updateTimeoutRunnable);
-        if (countdownRunnable != null) {
+        if (countdownRunnable != null && !isRemainingPayment) {
             handler.post(countdownRunnable);
         }
     }

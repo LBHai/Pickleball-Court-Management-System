@@ -147,4 +147,7 @@ public interface ApiService {
         Call<Void> forgetPassword(@Body ForgetPasswordRequest body);
     @POST("identity/users/registerForStudent")
     Call<Void> registerStudent(@Body StudentRegistrationRequest req);
+    @POST("identity/public/paymentOrder")
+    Call<CreateOrderResponse> createPaymentForRemaining(@Query("orderId") String orderId);
+
 }
