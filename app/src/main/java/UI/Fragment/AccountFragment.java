@@ -40,8 +40,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import Data.Network.ApiService;
 import Data.Network.RetrofitClient;
@@ -82,8 +84,8 @@ public class AccountFragment extends Fragment {
     private int unreadCount = 0;
     private LinearLayout authButtonsContainer;
     private Button btnLogin, btnRegister;
-    private List<Orders> bookedOrders;  // Thêm danh sách cho "Lịch đã đặt"
-    private List<Orders> serviceOrders; // Thêm danh sách cho "Dịch vụ đã đặt"
+    private List<Orders> bookedOrders;
+    private List<Orders> serviceOrders;
     private static final int REFRESH_INTERVAL = 2000;
 
     @Override
@@ -110,7 +112,7 @@ public class AccountFragment extends Fragment {
         orderList = new ArrayList<>();
         filteredOrderList = new ArrayList<>();
 
-        bookedOrders = new ArrayList<>();  // Khởi tạo danh sách
+        bookedOrders = new ArrayList<>();
         serviceOrders = new ArrayList<>();
 
         orderAdapter = new OrderAdapter(filteredOrderList, getContext());
@@ -118,11 +120,22 @@ public class AccountFragment extends Fragment {
         badge = view.findViewById(R.id.badge);
         getNotifications();
 
-
         if (sessionManager.getToken() == null || sessionManager.getToken().isEmpty()) {
             btnOptions.setVisibility(View.GONE);
+            authButtonsContainer.setVisibility(View.VISIBLE);
+
+            btnLogin.setOnClickListener(v -> {
+                Intent intent = new Intent(getActivity(), LoginActivity.class);
+                startActivity(intent);
+            });
+
+            btnRegister.setOnClickListener(v -> {
+                Intent intent = new Intent(getActivity(), SignUpActivity.class);
+                startActivity(intent);
+            });
         } else {
             btnOptions.setVisibility(View.VISIBLE);
+            authButtonsContainer.setVisibility(View.GONE);
         }
 
         btnNoti.setOnClickListener(v -> {
@@ -138,15 +151,6 @@ public class AccountFragment extends Fragment {
         tvTabBooked.setOnClickListener(v -> showBookedTab());
         tvServiceInfo.setOnClickListener(v -> showMemberInfoTab());
 
-        if (sessionManager.getToken() != null && !sessionManager.getToken().isEmpty()) {
-            getMyInfo();
-        } else {
-            if (!sessionManager.hasShownGuestDialog()) {
-                showGuestDialog();
-                sessionManager.setHasShownGuestDialog(true);
-            }
-            getAllOrderListForGuest();
-        }
         orderAdapter.setOnItemClickListener(order -> {
             Intent intent = new Intent(getActivity(), DetailBookingActivity.class);
             intent.putExtra("orderId", order.getId());
@@ -168,93 +172,43 @@ public class AccountFragment extends Fragment {
             }
             Log.d("AccountFragment", "Truyền customerName: " + order.getCustomerName() + ", phoneNumber: " + order.getPhoneNumber());
             startActivity(intent);
-
         });
 
-        btnNoti.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), NotificationActivity.class);
-
-            // Kiểm tra xem orderList có dữ liệu hay không
-            if (!orderList.isEmpty()) {
-                Orders order = orderList.get(0); // Lấy đơn hàng đầu tiên (hoặc chọn theo logic của bạn)
-                intent.putExtra("orderId", order.getId());
-                intent.putExtra("totalTime", order.getTotalTime());
-                intent.putExtra("selectedDate", order.getCreatedAt().substring(0, 10));
-                intent.putExtra("totalPrice", order.getTotalAmount());
-                intent.putExtra("courtId", order.getCourtId());
-                intent.putExtra("orderType", order.getOrderType());
-                intent.putExtra("customerName", order.getCustomerName());
-                intent.putExtra("phoneNumber", order.getPhoneNumber());
-                intent.putExtra("note", order.getNote());
-
-                String serviceDetailsJson = OrderServiceHolder.getInstance().getServiceDetailsJson(order.getId());
-                String serviceListJson = OrderServiceHolder.getInstance().getServiceListJson(order.getId());
-                if (serviceDetailsJson != null) {
-                    intent.putExtra("serviceDetailsJson", serviceDetailsJson);
-                }
-                if (serviceListJson != null) {
-                    intent.putExtra("serviceListJson", serviceListJson);
-                }
-
-                Log.d("AccountFragment", "Truyền totalTime: " + order.getTotalTime());
-            }
-
-            startActivity(intent);
-        });
-
-        if (sessionManager.getToken() == null || sessionManager.getToken().isEmpty()) {
-            btnOptions.setVisibility(View.GONE);
-            authButtonsContainer.setVisibility(View.VISIBLE);
-
-            btnLogin.setOnClickListener(v -> {
-                Intent intent = new Intent(getActivity(), LoginActivity.class);
-                startActivity(intent);
-            });
-
-            btnRegister.setOnClickListener(v -> {
-                Intent intent = new Intent(getActivity(), SignUpActivity.class);
-                startActivity(intent);
-            });
+        if (sessionManager.getToken() != null && !sessionManager.getToken().isEmpty()) {
+            getMyInfo();
         } else {
-            btnOptions.setVisibility(View.VISIBLE);
-            authButtonsContainer.setVisibility(View.GONE);
+            if (!sessionManager.hasShownGuestDialog()) {
+                showGuestDialog();
+                sessionManager.setHasShownGuestDialog(true);
+            }
         }
 
-
         return view;
-
     }
+
     @Override
     public void onResume() {
         super.onResume();
         if (sessionManager.getToken() != null && !sessionManager.getToken().isEmpty()) {
-            getMyInfo(); // Gọi lại phương thức để tải thông tin người dùng
-            getNotifications(); // Tải lại thông báo nếu cần
+            getMyInfo();
+            getNotifications();
         } else {
             getAllOrderListForGuest();
         }
     }
+
     private void showDatePickerDialog() {
-        // Create a MaterialDatePicker for selecting a date range
         MaterialDatePicker.Builder<androidx.core.util.Pair<Long, Long>> builder = MaterialDatePicker.Builder.dateRangePicker();
         builder.setTitleText("Select Date Range");
-
-
-        // Build and show the date picker
         MaterialDatePicker<androidx.core.util.Pair<Long, Long>> datePicker = builder.build();
         datePicker.addOnPositiveButtonClickListener(selection -> {
             Long startDate = selection.first;
             Long endDate = selection.second;
-
-            // Format the dates as needed
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
             String startDateStr = dateFormat.format(new Date(startDate));
             String endDateStr = dateFormat.format(new Date(endDate));
-
-            // Use the selected dates (e.g., filter data)
             filterOrdersByDateRange(startDateStr, endDateStr);
         });
-
         datePicker.show(getParentFragmentManager(), "DATE_PICKER");
     }
 
@@ -293,8 +247,7 @@ public class AccountFragment extends Fragment {
     }
 
     private void showStatusFilterDialog() {
-        String[] statuses = {"Đang xử lý", "Đã hoàn thành", "Hủy đặt lịch", "Đặt lịch thành công", "Thay đổi lịch đặt thành công", "Hủy đặt lịch do quá giờ thanh toán","Đặt dịch vụ tại sân"
-        };
+        String[] statuses = {"Đang xử lý", "Đã hoàn thành", "Hủy đặt lịch", "Đặt lịch thành công", "Thay đổi lịch đặt thành công", "Hủy đặt lịch do quá giờ thanh toán", "Đặt dịch vụ tại sân"};
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Chọn trạng thái");
         builder.setSingleChoiceItems(statuses, -1, (dialog, which) -> {
@@ -323,17 +276,43 @@ public class AccountFragment extends Fragment {
             return;
         }
 
+        // Clear old data to prevent duplicates
         orderList.clear();
         filteredOrderList.clear();
+        bookedOrders.clear();
+        serviceOrders.clear();
 
         ApiService apiService = RetrofitClient.getApiService(getContext());
         apiService.getOrders(guestPhone).enqueue(new Callback<List<Orders>>() {
             @Override
             public void onResponse(Call<List<Orders>> call, Response<List<Orders>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    orderList.addAll(response.body());
+                    List<Orders> ordersFromApi = response.body();
+                    Log.d("AccountFragment", "Số lượng đơn hàng từ API: " + ordersFromApi.size());
+
+                    // Remove duplicates based on orderId
+                    Set<String> orderIds = new HashSet<>();
+                    List<Orders> uniqueOrders = new ArrayList<>();
+                    for (Orders order : ordersFromApi) {
+                        if (orderIds.add(order.getId())) {
+                            uniqueOrders.add(order);
+                            Log.d("AccountFragment", "Order ID: " + order.getId() + ", Type: " + order.getOrderType());
+                        } else {
+                            Log.d("AccountFragment", "Trùng lặp Order ID: " + order.getId() + " - Đã bỏ qua");
+                        }
+                    }
+
+                    orderList.addAll(uniqueOrders);
+                    Log.d("AccountFragment", "Số lượng đơn hàng sau khi loại trùng: " + orderList.size());
+
                     filterOrdersByType();
                     showBookedTab();
+
+                    // Log detailed display list
+                    Log.d("AccountFragment", "Số lượng đơn trong filteredOrderList: " + filteredOrderList.size());
+                    for (Orders order : filteredOrderList) {
+                        Log.d("AccountFragment", "Hiển thị Order ID: " + order.getId() + ", Type: " + order.getOrderType());
+                    }
                 } else {
                     Toast.makeText(getContext(), "Không có dữ liệu đơn hàng", Toast.LENGTH_SHORT).show();
                 }
@@ -345,7 +324,6 @@ public class AccountFragment extends Fragment {
             }
         });
     }
-
 
     private void showGuestDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
@@ -381,7 +359,7 @@ public class AccountFragment extends Fragment {
         tvTabBooked.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
         tvServiceInfo.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.darker_gray));
         filteredOrderList.clear();
-        filteredOrderList.addAll(bookedOrders); // Hiển thị đơn "Đơn cố định" và "Đơn ngày"
+        filteredOrderList.addAll(bookedOrders);
         orderAdapter.notifyDataSetChanged();
         recyclerOrder.setVisibility(View.VISIBLE);
         tvServiceOrderInfo.setVisibility(View.GONE);
@@ -391,7 +369,7 @@ public class AccountFragment extends Fragment {
         tvTabBooked.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.darker_gray));
         tvServiceInfo.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
         filteredOrderList.clear();
-        filteredOrderList.addAll(serviceOrders); // Hiển thị đơn "Đơn dịch vụ"
+        filteredOrderList.addAll(serviceOrders);
         orderAdapter.notifyDataSetChanged();
         recyclerOrder.setVisibility(View.VISIBLE);
         tvServiceOrderInfo.setVisibility(View.GONE);
@@ -487,8 +465,8 @@ public class AccountFragment extends Fragment {
                     List<Orders> orders = response.body();
                     orderList.clear();
                     orderList.addAll(orders);
-                    filterOrdersByType(); // Lọc đơn hàng theo loại
-                    showBookedTab(); // Mặc định hiển thị tab "Lịch đã đặt"
+                    filterOrdersByType();
+                    showBookedTab();
                 } else {
                     Toast.makeText(getContext(), "Không có đơn đặt sân nào", Toast.LENGTH_SHORT).show();
                 }
@@ -505,7 +483,6 @@ public class AccountFragment extends Fragment {
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.popup_menu_layout, null);
 
-        // Đo kích thước của popup
         popupView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         int popupWidth = popupView.getMeasuredWidth();
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
@@ -515,14 +492,13 @@ public class AccountFragment extends Fragment {
 
         int xoff = 0;
         if (anchorX + popupWidth > screenWidth) {
-            xoff = screenWidth - (anchorX + popupWidth); // Dịch trái để vừa màn hình
+            xoff = screenWidth - (anchorX + popupWidth);
         }
 
         PopupWindow popupWindow = new PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         popupWindow.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
         popupWindow.setOutsideTouchable(true);
 
-        // Đặt sự kiện click cho các item
         popupView.findViewById(R.id.menu_edit).setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), EditInformationActivity.class);
             intent.putExtra("id", id);
@@ -555,9 +531,9 @@ public class AccountFragment extends Fragment {
             popupWindow.dismiss();
         });
 
-        // Hiển thị với vị trí điều chỉnh
         popupWindow.showAsDropDown(anchorView, xoff, 0);
     }
+
     private void forceShowPopupMenuIcons(PopupMenu popupMenu) {
         try {
             Field[] fields = popupMenu.getClass().getDeclaredFields();
@@ -566,12 +542,8 @@ public class AccountFragment extends Fragment {
                     field.setAccessible(true);
                     Object menuPopupHelper = field.get(popupMenu);
                     Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
-
-                    // Buộc hiển thị biểu tượng
                     Method setForceIcons = classPopupHelper.getMethod("setForceShowIcon", boolean.class);
                     setForceIcons.invoke(menuPopupHelper, true);
-
-                    // Giới hạn chiều rộng
                     Field popupField = classPopupHelper.getDeclaredField("mPopup");
                     popupField.setAccessible(true);
                     Object listPopupWindow = popupField.get(menuPopupHelper);
@@ -645,12 +617,9 @@ public class AccountFragment extends Fragment {
 
     private void getNotifications() {
         ApiService apiService = RetrofitClient.getApiService(getContext());
-
-        // Lấy userId hoặc guestPhone từ session
         String userId = sessionManager.getUserId();
 
         if (userId != null && !userId.isEmpty()) {
-            // Nếu là user đã đăng nhập, lấy thông báo theo userId
             apiService.getNotifications(userId)
                     .enqueue(new Callback<NotificationResponse>() {
                         @Override
@@ -658,13 +627,8 @@ public class AccountFragment extends Fragment {
                             if (response.isSuccessful() && response.body() != null) {
                                 NotificationResponse notiResponse = response.body();
                                 notificationList = notiResponse.getNotifications();
-
-                                // Nếu API trả về số lượng chưa đọc
                                 int unreadCount = notiResponse.getUnreadCount();
                                 badge.setNumber(unreadCount);
-
-                                // Hoặc tính toán số lượng chưa đọc từ danh sách
-                                // updateBadge();
                             }
                         }
                         @Override
@@ -673,7 +637,6 @@ public class AccountFragment extends Fragment {
                         }
                     });
         } else {
-            // Nếu là guest, lấy thông báo theo số điện thoại
             String guestPhone = sessionManager.getGuestPhone();
             if (guestPhone != null && !guestPhone.isEmpty()) {
                 apiService.getNotifications(guestPhone)
@@ -683,13 +646,8 @@ public class AccountFragment extends Fragment {
                                 if (response.isSuccessful() && response.body() != null) {
                                     NotificationResponse notiResponse = response.body();
                                     notificationList = notiResponse.getNotifications();
-
-                                    // Nếu API trả về số lượng chưa đọc
                                     int unreadCount = notiResponse.getUnreadCount();
                                     badge.setNumber(unreadCount);
-
-                                    // Hoặc tính toán số lượng chưa đọc từ danh sách
-                                    // updateBadge();
                                 }
                             }
                             @Override
@@ -698,7 +656,6 @@ public class AccountFragment extends Fragment {
                             }
                         });
             } else {
-                // Không có thông tin để lấy thông báo
                 badge.setNumber(0);
             }
         }
@@ -716,15 +673,13 @@ public class AccountFragment extends Fragment {
             }
         }
     }
+
     private void filterOrdersByNewest() {
-        // Lấy toàn bộ đơn (orderList), sắp xếp từ mới nhất xuống cũ nhất
         filteredOrderList.clear();
         filteredOrderList.addAll(orderList);
         Collections.sort(filteredOrderList, new Comparator<Orders>() {
             @Override
             public int compare(Orders o1, Orders o2) {
-                // Giả sử createdAt là chuỗi ISO (yyyy-MM-dd...),
-                // so sánh lexicographically sẽ đúng thứ tự thời gian
                 return o2.getCreatedAt().compareTo(o1.getCreatedAt());
             }
         });

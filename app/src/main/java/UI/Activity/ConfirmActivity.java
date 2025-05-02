@@ -312,6 +312,7 @@ public class ConfirmActivity extends AppCompatActivity {
                         if (response.isSuccessful() && response.body() != null) {
                             CreateOrderResponse orderResponse = response.body();
                             String orderId = orderResponse.getId();
+                            Log.d("ConfirmActivity", "Đơn hàng được tạo - Order ID: " + orderId);
                             String qrCodeData = orderResponse.getQrcode();
                             String paymentTimeout = orderResponse.getPaymentTimeout();
 
