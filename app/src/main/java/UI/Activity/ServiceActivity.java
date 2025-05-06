@@ -19,6 +19,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.tabs.TabLayout;
+
 import UI.Adapter.ServiceAdapter;
 import Data.Network.ApiService;
 import Data.Network.RetrofitClient;
@@ -50,6 +52,7 @@ public class ServiceActivity extends Fragment {
     private MaterialButton btnOrderServices;
     private EditText etSearch;
     private ImageView imgClearSearch;
+    private TabLayout tabLayout;
 
     private String courtId;
     private SessionManager sessionManager;
@@ -92,11 +95,13 @@ public class ServiceActivity extends Fragment {
         btnOrderServices    = view.findViewById(R.id.btnOrderServices);
         etSearch            = view.findViewById(R.id.etSearch);
         imgClearSearch      = view.findViewById(R.id.imgClearSearch);
+        tabLayout           = view.findViewById(R.id.tabLayout);
 
-        // Setup RecyclerView và Search
+        // Setup RecyclerView, Search và TabLayout
         recyclerViewServices.setLayoutManager(new LinearLayoutManager(getContext()));
         setupRecyclerView();
         setupSearch();
+        setupTabLayout();
 
         // Load data
         loadServices();
@@ -121,7 +126,6 @@ public class ServiceActivity extends Fragment {
             @Override public void beforeTextChanged(CharSequence s, int st, int c1, int c2) {}
             @Override
             public void onTextChanged(CharSequence s, int st, int b, int c) {
-                // Lọc adapter theo chuỗi nhập
                 serviceAdapter.getFilter().filter(s);
                 imgClearSearch.setVisibility(s.length() > 0 ? View.VISIBLE : View.GONE);
             }
@@ -134,6 +138,52 @@ public class ServiceActivity extends Fragment {
         });
     }
 
+    private void setupTabLayout() {
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                filterServicesByTab(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+                filterServicesByTab(tab.getPosition());
+            }
+        });
+    }
+
+    private void filterServicesByTab(int position) {
+        List<Service> filteredList = new ArrayList<>();
+        String category = getCategoryFromTabPosition(position);
+
+        if (category.equals("All")) {
+            filteredList.addAll(serviceList);
+        } else {
+            for (Service service : serviceList) {
+                if (service.getCategory() != null && service.getCategory().equalsIgnoreCase(category)) {
+                    filteredList.add(service);
+                }
+            }
+        }
+
+        serviceAdapter.updateList(filteredList);
+        serviceAdapter.getFilter().filter(etSearch.getText());
+        showEmptyView(filteredList.isEmpty());
+    }
+
+    private String getCategoryFromTabPosition(int position) {
+        switch (position) {
+            case 0: return "All";       // Hiển thị tất cả dịch vụ
+            case 1: return "Đồ uống";   // Lọc các dịch vụ có category là "Đồ uống"
+            case 2: return "Đồ ăn";     // Lọc các dịch vụ có category là "Đồ ăn"
+            case 3: return "Khác";      // Lọc các dịch vụ có category là "Khác"
+            default: return "All";
+        }
+    }
+
     private void loadServices() {
         showLoading(true);
         ApiService apiService = RetrofitClient.getApiService(getContext());
@@ -144,10 +194,7 @@ public class ServiceActivity extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     serviceList.clear();
                     serviceList.addAll(response.body());
-                    // Cập nhật adapter và áp filter hiện tại
-                    serviceAdapter.updateList(serviceList);
-                    serviceAdapter.getFilter().filter(etSearch.getText());
-                    showEmptyView(serviceList.isEmpty());
+                    filterServicesByTab(0); // Hiển thị tab "All" mặc định
                 } else {
                     showEmptyView(true);
                     Toast.makeText(getContext(), getString(R.string.error_loading_service), Toast.LENGTH_SHORT).show();

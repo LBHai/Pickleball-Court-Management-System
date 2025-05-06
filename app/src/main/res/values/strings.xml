@@ -796,4 +796,9 @@ When you change your booking, if you do not complete payment for the booking you
     <string name="terms_section_2_8_title">2.8. Policy Changes</string>
     <string name="terms_section_2_8_bullet_1">All updates will be posted on the platform; significant changes will be notified via email.</string>
     <string name="terms_section_2_8_bullet_2">Continued use after changes signifies acceptance of the new policy.</string>
+    <string name="filter_by_newest">Latest</string>
+    <string name="filter_by_date">By date</string>
+    <string name="filter_by_status">By status</string>
+
+
 </resources>

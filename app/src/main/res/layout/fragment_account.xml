@@ -65,6 +65,20 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             tools:ignore="TouchTargetSizeCheck" />
+        <ImageButton
+            android:id="@+id/btn_terms_guest"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="8dp"
+            android:adjustViewBounds="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/menu_termsandconditions"
+            android:scaleType="fitCenter"
+            android:src="@drawable/term"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:ignore="TouchTargetSizeCheck" />
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/ivAvatar"

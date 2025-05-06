@@ -753,4 +753,8 @@
     <string name="terms_section_2_8_title">2.8. Thay đổi chính sách</string>
     <string name="terms_section_2_8_bullet_1">Mọi cập nhật sẽ được đăng trên nền tảng; nếu ảnh hưởng đáng kể, sẽ thông báo qua email.</string>
     <string name="terms_section_2_8_bullet_2">Tiếp tục sử dụng sau khi thay đổi đồng nghĩa với chấp nhận chính sách mới.</string>
+
+    <string name="filter_by_newest">Mới nhất</string>
+    <string name="filter_by_date">Theo ngày</string>
+    <string name="filter_by_status">Theo trạng thái</string>
 </resources>

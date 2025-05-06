@@ -44,7 +44,7 @@ public class SignUpActivity extends AppCompatActivity {
 
     // Regex patterns
     private static final String USERNAME_PATTERN = "^[a-zA-Z0-9]{4,}$";
-    private static final String PASSWORD_PATTERN ="^(?=.{6,}$)(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]+$";;
+    private static final String PASSWORD_PATTERN ="^(?=.{6,}$)(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]+$";
     private static final String NAME_PATTERN = "^[\\p{L} ]{2,}$";
 
     @Override

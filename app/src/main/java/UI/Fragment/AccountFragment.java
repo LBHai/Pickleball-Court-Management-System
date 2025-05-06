@@ -71,7 +71,7 @@ public class AccountFragment extends Fragment {
 
     private TextView tvUserName, tvPhoneNumber;
     private TextView tvTabBooked, tvServiceInfo, tvServiceOrderInfo;
-    private ImageButton btnNoti, btnOptions, btnFilter;
+    private ImageButton btnNoti, btnOptions, btnFilter,btnTermsGuest;
     private String id, username, email, firstName, lastName, userRank, gender, dob;
     private SessionManager sessionManager;
     private RecyclerView recyclerOrder;
@@ -89,7 +89,9 @@ public class AccountFragment extends Fragment {
     private List<Orders> serviceOrders;
     private static final int REFRESH_INTERVAL = 2000;
     private String avatarUrl;
-
+    private String currentTab; // Biến mới để theo dõi tab hiện tại
+    private static final String TAB_BOOKED = "booked";
+    private static final String TAB_SERVICE = "service";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -117,12 +119,38 @@ public class AccountFragment extends Fragment {
 
         bookedOrders = new ArrayList<>();
         serviceOrders = new ArrayList<>();
-
+        btnTermsGuest = view.findViewById(R.id.btn_terms_guest); // Khởi tạo nút mới
         orderAdapter = new OrderAdapter(filteredOrderList, getContext());
         recyclerOrder.setAdapter(orderAdapter);
         badge = view.findViewById(R.id.badge);
         getNotifications();
+        boolean isGuest = sessionManager.getToken() == null || sessionManager.getToken().isEmpty();
+        if (isGuest) {
+            btnOptions.setVisibility(View.GONE); // Ẩn nút options
+            btnTermsGuest.setVisibility(View.VISIBLE); // Hiển thị nút terms cho khách
+            authButtonsContainer.setVisibility(View.VISIBLE);
 
+            btnLogin.setOnClickListener(v -> {
+                Intent intent = new Intent(getActivity(), LoginActivity.class);
+                startActivity(intent);
+            });
+
+            btnRegister.setOnClickListener(v -> {
+                Intent intent = new Intent(getActivity(), SignUpActivity.class);
+                startActivity(intent);
+            });
+        } else {
+            btnOptions.setVisibility(View.VISIBLE); // Hiển thị nút options
+            btnTermsGuest.setVisibility(View.GONE); // Ẩn nút terms
+            authButtonsContainer.setVisibility(View.GONE);
+        }
+
+        // Listener cho nút terms (khách)
+        btnTermsGuest.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), TermsAndConditionsActivity.class);
+            intent.putExtra("fromAccountFragment", true);
+            startActivity(intent);
+        });
         if (sessionManager.getToken() == null || sessionManager.getToken().isEmpty()) {
             btnOptions.setVisibility(View.GONE);
             authButtonsContainer.setVisibility(View.VISIBLE);
@@ -221,7 +249,8 @@ public class AccountFragment extends Fragment {
 
     private void filterOrdersByDateRange(String startDate, String endDate) {
         filteredOrderList.clear();
-        for (Orders order : orderList) {
+        List<Orders> sourceList = currentTab.equals(TAB_BOOKED) ? bookedOrders : serviceOrders;
+        for (Orders order : sourceList) {
             String orderDate = order.getCreatedAt().substring(0, 10);
             if (orderDate.compareTo(startDate) >= 0 && orderDate.compareTo(endDate) <= 0) {
                 filteredOrderList.add(order);
@@ -266,15 +295,19 @@ public class AccountFragment extends Fragment {
         builder.show();
     }
 
-
     private void filterOrdersByStatus(String selectedStatus) {
         filteredOrderList.clear();
-        for (Orders order : orderList) {
+        List<Orders> sourceList = currentTab.equals(TAB_BOOKED) ? bookedOrders : serviceOrders;
+        for (Orders order : sourceList) {
             if (order.getOrderStatus().equals(selectedStatus)) {
                 filteredOrderList.add(order);
             }
         }
         orderAdapter.notifyDataSetChanged();
+
+        if (filteredOrderList.isEmpty()) {
+            Toast.makeText(getContext(), "Không có đơn nào với trạng thái " + selectedStatus, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void getAllOrderListForGuest() {
@@ -364,6 +397,7 @@ public class AccountFragment extends Fragment {
     }
 
     private void showBookedTab() {
+        currentTab = TAB_BOOKED; // Cập nhật tab hiện tại
         tvTabBooked.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
         tvServiceInfo.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.darker_gray));
         filteredOrderList.clear();
@@ -374,6 +408,7 @@ public class AccountFragment extends Fragment {
     }
 
     private void showMemberInfoTab() {
+        currentTab = TAB_SERVICE; // Cập nhật tab hiện tại
         tvTabBooked.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.darker_gray));
         tvServiceInfo.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white));
         filteredOrderList.clear();
@@ -686,13 +721,9 @@ public class AccountFragment extends Fragment {
 
     private void filterOrdersByNewest() {
         filteredOrderList.clear();
-        filteredOrderList.addAll(orderList);
-        Collections.sort(filteredOrderList, new Comparator<Orders>() {
-            @Override
-            public int compare(Orders o1, Orders o2) {
-                return o2.getCreatedAt().compareTo(o1.getCreatedAt());
-            }
-        });
+        List<Orders> sourceList = currentTab.equals(TAB_BOOKED) ? bookedOrders : serviceOrders;
+        filteredOrderList.addAll(sourceList);
+        Collections.sort(filteredOrderList, (o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt()));
         orderAdapter.notifyDataSetChanged();
 
         if (filteredOrderList.isEmpty()) {

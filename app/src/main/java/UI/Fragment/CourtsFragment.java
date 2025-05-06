@@ -11,6 +11,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
@@ -98,7 +99,14 @@ public class CourtsFragment extends Fragment {
 
     // Ngưỡng cuộn để kích hoạt animation
     private static final int SCROLL_THRESHOLD = 150;
-
+    private Handler handler = new Handler();
+    private Runnable refreshRunnable = new Runnable() {
+        @Override
+        public void run() {
+            callApiGetCourts();
+            handler.postDelayed(this, 500); // Làm mới mỗi 60 giây
+        }
+    };
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate layout fragment
@@ -231,7 +239,17 @@ public class CourtsFragment extends Fragment {
         }
         return view;
     }
+    @Override
+    public void onResume() {
+        super.onResume();
+        handler.post(refreshRunnable); // Bắt đầu polling
+    }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        handler.removeCallbacks(refreshRunnable); // Dừng polling
+    }
     private String removeDiacritics(String input) {
         String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
         return normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
@@ -487,9 +505,13 @@ public class CourtsFragment extends Fragment {
             @Override
             public void onResponse(Call<List<Courts>> call, Response<List<Courts>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    fullCourtsList = response.body(); // Lưu danh sách gốc của Courts
+                    fullCourtsList = response.body();
                     courtsList = new ArrayList<>(fullCourtsList);
-                    setupRecyclerView(courtsList);
+                    if (courtsAdapter == null) {
+                        setupRecyclerView(courtsList);
+                    } else {
+                        courtsAdapter.updateList(courtsList);
+                    }
                 } else {
                     Log.e("API_ERROR", "Response body null hoặc lỗi: " + response.errorBody());
                 }
