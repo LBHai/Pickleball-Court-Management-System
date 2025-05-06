@@ -19,7 +19,6 @@ import Data.Model.MyInfoResponse;
 import Data.Model.NotificationRequest;
 import Data.Model.NotificationResponse;
 import Data.Model.Orders;
-import Data.Model.QRPaymentRemaining;
 import Data.Model.Service;
 import Data.Model.ServiceOrderRequest;
 import Data.Model.StudentRegistrationRequest;

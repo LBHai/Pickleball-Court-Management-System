@@ -202,8 +202,8 @@ public class ConfirmActivity extends AppCompatActivity {
         final double paymentAmount = calculatePaymentAmount(serviceDetails);
 
         // Hiển thị thông tin lên giao diện
-        tvStadiumName.setText(getString(R.string.label_stadium_name, courtName));
-        tvAddress.setText(getString(R.string.label_address, courtAddress));
+        tvStadiumName.setText(getString(R.string.label_stadium_name)+ courtName);
+        tvAddress.setText(getString(R.string.label_address)+ courtAddress);
         tvDate.setText(getString(R.string.infomation_service_label));
 
         layoutConfirmOrders.removeAllViews();
@@ -226,8 +226,8 @@ public class ConfirmActivity extends AppCompatActivity {
         }
 
         tvTotalPriceLine.setText(Html.fromHtml(
-                getString(R.string.total_price_html, formatMoney((int) paymentAmount))
-        ));
+                getString(R.string.total_price_html)+ formatMoney((int) paymentAmount))
+        );
 
         // Ẩn nút đặt cọc và đặt tên nút thanh toán
         btnDeposit.setVisibility(View.GONE);
@@ -424,7 +424,7 @@ public class ConfirmActivity extends AppCompatActivity {
                         totalPriceFixedOrder = response.body().intValue();
                         int numberOfCourts = finalSelectedCourtSlots.size();
                         int finalTotalPrice = totalPriceFixedOrder * numberOfCourts;
-                        String totalPriceText = getString(R.string.total_price_html, formatMoney(finalTotalPrice));
+                        String totalPriceText = getString(R.string.total_price_html)+ formatMoney(finalTotalPrice);
                         tvTotalPriceLine.setText(Html.fromHtml(totalPriceText));
                     }
                 } else {
@@ -688,8 +688,8 @@ public class ConfirmActivity extends AppCompatActivity {
         int hours = totalMinutes / 60;
         int mins = totalMinutes % 60;
         totalTime = String.format(Locale.getDefault(), "%dh%02d", hours, mins);
-        tvTotalPriceLine.setText(Html.fromHtml(getString(R.string.total_price_html, formatMoney(overallTotalPrice))));
-        tvTotalTimeLine.setText(getString(R.string.total_play_time, totalTime));
+        tvTotalPriceLine.setText(Html.fromHtml(getString(R.string.total_price_html)+ formatMoney(overallTotalPrice)));
+        tvTotalTimeLine.setText(getString(R.string.total_play_time)+ totalTime);
 
     }
     private void createFixedOrder(boolean isDeposit, int totalPriceFixedOrder) {

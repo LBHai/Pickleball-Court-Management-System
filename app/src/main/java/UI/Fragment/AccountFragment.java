@@ -253,17 +253,18 @@ public class AccountFragment extends Fragment {
     }
 
     private void showStatusFilterDialog() {
-        String[] statuses = {"Đang xử lý", "Đã hoàn thành", "Hủy đặt lịch", "Đặt lịch thành công", "Thay đổi lịch đặt thành công", "Hủy đặt lịch do quá giờ thanh toán", "Đặt dịch vụ tại sân"};
+        String[] statuses = getResources().getStringArray(R.array.order_statuses);
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Chọn trạng thái");
+        builder.setTitle(R.string.select_status_title);
         builder.setSingleChoiceItems(statuses, -1, (dialog, which) -> {
             String selectedStatus = statuses[which];
             filterOrdersByStatus(selectedStatus);
             dialog.dismiss();
         });
-        builder.setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss());
+        builder.setNegativeButton(R.string.cancel, (dialog, which) -> dialog.dismiss());
         builder.show();
     }
+
 
     private void filterOrdersByStatus(String selectedStatus) {
         filteredOrderList.clear();

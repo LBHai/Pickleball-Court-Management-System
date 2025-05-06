@@ -2,10 +2,14 @@ package UI.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,6 +48,9 @@ public class ServiceActivity extends Fragment {
     private TextView tvTotalItems;
     private TextView tvTotalPrice;
     private MaterialButton btnOrderServices;
+    private EditText etSearch;
+    private ImageView imgClearSearch;
+
     private String courtId;
     private SessionManager sessionManager;
     private List<ServiceDetail> orderedServiceDetails;
@@ -64,28 +71,37 @@ public class ServiceActivity extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_service, container, false);
 
+        // Lấy courtId từ arguments
         if (getArguments() != null) {
             courtId = getArguments().getString("courtId", "1");
-            Log.d("courtId", courtId);
+            Log.d("ServiceActivity", "courtId=" + courtId);
         } else {
             courtId = "1";
         }
 
+        // Khởi tạo session, list order
         sessionManager = new SessionManager(getContext());
         orderedServiceDetails = new ArrayList<>();
 
+        // Find view
         recyclerViewServices = view.findViewById(R.id.recyclerViewServices);
-        progressBar = view.findViewById(R.id.progressBar);
-        tvEmptyServices = view.findViewById(R.id.tvEmptyServices);
-        tvTotalItems = view.findViewById(R.id.tvItemCount);
-        tvTotalPrice = view.findViewById(R.id.tvTotalPrice);
-        btnOrderServices = view.findViewById(R.id.btnOrderServices);
+        progressBar         = view.findViewById(R.id.progressBar);
+        tvEmptyServices     = view.findViewById(R.id.tvEmptyServices);
+        tvTotalItems        = view.findViewById(R.id.tvItemCount);
+        tvTotalPrice        = view.findViewById(R.id.tvTotalPrice);
+        btnOrderServices    = view.findViewById(R.id.btnOrderServices);
+        etSearch            = view.findViewById(R.id.etSearch);
+        imgClearSearch      = view.findViewById(R.id.imgClearSearch);
 
+        // Setup RecyclerView và Search
         recyclerViewServices.setLayoutManager(new LinearLayoutManager(getContext()));
         setupRecyclerView();
+        setupSearch();
 
+        // Load data
         loadServices();
 
+        // Button order
         btnOrderServices.setOnClickListener(v -> handleOrderServices());
 
         return view;
@@ -95,14 +111,27 @@ public class ServiceActivity extends Fragment {
         serviceAdapter = new ServiceAdapter(
                 getContext(),
                 serviceList,
-                new ServiceAdapter.OnServiceActionListener() {
-                    @Override
-                    public void onQuantityChanged(Service service, int newQuantity) {
-                        updateTotals();
-                    }
-                }
+                (service, newQty) -> updateTotals()
         );
         recyclerViewServices.setAdapter(serviceAdapter);
+    }
+
+    private void setupSearch() {
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int st, int c1, int c2) {}
+            @Override
+            public void onTextChanged(CharSequence s, int st, int b, int c) {
+                // Lọc adapter theo chuỗi nhập
+                serviceAdapter.getFilter().filter(s);
+                imgClearSearch.setVisibility(s.length() > 0 ? View.VISIBLE : View.GONE);
+            }
+            @Override public void afterTextChanged(Editable e) {}
+        });
+
+        imgClearSearch.setOnClickListener(v -> {
+            etSearch.setText("");
+            serviceAdapter.getFilter().filter("");
+        });
     }
 
     private void loadServices() {
@@ -115,12 +144,10 @@ public class ServiceActivity extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     serviceList.clear();
                     serviceList.addAll(response.body());
-                    serviceAdapter.notifyDataSetChanged();
-                    if (serviceList.isEmpty()) {
-                        showEmptyView(true);
-                    } else {
-                        showEmptyView(false);
-                    }
+                    // Cập nhật adapter và áp filter hiện tại
+                    serviceAdapter.updateList(serviceList);
+                    serviceAdapter.getFilter().filter(etSearch.getText());
+                    showEmptyView(serviceList.isEmpty());
                 } else {
                     showEmptyView(true);
                     Toast.makeText(getContext(), getString(R.string.error_loading_service), Toast.LENGTH_SHORT).show();
@@ -131,7 +158,7 @@ public class ServiceActivity extends Fragment {
             public void onFailure(Call<List<Service>> call, Throwable t) {
                 showLoading(false);
                 showEmptyView(true);
-                Toast.makeText(getContext(), getString(R.string.connection_error, t.getMessage()), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), getString(R.string.connection_error)+ t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -149,16 +176,14 @@ public class ServiceActivity extends Fragment {
 
         for (Map.Entry<String, Integer> entry : orderQuantities.entrySet()) {
             String serviceId = entry.getKey();
-            int selectedQuantity = entry.getValue();
-
-            if (selectedQuantity > 0) {
-                Service service = findServiceById(serviceId);
-                if (service != null) {
+            int qty = entry.getValue();
+            if (qty > 0) {
+                Service svc = findServiceById(serviceId);
+                if (svc != null) {
                     ServiceDetail detail = new ServiceDetail();
                     detail.setCourtServiceId(serviceId);
-                    //detail.setCourtServiceName(service.getName());
-                    detail.setQuantity(selectedQuantity);
-                    detail.setPrice(service.getPrice());
+                    detail.setQuantity(qty);
+                    detail.setPrice(svc.getPrice());
                     orderedServiceDetails.add(detail);
                 }
             }
@@ -169,47 +194,43 @@ public class ServiceActivity extends Fragment {
             return;
         }
 
-        String totalPriceText = tvTotalPrice.getText().toString().replace("đ", "").replace(",", "").trim();
-        double paymentAmount = Double.parseDouble(totalPriceText);
+        String priceText = tvTotalPrice.getText().toString()
+                .replace("đ","")
+                .replace(",","")
+                .trim();
+        double paymentAmount = Double.parseDouble(priceText);
 
-        ApiService apiService = RetrofitClient.getApiService(getContext());
-        Call<Courts> courtCall = apiService.getCourtById(courtId);
-        courtCall.enqueue(new Callback<Courts>() {
-            @Override
-            public void onResponse(Call<Courts> call, Response<Courts> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Courts court = response.body();
-                    String courtName = court.getName();
-                    String address = court.getAddress();
-                    Intent intent = new Intent(getActivity(), ConfirmActivity.class);
-                    intent.putExtra("orderType", "Đơn dịch vụ");
-                    intent.putExtra("courtId", courtId);
-                    intent.putExtra("courtName", courtName);
-                    intent.putExtra("address", address);
-                    intent.putExtra("paymentAmount", paymentAmount);
-                    String serviceDetailsJson = new Gson().toJson(orderedServiceDetails);
-                    Log.d("ServiceActivity", "serviceDetailsJson: " + serviceDetailsJson);
-                    intent.putExtra("serviceDetailsJson", serviceDetailsJson);
-                    String serviceListJson = new Gson().toJson(serviceList);
-                    intent.putExtra("serviceListJson", serviceListJson);
-                    startActivity(intent);
-                } else {
-                    Toast.makeText(getContext(), getString(R.string.error_getting_field_info), Toast.LENGTH_SHORT).show();
-                }
-            }
+        RetrofitClient.getApiService(getContext())
+                .getCourtById(courtId)
+                .enqueue(new Callback<Courts>() {
+                    @Override
+                    public void onResponse(Call<Courts> call, Response<Courts> resp) {
+                        if (resp.isSuccessful() && resp.body() != null) {
+                            Courts court = resp.body();
+                            Intent intent = new Intent(getActivity(), ConfirmActivity.class);
+                            intent.putExtra("orderType", "Đơn dịch vụ");
+                            intent.putExtra("courtId", courtId);
+                            intent.putExtra("courtName", court.getName());
+                            intent.putExtra("address", court.getAddress());
+                            intent.putExtra("paymentAmount", paymentAmount);
+                            intent.putExtra("serviceDetailsJson", new Gson().toJson(orderedServiceDetails));
+                            intent.putExtra("serviceListJson", new Gson().toJson(serviceList));
+                            startActivity(intent);
+                        } else {
+                            Toast.makeText(getContext(), getString(R.string.error_getting_field_info), Toast.LENGTH_SHORT).show();
+                        }
+                    }
 
-            @Override
-            public void onFailure(Call<Courts> call, Throwable t) {
-                Toast.makeText(getContext(), getString(R.string.network_error, t.getMessage()), Toast.LENGTH_SHORT).show();
-            }
-        });
+                    @Override
+                    public void onFailure(Call<Courts> call, Throwable t) {
+                        Toast.makeText(getContext(), getString(R.string.network_error)+ t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private Service findServiceById(String id) {
-        for (Service service : serviceList) {
-            if (service.getId().equals(id)) {
-                return service;
-            }
+        for (Service s : serviceList) {
+            if (s.getId().equals(id)) return s;
         }
         return null;
     }

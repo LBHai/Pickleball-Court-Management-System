@@ -4,6 +4,8 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -11,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -20,12 +23,14 @@ import Data.Holder.ServiceViewHolder;
 import Data.Model.Service;
 import SEP490.G9.R;
 
-public class ServiceAdapter extends RecyclerView.Adapter<ServiceViewHolder> {
+public class ServiceAdapter extends RecyclerView.Adapter<ServiceViewHolder>
+        implements Filterable {
 
     private final Context context;
-    private List<Service> serviceList;
+    private List<Service> originalList;    // danh sách gốc để filter
+    private List<Service> filteredList;    // danh sách đang hiển thị
     private final OnServiceActionListener listener;
-    private final Map<String, Integer> orderQuantities; // Lưu số lượng dịch vụ người dùng chọn
+    private final Map<String, Integer> orderQuantities;
 
     public interface OnServiceActionListener {
         void onQuantityChanged(Service service, int newQuantity);
@@ -33,13 +38,15 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceViewHolder> {
 
     public ServiceAdapter(Context context, List<Service> serviceList, OnServiceActionListener listener) {
         this.context = context;
-        this.serviceList = serviceList;
+        this.originalList = new ArrayList<>(serviceList);
+        this.filteredList = new ArrayList<>(serviceList);
         this.listener = listener;
         this.orderQuantities = new HashMap<>();
         initializeOrderQuantities(serviceList);
     }
 
     private void initializeOrderQuantities(List<Service> services) {
+        orderQuantities.clear();
         if (services != null) {
             for (Service service : services) {
                 if (service.getId() != null) {
@@ -49,9 +56,10 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceViewHolder> {
         }
     }
 
+    /** Cập nhật toàn bộ danh sách (khi load lại từ server) */
     public void updateList(List<Service> newList) {
-        this.serviceList = newList;
-        orderQuantities.clear();
+        this.originalList = new ArrayList<>(newList);
+        this.filteredList = new ArrayList<>(newList);
         initializeOrderQuantities(newList);
         notifyDataSetChanged();
     }
@@ -65,12 +73,8 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ServiceViewHolder holder, int position) {
-        Service service = serviceList.get(position);
-        String serviceId = service.getId();
-
-        if (serviceId == null) {
-            serviceId = "service_" + position;
-        }
+        Service service = filteredList.get(position);
+        String serviceId = service.getId() != null ? service.getId() : "service_" + position;
 
         holder.itemView.setTag(serviceId);
         holder.tvName.setText(service.getName());
@@ -97,75 +101,101 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceViewHolder> {
             holder.ivDrink.setImageResource(R.drawable.revive);
         }
 
-        final String finalServiceId = serviceId;
-        holder.btnDecrease.setOnClickListener(null);
-        holder.btnIncrease.setOnClickListener(null);
-
-        holder.btnDecrease.setOnClickListener(v -> decreaseQuantity(holder, finalServiceId, service));
-        holder.btnIncrease.setOnClickListener(v -> increaseQuantity(holder, finalServiceId, service));
-    }
-
-    private void updateQuantityDisplay(ServiceViewHolder holder, String serviceId, Service service) {
-        int currentQuantity = orderQuantities.getOrDefault(serviceId, 0);
-        holder.tvQuantity.setText(String.valueOf(currentQuantity));
-        holder.btnDecrease.setEnabled(currentQuantity > 0);
-        holder.btnDecrease.setAlpha(currentQuantity > 0 ? 1.0f : 0.5f);
-        boolean canIncrease = service.getQuantity() > currentQuantity;
-        holder.btnIncrease.setEnabled(canIncrease);
-        holder.btnIncrease.setAlpha(canIncrease ? 1.0f : 0.5f);
-    }
-
-    private void decreaseQuantity(ServiceViewHolder holder, String serviceId, Service service) {
-        int currentQuantity = orderQuantities.getOrDefault(serviceId, 0);
-        if (currentQuantity > 0) {
-            int newQuantity = currentQuantity - 1;
-            orderQuantities.put(serviceId, newQuantity);
-            updateQuantityDisplay(holder, serviceId, service);
-            if (listener != null) {
-                listener.onQuantityChanged(service, newQuantity);
-            }
-        }
-    }
-
-    private void increaseQuantity(ServiceViewHolder holder, String serviceId, Service service) {
-        int currentQuantity = orderQuantities.getOrDefault(serviceId, 0);
-        if (currentQuantity < service.getQuantity()) {
-            int newQuantity = currentQuantity + 1;
-            orderQuantities.put(serviceId, newQuantity);
-            updateQuantityDisplay(holder, serviceId, service);
-            if (listener != null) {
-                listener.onQuantityChanged(service, newQuantity);
-            }
-        }
+        holder.btnDecrease.setOnClickListener(v -> decreaseQuantity(holder, serviceId, service));
+        holder.btnIncrease.setOnClickListener(v -> increaseQuantity(holder, serviceId, service));
     }
 
     @Override
     public int getItemCount() {
-        return serviceList != null ? serviceList.size() : 0;
+        return filteredList != null ? filteredList.size() : 0;
     }
 
+    /** Filterable implementation **/
+    @Override
+    public Filter getFilter() {
+        return serviceFilter;
+    }
+
+    private final Filter serviceFilter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<Service> filtered = new ArrayList<>();
+            if (constraint == null || constraint.length() == 0) {
+                filtered.addAll(originalList);
+            } else {
+                String pattern = constraint.toString().toLowerCase().trim();
+                for (Service svc : originalList) {
+                    if (svc.getName().toLowerCase().contains(pattern)) {
+                        filtered.add(svc);
+                    }
+                }
+            }
+            FilterResults results = new FilterResults();
+            results.values = filtered;
+            return results;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            filteredList.clear();
+            filteredList.addAll((List<Service>) results.values);
+            notifyDataSetChanged();
+            // cập nhật lại tổng khi filter
+            listener.onQuantityChanged(null, 0);
+        }
+    };
+
+    /** Các phương thức tính tổng số lượng, tổng giá **/
     public int getTotalOrderQuantity() {
         int total = 0;
-        for (Integer quantity : orderQuantities.values()) {
-            total += quantity;
+        for (Integer qty : orderQuantities.values()) {
+            total += qty;
         }
         return total;
+    }
+
+    public double getTotalPrice() {
+        double sum = 0;
+        for (Service svc : originalList) {
+            String id = svc.getId();
+            if (id != null && orderQuantities.containsKey(id)) {
+                sum += orderQuantities.get(id) * svc.getPrice();
+            }
+        }
+        return sum;
     }
 
     public Map<String, Integer> getOrderQuantities() {
         return new HashMap<>(orderQuantities);
     }
 
-    public double getTotalPrice() {
-        double total = 0;
-        for (int i = 0; i < serviceList.size(); i++) {
-            Service service = serviceList.get(i);
-            String serviceId = service.getId();
-            if (serviceId != null && orderQuantities.containsKey(serviceId)) {
-                int quantity = orderQuantities.get(serviceId);
-                total += service.getPrice() * quantity;
-            }
+    /** Helper cập nhật UI nút + số lượng **/
+    private void updateQuantityDisplay(ServiceViewHolder holder, String serviceId, Service service) {
+        int current = orderQuantities.getOrDefault(serviceId, 0);
+        holder.tvQuantity.setText(String.valueOf(current));
+        holder.btnDecrease.setEnabled(current > 0);
+        holder.btnDecrease.setAlpha(current > 0 ? 1f : 0.5f);
+        boolean canInc = current < service.getQuantity();
+        holder.btnIncrease.setEnabled(canInc);
+        holder.btnIncrease.setAlpha(canInc ? 1f : 0.5f);
+    }
+
+    private void decreaseQuantity(ServiceViewHolder holder, String serviceId, Service service) {
+        int curr = orderQuantities.getOrDefault(serviceId, 0);
+        if (curr > 0) {
+            orderQuantities.put(serviceId, curr - 1);
+            updateQuantityDisplay(holder, serviceId, service);
+            listener.onQuantityChanged(service, curr - 1);
         }
-        return total;
+    }
+
+    private void increaseQuantity(ServiceViewHolder holder, String serviceId, Service service) {
+        int curr = orderQuantities.getOrDefault(serviceId, 0);
+        if (curr < service.getQuantity()) {
+            orderQuantities.put(serviceId, curr + 1);
+            updateQuantityDisplay(holder, serviceId, service);
+            listener.onQuantityChanged(service, curr + 1);
+        }
     }
 }
