@@ -33,7 +33,18 @@ public class PaymentFailedActivity extends AppCompatActivity {
         courtId = getIntent().getStringExtra("courtId");
         orderType = getIntent().getStringExtra("orderType");
         serviceDetailsJson = getIntent().getStringExtra("serviceDetailsJson");
-
+        Log.d("PaymentFailedActivity", "Nhận từ QRCodeActivity:");
+        Log.d("PaymentFailedActivity", "orderId: " + orderId);
+        Log.d("PaymentFailedActivity", "totalTime: " + totalTime);
+        Log.d("PaymentFailedActivity", "selectedDate: " + selectedDate);
+        Log.d("PaymentFailedActivity", "totalPrice: " + totalPrice);
+        Log.d("PaymentFailedActivity", "orderStatus: " + orderStatus);
+        Log.d("PaymentFailedActivity", "courtId: " + courtId);
+        Log.d("PaymentFailedActivity", "orderType: " + orderType);
+        Log.d("PaymentFailedActivity", "serviceDetailsJson: " + serviceDetailsJson);
+        Log.d("PaymentFailedActivity", "customerName: " + getIntent().getStringExtra("customerName"));
+        Log.d("PaymentFailedActivity", "phoneNumber: " + getIntent().getStringExtra("phoneNumber"));
+        Log.d("PaymentFailedActivity", "note: " + getIntent().getStringExtra("note"));
         if (totalTime == null) {
             //Log.e("PaymentFailedActivity", "totalTime là null");
             totalTime = "0h00";
@@ -55,6 +66,19 @@ public class PaymentFailedActivity extends AppCompatActivity {
             intent.putExtra("customerName", getIntent().getStringExtra("customerName"));
             intent.putExtra("phoneNumber", getIntent().getStringExtra("phoneNumber"));
             intent.putExtra("note", getIntent().getStringExtra("note"));
+            intent.putExtra("fromPaymentFlow", true);
+            Log.d("PaymentFailedActivity", "Truyền sang BookingDetailActivity:");
+            Log.d("PaymentFailedActivity", "orderId: " + orderId);
+            Log.d("PaymentFailedActivity", "totalTime: " + totalTime);
+            Log.d("PaymentFailedActivity", "selectedDate: " + selectedDate);
+            Log.d("PaymentFailedActivity", "totalPrice: " + totalPrice);
+            Log.d("PaymentFailedActivity", "orderStatus: " + orderStatus);
+            Log.d("PaymentFailedActivity", "courtId: " + courtId);
+            Log.d("PaymentFailedActivity", "orderType: " + orderType);
+            Log.d("PaymentFailedActivity", "serviceDetailsJson: " + serviceDetailsJson);
+            Log.d("PaymentFailedActivity", "customerName: " + getIntent().getStringExtra("customerName"));
+            Log.d("PaymentFailedActivity", "phoneNumber: " + getIntent().getStringExtra("phoneNumber"));
+            Log.d("PaymentFailedActivity", "note: " + getIntent().getStringExtra("note"));
             startActivity(intent);
             finish();
         });

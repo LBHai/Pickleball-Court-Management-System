@@ -87,8 +87,7 @@ public class PaymentSuccessActivity extends AppCompatActivity {
                 detailIntent.putExtra("customerName", getIntent().getStringExtra("customerName"));  // Truyền tiếp
                 detailIntent.putExtra("phoneNumber", getIntent().getStringExtra("phoneNumber"));    // Truyền tiếp
                 detailIntent.putExtra("note", getIntent().getStringExtra("note"));                  // Truyền tiếp
-//                Log.d("Paymentsuscess", "totalTime truyen di: " + totalTime);
-//                Log.d("Paymentsuscess", "slotPrices truyen di: " + slotPrices);
+                detailIntent.putExtra("fromPaymentFlow", true);
                 startActivity(detailIntent);
                 finish();
             }

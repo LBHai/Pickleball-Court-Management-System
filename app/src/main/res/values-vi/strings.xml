@@ -31,6 +31,7 @@
     <string name="menu_translate">Ngôn ngữ</string>
     <string name="menu_logout">Đăng xuất</string>
     <string name="menu_version">Version: 2.6.5</string>
+    <string name="menu_termsandconditions">Điều khoản &amp; Chính sách</string>
     <string name="menu_deleteaccount">Xóa tài khoản</string>
 
     <string-array name="gender_array">
@@ -489,7 +490,7 @@
     <!-- Buttons -->
     <string name="cancel_booking">Hủy đặt lịch</string>
     <string name="change_booking">Thay đổi lịch đặt</string>
-    <string name="pay_remaining">Thanh toán</string>
+    <string name="pay_remaining">Thanh toán phần còn lại</string>
     <string name="student">Học sinh</string>
     <string name="adult">Người lớn</string>
     <string name="loading_error_message">Đang tải dữ liệu, vui lòng thử lại sau</string>
@@ -632,4 +633,124 @@
     <string name="notification_description">Nội dung mô tả</string>
     <string name="detail">Chi tiết: </string>
     <string name="left">Còn: </string>
+
+
+    <!-- Toast message -->
+    <string name="must_agree_to_terms">Bạn phải đồng ý với các điều khoản và chính sách để tiếp tục.</string>
+
+    <!-- Terms and Conditions -->
+    <string name="termandcondition">Điều khoản và Chính sách</string>
+    <string name="agree_termandcondition">Tôi đồng ý với các điều khoản và chính sách</string>
+    <string name="continue_termandcondition">Tiếp tục</string>
+
+    <!-- Section 1: SERVICE TERMS -->
+    <string name="terms_section_1_title">1. ĐIỀU KHOẢN DỊCH VỤ</string>
+
+    <string name="terms_section_1_1_title">1.1. Định nghĩa</string>
+    <string name="terms_section_1_1_bullet_1">Nền tảng: Website picklecourt.id.vn hoặc ứng dụng PickleCourt</string>
+    <string name="terms_section_1_1_bullet_2">Người dùng: Cá nhân hoặc tổ chức đăng ký, tạo tài khoản và sử dụng dịch vụ.</string>
+    <string name="terms_section_1_1_bullet_3">Nhà cung cấp sân: Đơn vị doanh nghiệp nhỏ, cá nhân sở hữu hoặc quản lý sân pickleball liên kết với nền tảng.</string>
+
+    <string name="terms_section_1_2_title">1.2. Phạm vi áp dụng</string>
+    <string name="terms_section_1_2_paragraph">Các Điều khoản này áp dụng cho mọi hoạt động truy cập, sử dụng nền tảng của Người dùng và Nhà cung cấp sân.</string>
+
+    <string name="terms_section_1_3_title">1.3. Đăng ký tài khoản</string>
+    <string name="terms_section_1_3_bullet_1">Người dùng cam kết cung cấp thông tin chính xác, đầy đủ khi đăng ký (Họ và tên, email, số điện thoại, ngày sinh).</string>
+    <string name="terms_section_1_3_bullet_2">Mọi thay đổi thông tin phải được cập nhật kịp thời.</string>
+    <string name="terms_section_1_3_bullet_3">Mỗi người chỉ được sở hữu một tài khoản; không được chuyển nhượng dưới mọi hình thức.</string>
+
+    <string name="terms_section_1_4_title">1.4. Quy trình đặt sân</string>
+    <string name="terms_section_1_4_point_1">Chọn ngày giờ, khung giờ, và địa điểm sân.</string>
+    <string name="terms_section_1_4_point_2">Xác nhận thông tin đặt sân.</string>
+    <string name="terms_section_1_4_point_3">Hoàn tất thanh toán qua QR Code (theo mức giá hiển thị).</string>
+    <string name="terms_section_1_4_point_4">Hệ thống gửi email/notification xác nhận thành công.</string>
+    <string name="terms_section_1_4_point_5">Đến đúng giờ, xuất trình thông tin người chơi (số điện thoại, email, username).</string>
+
+    <string name="terms_section_1_5_title">1.5. Thanh toán</string>
+    <string name="terms_section_1_5_bullet_1">Hỗ trợ các hình thức: Ví điện tử, Chuyển khoản.</string>
+    <string name="terms_section_1_5_bullet_2">Thanh toán hoàn tất đồng nghĩa với việc chấp nhận khoản phí đã thanh toán.</string>
+    <string name="terms_section_1_5_bullet_3">Mọi tranh chấp về thanh toán phải được gửi yêu cầu khiếu nại trong vòng 7 ngày.</string>
+
+    <string name="terms_section_1_6_title">1.6. Chính sách đặt cọc và thanh toán (đầy đủ)</string>
+    <string name="terms_section_1_6_bullet_1">Đối với đặt lịch hằng ngày sẽ có thanh toán hoặc đặt cọc.</string>
+    <string name="terms_section_1_6_bullet_2">Đối với đặt lịch cố định chỉ có thanh toán.</string>
+    <string name="terms_section_1_6_bullet_3">Đối với đặt lịch tối ưu chỉ có thanh toán.</string>
+    <string name="terms_section_1_6_bullet_4">Đối với đặt dịch vụ chỉ có thanh toán.</string>
+
+    <string name="terms_section_1_7_title">1.7. Chính sách tính tiền đặt cọc và thanh toán (đầy đủ)</string>
+    <string name="terms_section_1_7_bullet_1">Đối với đơn đặt cọc sẽ tính là: Đặt ba sân sẽ tính tiền cọc một sân nhỏ nhất, sáu sân sẽ tính tiền cọc hai sân nhỏ nhất, chín sân sẽ tính tiền cọc ba sân nhỏ nhất, ...</string>
+    <string name="terms_section_1_7_bullet_2">Đối với đơn đặt cọc khi thanh toán phần còn lại sẽ tính là: Tổng tiền đơn - Tiền đã đặt cọc = Số tiền còn lại cần thanh toán.</string>
+    <string name="terms_section_1_7_bullet_3">Đối với đặt lịch hằng ngày: Có thể thanh toán toàn bộ tổng tiền đơn hiển thị hoặc Có thể đặt cọc tiền ở đơn hiển thị.</string>
+    <string name="terms_section_1_7_bullet_4">Đối với đặt lịch cố định: Thanh toán toàn bộ tổng tiền đơn hiển thị.</string>
+    <string name="terms_section_1_7_bullet_5">Đối với đặt lịch tối ưu: Thanh toán toàn bộ tổng tiền đơn hiển thị.</string>
+    <string name="terms_section_1_7_bullet_6">Đối với đặt lịch dịch vụ: Thanh toán toàn bộ tổng tiền đơn hiển thị.</string>
+
+    <string name="terms_section_1_8_title">1.8. Chính sách hủy và hoàn tiền (tự động)</string>
+    <string name="terms_section_1_8_bullet_1">Đối với đơn chưa thanh toán hoặc chưa đặt cọc có thể hủy do đặt nhầm.</string>
+    <string name="terms_section_1_8_bullet_2">Đối với đơn đã đặt cọc khi hủy hoặc tới giờ chơi không thanh toán đầy đủ: Không hoàn tiền cọc, hủy khung giờ khách đã đặt cọc.</string>
+    <string name="terms_section_1_8_bullet_3">Đối với đơn đã thanh toán đầy đủ khi hủy đơn: Tiền hoàn trả = Tổng tiền đơn (đã thanh toán đầy đủ) - Tiền cọc sân.</string>
+    <string name="terms_section_1_8_bullet_4">Đối với đơn đã thanh toán đầy đủ khi không tới check-in: Tiền hoàn trả = Tổng tiền đơn (đã thanh toán đầy đủ) - Tiền cọc sân.</string>
+    <string name="terms_section_1_8_bullet_5">Đối với đặt lịch cố định, tối ưu, dịch vụ khi thanh toán đầy đủ: Không thể hủy đặt dịch vụ/ hủy đặt lịch.</string>
+    <string name="terms_section_1_8_bullet_6">Đối với đặt lịch cố định, tối ưu khi thanh toán đầy đủ không tới chơi: Không hoàn tiền.</string>
+    <string name="terms_section_1_8_bullet_7">Đối với đặt lịch dịch vụ khi thanh toán đầy đủ không tới nhận: Không hoàn tiền.</string>
+    <string name="terms_section_1_8_bullet_8">Trường hợp bất khả kháng (thiên tai, dịch bệnh): Hai bên thỏa thuận riêng.</string>
+
+    <string name="terms_section_1_9_title">1.9. Quyền và nghĩa vụ của Người dùng</string>
+    <string name="terms_section_1_9_bullet_1">Tuân thủ quy định của sân (trang phục, giờ giấc, an toàn, vệ sinh, tôn trọng).</string>
+    <string name="terms_section_1_9_bullet_2">Không làm hư hại tài sản, không gây mất trật tự.</string>
+    <string name="terms_section_1_9_bullet_3">Bảo mật thông tin đăng nhập, chịu trách nhiệm về mọi hoạt động trên tài khoản.</string>
+
+    <string name="terms_section_1_10_title">1.10. Quyền và nghĩa vụ của Nhà cung cấp sân</string>
+    <string name="terms_section_1_10_bullet_1">Cung cấp sân đúng chất lượng, đúng giờ.</string>
+    <string name="terms_section_1_10_bullet_2">Chịu trách nhiệm giải quyết sự cố kỹ thuật, an toàn cho Người dùng.</string>
+    <string name="terms_section_1_10_bullet_3">Tuân thủ quy tắc vận hành, đảm bảo quyền lợi người đặt sân qua nền tảng, ứng dụng.</string>
+
+    <string name="terms_section_1_11_title">1.11. Giới hạn trách nhiệm</string>
+    <string name="terms_section_1_11_bullet_1">Nền tảng không chịu trách nhiệm về tai nạn, mất mát trong quá trình sử dụng sân.</string>
+    <string name="terms_section_1_11_bullet_2">Không chịu trách nhiệm cho lỗi hủy đặt do bên thứ ba (ngân hàng, Internet).</string>
+    <string name="terms_section_1_11_bullet_3">Mọi khiếu nại về chất lượng sân do Nhà cung cấp sân giải quyết chính thức.</string>
+
+    <string name="terms_section_1_12_title">1.12. Sửa đổi và chấm dứt</string>
+    <string name="terms_section_1_12_bullet_1">Chúng tôi có quyền cập nhật Điều khoản; thông báo trước 7 ngày qua email hoặc trên nền tảng.</string>
+    <string name="terms_section_1_12_bullet_2">Người dùng vi phạm nghiêm trọng có thể bị khóa tài khoản, chấm dứt cung cấp dịch vụ.</string>
+
+    <!-- Section 2: PRIVACY POLICY -->
+    <string name="terms_section_2_title">2. CHÍNH SÁCH BẢO MẬT</string>
+
+    <string name="terms_section_2_1_title">2.1. Mục đích thu thập thông tin</string>
+    <string name="terms_section_2_1_bullet_1">Xác thực danh tính, tạo tài khoản.</string>
+    <string name="terms_section_2_1_bullet_2">Quản lý đặt sân, thanh toán, chăm sóc khách hàng.</string>
+    <string name="terms_section_2_1_bullet_3">Nâng cao chất lượng dịch vụ, phân tích hành vi.</string>
+
+    <string name="terms_section_2_2_title">2.2. Phạm vi thu thập</string>
+    <string name="terms_section_2_2_bullet_1">Thông tin bắt buộc: Họ và tên, email, số điện thoại, ngày sinh.</string>
+    <string name="terms_section_2_2_bullet_2">Thông tin bổ sung (không bắt buộc): Giới tính, ảnh đại diện.</string>
+    <string name="terms_section_2_2_bullet_3">Dữ liệu sử dụng: Lịch sử đặt sân, thời gian truy cập, ID thiết bị.</string>
+
+    <string name="terms_section_2_3_title">2.3. Phương thức thu thập</string>
+    <string name="terms_section_2_3_bullet_1">Khi người dùng đăng ký tài khoản, đặt sân, hoặc tương tác trên nền tảng.</string>
+    <string name="terms_section_2_3_bullet_2">Tự động thu thập qua log hệ thống.</string>
+
+    <string name="terms_section_2_4_title">2.4. Thời gian lưu trữ</string>
+    <string name="terms_section_2_4_bullet_1">Thông tin cá nhân lưu trữ tối đa 5 năm kể từ lần cuối cùng đặt sân.</string>
+    <string name="terms_section_2_4_bullet_2">Dữ liệu sử dụng lưu tối đa 2 năm phục vụ phân tích.</string>
+
+    <string name="terms_section_2_5_title">2.5. Bảo mật thông tin</string>
+    <string name="terms_section_2_5_bullet_1">Áp dụng mã hóa SSL/TLS cho dữ liệu truyền tải.</string>
+    <string name="terms_section_2_5_bullet_2">Lưu trữ trên server có tường lửa, sao lưu định kỳ.</string>
+    <string name="terms_section_2_5_bullet_3">Quy định chặt chẽ về phân quyền truy cập nội bộ.</string>
+
+    <string name="terms_section_2_6_title">2.6. Chia sẻ thông tin với bên thứ ba</string>
+    <string name="terms_section_2_6_bullet_1">Chỉ chia sẻ với Nhà cung cấp sân để xác nhận đặt sân.</string>
+    <string name="terms_section_2_6_bullet_2">Đối tác thanh toán (Ngân hàng, ví điện tử) chỉ được cung cấp số tiền, mã giao dịch, không được truy cập thông tin cá nhân chi tiết.</string>
+    <string name="terms_section_2_6_bullet_3">Không chuyển giao, bán thông tin cho mục đích quảng cáo bên ngoài khi chưa có sự đồng ý.</string>
+
+    <string name="terms_section_2_7_title">2.7. Quyền của người dùng</string>
+    <string name="terms_section_2_7_bullet_1">Truy cập, chỉnh sửa, cập nhật hoặc yêu cầu xóa thông tin cá nhân.</string>
+    <string name="terms_section_2_7_bullet_2">Từ chối hoặc thu hồi quyền đồng ý xử lý dữ liệu (trừ thông tin bắt buộc cho vận hành dịch vụ).</string>
+    <string name="terms_section_2_7_bullet_3">Khi có yêu cầu, chúng tôi sẽ phản hồi trong vòng 30 ngày.</string>
+
+    <string name="terms_section_2_8_title">2.8. Thay đổi chính sách</string>
+    <string name="terms_section_2_8_bullet_1">Mọi cập nhật sẽ được đăng trên nền tảng; nếu ảnh hưởng đáng kể, sẽ thông báo qua email.</string>
+    <string name="terms_section_2_8_bullet_2">Tiếp tục sử dụng sau khi thay đổi đồng nghĩa với chấp nhận chính sách mới.</string>
 </resources>

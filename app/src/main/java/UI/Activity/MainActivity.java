@@ -11,6 +11,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -52,10 +53,19 @@ public class MainActivity extends AppCompatActivity implements PermissionRequest
 
         // Khởi tạo SessionManager
         sessionManager = new SessionManager(this);
-
         accountFragment = new AccountFragment();
         courtsFragment = new CourtsFragment();
         courtServiceFragment = new CourtServiceFragment();
+
+        SharedPreferences preferences = getSharedPreferences("app_prefs", MODE_PRIVATE);
+        boolean termsAccepted = preferences.getBoolean("terms_accepted", false);
+
+        if (!termsAccepted) {
+            Intent intent = new Intent(this, TermsAndConditionsActivity.class);
+            startActivity(intent);
+            finish(); // Kết thúc MainActivity để người dùng không thể quay lại mà không đồng ý
+            return;
+        }
 
         BottomNavigationView navigationView = findViewById(R.id.bottom_nav);
 
@@ -81,34 +91,35 @@ public class MainActivity extends AppCompatActivity implements PermissionRequest
             }
         });
 
-        // Kiểm tra xem có intent để hiển thị fragment cụ thể không
-        String showFragment = getIntent().getStringExtra("showFragment");
-        if (showFragment != null) {
-            switch (showFragment) {
-                case "courts":
-                    navigationView.setSelectedItemId(R.id.nav_courts);
-                    break;
-                case "account":
-                    if (!isUserLoggedIn()) {
-                        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                        startActivity(intent);
-                        finish();
-                        return;
-                    }
-                    navigationView.setSelectedItemId(R.id.nav_account);
-                    break;
-                case "prominent":
-                    navigationView.setSelectedItemId(R.id.nav_court_service);
-                    break;
-                default:
-                    navigationView.setSelectedItemId(R.id.nav_courts);
-                    break;
-            }
+        // Xử lý intent để hiển thị fragment
+        Intent intent = getIntent();
+        if (intent.getBooleanExtra("showCourtsFragment", false)) {
+            navigationView.setSelectedItemId(R.id.nav_courts);
         } else {
-            // Mặc định, mở CourtsFragment khi khởi động app
-            if (savedInstanceState == null) {
+            String showFragment = intent.getStringExtra("showFragment");
+            if (showFragment != null) {
+                switch (showFragment) {
+                    case "courts":
+                        navigationView.setSelectedItemId(R.id.nav_courts);
+                        break;
+                    case "account":
+                        if (!isUserLoggedIn()) {
+                            Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
+                            startActivity(loginIntent);
+                            finish();
+                            return;
+                        }
+                        navigationView.setSelectedItemId(R.id.nav_account);
+                        break;
+                    case "prominent":
+                        navigationView.setSelectedItemId(R.id.nav_court_service);
+                        break;
+                    default:
+                        navigationView.setSelectedItemId(R.id.nav_courts);
+                        break;
+                }
+            } else {
                 navigationView.setSelectedItemId(R.id.nav_courts);
-                loadFragmentWithDebounce(courtsFragment);
             }
         }
     }
@@ -174,5 +185,19 @@ public class MainActivity extends AppCompatActivity implements PermissionRequest
                 return permission.substring(permission.lastIndexOf(".") + 1);
         }
     }
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        if (intent.getBooleanExtra("showCourtsFragment", false)) {
+            showCourtsFragment();
+        }
+    }
 
+    private void showCourtsFragment() {
+        Fragment courtsFragment = new CourtsFragment();
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, courtsFragment)
+                .commit();
+    }
 }

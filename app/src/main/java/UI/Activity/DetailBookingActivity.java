@@ -147,7 +147,17 @@ public class DetailBookingActivity extends AppCompatActivity {
         customerName = getIntent().getStringExtra("customerName");
         phoneNumber = getIntent().getStringExtra("phoneNumber");
         Log.d("DetailBookingActivity", "phoneNumber" + phoneNumber);
-
+        Log.d("BookingDetailActivity", "Nhận từ PaymentFailedActivity:");
+        Log.d("BookingDetailActivity", "orderId: " + orderId);
+        Log.d("BookingDetailActivity", "totalTime: " + totalTime);
+        Log.d("BookingDetailActivity", "totalPrice: " + totalPrice);
+        Log.d("BookingDetailActivity", "orderStatus: " + orderStatus);
+        Log.d("BookingDetailActivity", "courtId: " + courtId);
+        Log.d("BookingDetailActivity", "orderType: " + orderType);
+        Log.d("BookingDetailActivity", "slotPrices: " + (slotPrices != null ? slotPrices.toString() : "null"));
+        Log.d("BookingDetailActivity", "customerName: " + customerName);
+        Log.d("BookingDetailActivity", "phoneNumber: " + phoneNumber);
+        Log.d("BookingDetailActivity", "note: " + note);
         note = getIntent().getStringExtra("note");
         if (orderId == null || orderId.isEmpty()) {
             Log.d("DetailBookingActivity", "orderId is null or empty");
@@ -209,7 +219,7 @@ public class DetailBookingActivity extends AppCompatActivity {
 
         // Hiển thị thông tin
         tvName.setText("Khách Hàng: " + (customerName != null ? customerName : "N/A"));
-        tvPhonenumber.setText("SDT: " + (phoneNumber != null ? phoneNumber : "N/A"));
+        tvPhonenumber.setText("Số điện thoại: " + (phoneNumber != null ? phoneNumber : "N/A"));
         String displayNote = (note == null || note.trim().isEmpty()) ? "Không có" : note;
         tvNote.setText("Khách hàng ghi chú: " + displayNote);
     }
@@ -450,6 +460,9 @@ public class DetailBookingActivity extends AppCompatActivity {
                     intent.putExtra("totalTime", totalTime);
                     intent.putExtra("totalPrice", totalPrice);
                     intent.putExtra("courtId", courtId);
+                    intent.putExtra("customerName", customerName);
+                    intent.putExtra("phoneNumber", phoneNumber);
+                    intent.putExtra("note", note);
                     intent.putIntegerArrayListExtra("slotPrices", slotPrices);
                     startActivity(intent);
                 });
@@ -935,14 +948,16 @@ public class DetailBookingActivity extends AppCompatActivity {
     }
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-    }
-
-    private void goBackToMainActivity() {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-        finish();
+        boolean fromPaymentFlow = getIntent().getBooleanExtra("fromPaymentFlow", false);
+        if (fromPaymentFlow) {
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.putExtra("showCourtsFragment", true);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
+            finish();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override

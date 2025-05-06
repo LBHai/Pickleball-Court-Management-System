@@ -37,8 +37,9 @@
         <color name="status_red">#FF6666</color>
         <color name="icon_orange">#FF5722</color>
         <color name="light_blue">#E6F0FA</color>
-        <color name="colorPrimaryDark">#1976D2</color>
-
+        <color name="lightGray">#EEEEEE</color>
+        <color name="colorPrimaryDark">#388E3C</color>
+        <color name="textColor">#333333</color>
                 <color name="textPrimary">#212121</color>
                 <color name="textSecondary">#757575</color>
                 <color name="divider">#BDBDBD</color>

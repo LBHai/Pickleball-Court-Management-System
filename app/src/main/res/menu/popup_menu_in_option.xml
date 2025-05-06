@@ -20,6 +20,12 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/menu_termsandconditions"
+        android:icon="@drawable/term"
+        android:title="@string/menu_termsandconditions"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/menu_logout"
         android:icon="@drawable/logout"
         android:title="@string/menu_logout"

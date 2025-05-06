@@ -27,7 +27,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="25dp"
-        android:text="Chi tiết đặt lịch"
+        android:text="@string/title_booking_detail"
         android:textAlignment="center"
         android:textColor="@android:color/white"
         android:textSize="25sp"
@@ -54,7 +54,7 @@
             android:layout_weight="1"
             android:gravity="center"
             android:paddingVertical="8dp"
-            android:text="Thông tin Đặt lịch"
+            android:text="@string/title_booking_detail"
             android:textColor="@android:color/white"
             android:textSize="16sp" />
 
@@ -125,7 +125,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="4dp"
-                            android:text="Khách Hàng: Username"
+                            android:text="@string/customer_label"
                             android:textColor="#FFFFFF"
                             android:textSize="14sp" />
 
@@ -147,7 +147,7 @@
                                 android:id="@+id/subject"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Đối tượng: Pickleball"
+                                android:text="@string/sport_label"
                                 android:textColor="#FFFFFF"
                                 android:textSize="14sp" />
                         </LinearLayout>
@@ -157,7 +157,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="4dp"
-                            android:text="Số điện thoại: 0xxxxxxxxxx"
+                            android:text="@string/phone_label"
                             android:textColor="#ddfa88"
                             android:textSize="14sp" />
                     </LinearLayout>
@@ -198,7 +198,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="8dp"
-                            android:text="Thông tin Đặt lịch"
+                            android:text="@string/booking_info_title"
                             android:textColor="#ddfa88"
                             android:textSize="15sp"
                             android:textStyle="bold" />
@@ -209,7 +209,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Tên sân: "
+                        android:text="@string/stadium_name_label"
                         android:textColor="#FFFFFF"
                         android:textSize="14sp" />
 
@@ -218,7 +218,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Địa chỉ: "
+                        android:text="@string/address_label"
                         android:textColor="#FFFFFF"
                         android:textSize="14sp" />
 
@@ -234,7 +234,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Tổng thời gian: "
+                        android:text="@string/total_time_label"
                         android:textColor="#ddfa88"
                         android:textSize="14sp" />
 
@@ -243,7 +243,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Tổng tiền: "
+                        android:text="@string/total_price_label"
                         android:textColor="#ddfa88"
                         android:textSize="14sp" />
 
@@ -252,7 +252,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Trạng thái thanh toán: Đã thanh toán"
+                        android:text="@string/payment_status_paid"
                         android:textColor="#FFFFFF"
                         android:textSize="14sp" />
 
@@ -261,7 +261,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Số tiền đã trả: 0 đ"
+                        android:text="@string/amount_paid_label"
                         android:textColor="#ddfa88"
                         android:textSize="14sp" />
 
@@ -270,7 +270,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Số tiền đã hoàn lại: 0 đ"
+                        android:text="@string/refund_amount_label"
                         android:textColor="#00FF00"
                         android:textSize="14sp"
                         android:visibility="gone" />
@@ -296,7 +296,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Khách hàng ghi chú: Không có"
+                        android:text="@string/note_label"
                         android:textColor="#FFFFFF"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -317,7 +317,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginEnd="4dp"
-                    android:text="Hủy đặt lịch"
+                    android:text="@string/cancel_booking"
                     android:textAllCaps="false"
                     android:backgroundTint="#be3725" />
 
@@ -328,7 +328,7 @@
                     android:layout_weight="1"
                     android:layout_marginStart="4dp"
                     android:layout_marginEnd="4dp"
-                    android:text="Thay đổi lịch đặt"
+                    android:text="@string/change_booking"
                     android:textAllCaps="false"
                     android:backgroundTint="#e3b02c" />
 
@@ -338,7 +338,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="4dp"
-                    android:text="Thanh toán nốt"
+                    android:text="@string/pay_remaining"
                     android:textColor="#FFFFFF"
                     android:backgroundTint="#FF5722"
                     android:visibility="gone" />

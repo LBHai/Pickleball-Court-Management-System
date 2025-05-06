@@ -61,6 +61,7 @@ import UI.Activity.NotificationActivity;
 import SEP490.G9.R;
 import UI.Activity.SignUpActivity;
 import Data.Session.SessionManager;
+import UI.Activity.TermsAndConditionsActivity;
 import UI.Adapter.OrderAdapter;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -524,7 +525,12 @@ public class AccountFragment extends Fragment {
             startActivity(intent);
             popupWindow.dismiss();
         });
-
+        popupView.findViewById(R.id.menu_termsandconditions).setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), TermsAndConditionsActivity.class);
+            intent.putExtra("fromAccountFragment", true); // Thêm extra để đánh dấu
+            startActivity(intent);
+            popupWindow.dismiss();
+        });
         popupView.findViewById(R.id.menu_transalate).setOnClickListener(v -> {
             showLanguageDialog();
             popupWindow.dismiss();

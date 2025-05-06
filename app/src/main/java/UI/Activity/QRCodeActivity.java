@@ -100,6 +100,23 @@ public class QRCodeActivity extends AppCompatActivity {
         isRemainingPayment = getIntent().getBooleanExtra("isRemainingPayment", false);
         setpaymentimeoutStr = getIntent().getStringExtra("setPaymentTimeout");
 
+
+        Log.d("QRCodeActivity", "Nhận từ ConfirmActivity:");
+        Log.d("QRCodeActivity", "qrCodeData: " + qrCodeData);
+        Log.d("QRCodeActivity", "paymentTimeoutStr: " + paymentTimeoutStr);
+        Log.d("QRCodeActivity", "orderId: " + orderId);
+        Log.d("QRCodeActivity", "totalTime: " + totalTime);
+        Log.d("QRCodeActivity", "selectedDate: " + selectedDate);
+        Log.d("QRCodeActivity", "totalPrice: " + totalPrice);
+        Log.d("QRCodeActivity", "source: " + source);
+        Log.d("QRCodeActivity", "depositAmount: " + depositAmount);
+        Log.d("QRCodeActivity", "overallTotalPrice: " + overallTotalPrice);
+        Log.d("QRCodeActivity", "isDeposit: " + isDeposit);
+        Log.d("QRCodeActivity", "orderStatus: " + orderStatus);
+        Log.d("QRCodeActivity", "courtId: " + courtId);
+        Log.d("QRCodeActivity", "paymentAmount: " + paymentAmount);
+        Log.d("QRCodeActivity", "slotPrices: " + (slotPrices != null ? slotPrices.toString() : "null"));
+        Log.d("QRCodeActivity", "orderType: " + orderType);
         if (orderType == null) {
             orderType = "Unknown";
             Log.w("QRCodeActivity", "orderType là null, đặt thành 'Unknown'");
@@ -360,6 +377,20 @@ public class QRCodeActivity extends AppCompatActivity {
             intent.putExtra("customerName", getIntent().getStringExtra("customerName"));
             intent.putExtra("phoneNumber", getIntent().getStringExtra("phoneNumber"));
             intent.putExtra("note", getIntent().getStringExtra("note"));
+
+
+            Log.d("QRCodeActivity", "Truyền sang PaymentFailedActivity:");
+            Log.d("QRCodeActivity", "orderId: " + orderId);
+            Log.d("QRCodeActivity", "totalTime: " + totalTime);
+            Log.d("QRCodeActivity", "selectedDate: " + selectedDate);
+            Log.d("QRCodeActivity", "totalPrice: " + totalPrice);
+            Log.d("QRCodeActivity", "orderStatus: " + orderStatus);
+            Log.d("QRCodeActivity", "courtId: " + courtId);
+            Log.d("QRCodeActivity", "orderType: " + orderType);
+            Log.d("QRCodeActivity", "serviceDetailsJson: " + getIntent().getStringExtra("serviceDetailsJson"));
+            Log.d("QRCodeActivity", "customerName: " + getIntent().getStringExtra("customerName"));
+            Log.d("QRCodeActivity", "phoneNumber: " + getIntent().getStringExtra("phoneNumber"));
+            Log.d("QRCodeActivity", "note: " + getIntent().getStringExtra("note"));
             startActivity(intent);
             finish();
         }
@@ -381,6 +412,20 @@ public class QRCodeActivity extends AppCompatActivity {
             intent.putExtra("phoneNumber", getIntent().getStringExtra("phoneNumber"));
             intent.putExtra("note", getIntent().getStringExtra("note"));
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+
+
+            Log.d("QRCodeActivity", "Truyền sang PaymentFailedActivity:");
+            Log.d("QRCodeActivity", "orderId: " + orderId);
+            Log.d("QRCodeActivity", "totalTime: " + totalTime);
+            Log.d("QRCodeActivity", "selectedDate: " + selectedDate);
+            Log.d("QRCodeActivity", "totalPrice: " + totalPrice);
+            Log.d("QRCodeActivity", "orderStatus: " + orderStatus);
+            Log.d("QRCodeActivity", "courtId: " + courtId);
+            Log.d("QRCodeActivity", "orderType: " + orderType);
+            Log.d("QRCodeActivity", "serviceDetailsJson: " + getIntent().getStringExtra("serviceDetailsJson"));
+            Log.d("QRCodeActivity", "customerName: " + getIntent().getStringExtra("customerName"));
+            Log.d("QRCodeActivity", "phoneNumber: " + getIntent().getStringExtra("phoneNumber"));
+            Log.d("QRCodeActivity", "note: " + getIntent().getStringExtra("note"));
             startActivity(intent);
             finish();
         }

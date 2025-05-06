@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -88,6 +89,8 @@ public class BookingRegularTableActivity extends AppCompatActivity {
         btnEndTime = findViewById(R.id.btnEndTime);
         resultContainer = findViewById(R.id.resultContainer);
 
+        ImageButton btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(v -> finish());
         // Listener for date and time selections
         btnStartDate.setOnClickListener(v -> {
             DatePickerDialog datePickerDialog = new DatePickerDialog(
@@ -640,5 +643,9 @@ public class BookingRegularTableActivity extends AppCompatActivity {
         if (cbSaturday.isChecked()) selectedDaysEnglish.add("SATURDAY");
         if (cbSunday.isChecked()) selectedDaysEnglish.add("SUNDAY");
         return selectedDaysEnglish;
+    }
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
     }
 }

@@ -337,6 +337,22 @@ public class ConfirmActivity extends AppCompatActivity {
                             i.putExtra("phoneNumber", phone);
                             i.putExtra("note", note);
                             i.putExtra("totalTime", totalTime);
+
+
+                            Log.d("ConfirmActivity", "Truyền sang QRCodeActivity:");
+                            Log.d("ConfirmActivity", "orderType: " + "Đơn dịch vụ");
+                            Log.d("ConfirmActivity", "orderId: " + orderId);
+                            Log.d("ConfirmActivity", "qrCodeData: " + qrCodeData);
+                            Log.d("ConfirmActivity", "paymentTimeout: " + paymentTimeout);
+                            Log.d("ConfirmActivity", "overallTotalPrice: " + (int) paymentAmount);
+                            Log.d("ConfirmActivity", "paymentAmount: " + (int) paymentAmount);
+                            Log.d("ConfirmActivity", "serviceDetailsJson: " + serviceDetailsJson);
+                            Log.d("ConfirmActivity", "serviceListJson: " + serviceListJson);
+                            Log.d("ConfirmActivity", "isDeposit: " + false);
+                            Log.d("ConfirmActivity", "customerName: " + name);
+                            Log.d("ConfirmActivity", "phoneNumber: " + phone);
+                            Log.d("ConfirmActivity", "note: " + note);
+                            Log.d("ConfirmActivity", "totalTime: " + totalTime);
                             startActivity(i);
                             finish();
                         } else {
