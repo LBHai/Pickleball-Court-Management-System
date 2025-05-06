@@ -71,7 +71,7 @@
                 android:id="@+id/tvStockQuantity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Còn: 10"
+                android:text="@string/left"
                 android:textSize="12sp"
                 android:textColor="#757575"
                 android:layout_marginBottom="4dp" />

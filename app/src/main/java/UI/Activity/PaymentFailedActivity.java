@@ -35,10 +35,10 @@ public class PaymentFailedActivity extends AppCompatActivity {
         serviceDetailsJson = getIntent().getStringExtra("serviceDetailsJson");
 
         if (totalTime == null) {
-            Log.e("PaymentFailedActivity", "totalTime là null");
+            //Log.e("PaymentFailedActivity", "totalTime là null");
             totalTime = "0h00";
         }
-        Log.d("PaymentFailedActivity", "serviceDetailsJson: " + serviceDetailsJson);
+        //Log.d("PaymentFailedActivity", "serviceDetailsJson: " + serviceDetailsJson);
 
         btnBack.setOnClickListener(v -> goBackToMainActivity());
         btnReturn.setOnClickListener(v -> goBackToMainActivity());

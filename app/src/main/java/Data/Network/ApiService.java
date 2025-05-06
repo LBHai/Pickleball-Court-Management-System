@@ -19,6 +19,7 @@ import Data.Model.MyInfoResponse;
 import Data.Model.NotificationRequest;
 import Data.Model.NotificationResponse;
 import Data.Model.Orders;
+import Data.Model.QRPaymentRemaining;
 import Data.Model.Service;
 import Data.Model.ServiceOrderRequest;
 import Data.Model.StudentRegistrationRequest;
@@ -142,12 +143,13 @@ public interface ApiService {
     Call<CreateOrderResponse> createServiceOrder(@Body ServiceOrderRequest request);
     @GET("identity/public/getTransactionHistory")
     Call<List<Transaction>> getTransactionHistory(@Query("orderId") String orderId);
-        @Headers("Content-Type: application/json")
-        @POST("identity/auth/forgetPassword")
-        Call<Void> forgetPassword(@Body ForgetPasswordRequest body);
+    @Headers("Content-Type: application/json")
+    @POST("identity/auth/forgetPassword")
+    Call<Void> forgetPassword(@Body ForgetPasswordRequest body);
     @POST("identity/users/registerForStudent")
     Call<Void> registerStudent(@Body StudentRegistrationRequest req);
+
     @POST("identity/public/paymentOrder")
-    Call<CreateOrderResponse> createPaymentForRemaining(@Query("orderId") String orderId);
+    Call<String> createPaymentForRemaining(@Query("orderId") String orderId);
 
 }

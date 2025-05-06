@@ -14,6 +14,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -35,6 +37,10 @@ public class MainActivity extends AppCompatActivity implements PermissionRequest
     CourtsFragment courtsFragment;
     CourtServiceFragment courtServiceFragment;
     private SessionManager sessionManager;
+
+    private static final long DEBOUNCE_DELAY = 250; // milliseconds
+    private Handler handler = new Handler(Looper.getMainLooper());
+    private Runnable pendingFragmentLoad;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,14 +64,17 @@ public class MainActivity extends AppCompatActivity implements PermissionRequest
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int itemId = item.getItemId();
+                Fragment selectedFragment = null;
                 if (itemId == R.id.nav_account) {
-                    loadFragment(accountFragment);
-                    return true;
+                    selectedFragment = accountFragment;
                 } else if (itemId == R.id.nav_courts) {
-                    loadFragment(courtsFragment);
-                    return true;
+                    selectedFragment = courtsFragment;
                 } else if (itemId == R.id.nav_court_service) {
-                    loadFragment(courtServiceFragment);
+                    selectedFragment = courtServiceFragment;
+                }
+
+                if (selectedFragment != null) {
+                    loadFragmentWithDebounce(selectedFragment);
                     return true;
                 }
                 return false;
@@ -99,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements PermissionRequest
             // Mặc định, mở CourtsFragment khi khởi động app
             if (savedInstanceState == null) {
                 navigationView.setSelectedItemId(R.id.nav_courts);
-                loadFragment(courtsFragment);
+                loadFragmentWithDebounce(courtsFragment);
             }
         }
     }
@@ -107,6 +116,20 @@ public class MainActivity extends AppCompatActivity implements PermissionRequest
     private boolean isUserLoggedIn() {
         String token = sessionManager.getToken();
         return token != null && !token.isEmpty();
+    }
+
+    private void loadFragmentWithDebounce(final Fragment fragment) {
+        if (pendingFragmentLoad != null) {
+            handler.removeCallbacks(pendingFragmentLoad);
+        }
+        pendingFragmentLoad = new Runnable() {
+            @Override
+            public void run() {
+                loadFragment(fragment);
+                pendingFragmentLoad = null;
+            }
+        };
+        handler.postDelayed(pendingFragmentLoad, DEBOUNCE_DELAY);
     }
 
     private void loadFragment(Fragment fragment) {
@@ -118,39 +141,38 @@ public class MainActivity extends AppCompatActivity implements PermissionRequest
 
     @Override
     public void onAllPermissionsGranted() {
-        Toast.makeText(this, "Tất cả quyền đã được cấp", Toast.LENGTH_SHORT).show();
-        // Tiếp tục hoạt động bình thường của ứng dụng
+        Toast.makeText(this, getString(R.string.all_permissions_granted), Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onPermissionsDenied(List<String> deniedPermissions) {
-        // Xử lý khi một số quyền bị từ chối
-        StringBuilder message = new StringBuilder("Các quyền bị từ chối: \n");
+        StringBuilder message = new StringBuilder();
         for (String permission : deniedPermissions) {
             message.append("- ").append(getPermissionName(permission)).append("\n");
         }
 
         new AlertDialog.Builder(this)
-                .setTitle("Quyền bị từ chối")
-                .setMessage(message.toString() + "\nMột số tính năng có thể không hoạt động đúng.")
-                .setPositiveButton("Đồng ý", null)
+                .setTitle(getString(R.string.permissions_denied_title))
+                .setMessage(message.toString() + "\n" + getString(R.string.permissions_denied_message_suffix))
+                .setPositiveButton(getString(R.string.button_agree), null)
                 .show();
     }
 
     private String getPermissionName(String permission) {
         switch (permission) {
             case Manifest.permission.CAMERA:
-                return "Camera";
+                return getString(R.string.denied_camera);
             case Manifest.permission.READ_EXTERNAL_STORAGE:
-                return "Đọc bộ nhớ";
+                return getString(R.string.denied_read_storage);
             case Manifest.permission.WRITE_EXTERNAL_STORAGE:
-                return "Ghi bộ nhớ";
+                return getString(R.string.denied_write_storage);
             case Manifest.permission.ACCESS_FINE_LOCATION:
-                return "Vị trí chính xác";
+                return getString(R.string.denied_fine_location);
             case Manifest.permission.ACCESS_COARSE_LOCATION:
-                return "Vị trí gần đúng";
+                return getString(R.string.denied_coarse_location);
             default:
                 return permission.substring(permission.lastIndexOf(".") + 1);
         }
     }
+
 }

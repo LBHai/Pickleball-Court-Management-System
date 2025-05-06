@@ -23,7 +23,7 @@ public class ImageZoomInOutActivity extends AppCompatActivity {
         String url = getIntent().getStringExtra(EXTRA_URL);
 
         if (url == null || url.isEmpty()) {
-            Toast.makeText(this, "Không có URL hình ảnh", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.error_no_image_url), Toast.LENGTH_SHORT).show();
             finish();
             return;
         }

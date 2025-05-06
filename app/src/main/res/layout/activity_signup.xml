@@ -11,7 +11,7 @@
         android:id="@+id/imgBackground"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:contentDescription="Background"
+        android:contentDescription="@string/background_cd"
         android:scaleType="centerCrop"
         android:src="@drawable/imagebackground"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -39,12 +39,13 @@
             android:layout_height="wrap_content"
             android:paddingBottom="24dp">
 
+            <!-- Header -->
             <TextView
                 android:id="@+id/tvSignupHeader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="48dp"
-                android:text="Join Us Today"
+                android:text="@string/join_us_today"
                 android:textColor="@color/white"
                 android:textSize="32sp"
                 android:textStyle="bold"
@@ -52,6 +53,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <!-- Form card -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardForm"
                 android:layout_width="match_parent"
@@ -70,11 +72,12 @@
                     android:layout_height="wrap_content"
                     android:padding="24dp">
 
+                    <!-- Title inside card -->
                     <TextView
                         android:id="@+id/tvCreateAccount"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Create Account"
+                        android:text="@string/create_account"
                         android:textAlignment="center"
                         android:textColor="@color/colorPrimary"
                         android:textSize="24sp"
@@ -83,13 +86,14 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
+                    <!-- Username -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/tilUsername"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="24dp"
-                        android:hint="Username"
+                        android:hint="@string/hint_username"
                         app:boxStrokeColor="@color/colorPrimary"
                         app:hintTextColor="@color/colorPrimary"
                         app:startIconDrawable="@drawable/person"
@@ -106,13 +110,14 @@
                             android:maxLines="1" />
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <!-- Password -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/tilPassword"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:hint="Password"
+                        android:hint="@string/hint_password"
                         app:boxStrokeColor="@color/colorPrimary"
                         app:endIconMode="password_toggle"
                         app:hintTextColor="@color/colorPrimary"
@@ -130,6 +135,7 @@
                             android:maxLines="1" />
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <!-- First / Last name -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/tilFirstName"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -137,7 +143,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginEnd="8dp"
-                        android:hint="First Name"
+                        android:hint="@string/hint_first_name"
                         app:boxStrokeColor="@color/colorPrimary"
                         app:hintTextColor="@color/colorPrimary"
                         app:layout_constraintEnd_toStartOf="@+id/tilLastName"
@@ -158,12 +164,12 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:hint="Last Name"
+                        android:hint="@string/hint_last_name"
                         app:boxStrokeColor="@color/colorPrimary"
                         app:hintTextColor="@color/colorPrimary"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@+id/tilFirstName"
-                        app:layout_constraintTop_toTopOf="@+id/tilFirstName">
+                        app:layout_constraintTop_toTopOf="@id/tilFirstName">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/edtLastName"
@@ -173,20 +179,21 @@
                             android:maxLines="1" />
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <!-- Email -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/tilEmail"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:hint="Email"
+                        android:hint="@string/hint_email"
                         app:boxStrokeColor="@color/colorPrimary"
                         app:hintTextColor="@color/colorPrimary"
                         app:startIconDrawable="@drawable/email"
                         app:startIconTint="@color/colorPrimary"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tilFirstName">
+                        app:layout_constraintTop_toBottomOf="@id/tilLastName">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/edtEmail"
@@ -196,13 +203,14 @@
                             android:maxLines="1" />
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <!-- Phone -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/tilPhoneNumber"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:hint="Phone Number"
+                        android:hint="@string/hint_phone_number"
                         app:boxStrokeColor="@color/colorPrimary"
                         app:hintTextColor="@color/colorPrimary"
                         app:startIconDrawable="@drawable/ic_phone"
@@ -219,7 +227,7 @@
                             android:maxLines="1" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- Nhãn Ngày sinh -->
+                    <!-- Date of Birth -->
                     <TextView
                         android:id="@+id/tvDobLabel"
                         android:layout_width="wrap_content"
@@ -232,40 +240,36 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/tilPhoneNumber" />
 
-                    <!-- Container cho DOB với ba Spinner -->
                     <LinearLayout
                         android:id="@+id/dobContainer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:orientation="horizontal"
-                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/tvDobLabel">
 
-                        <!-- Spinner cho ngày -->
                         <Spinner
                             android:id="@+id/spinnerDay"
                             android:layout_width="0dp"
                             android:layout_height="48dp"
-                            android:layout_marginEnd="8dp"
                             android:layout_weight="1"
+                            android:layout_marginEnd="8dp"
                             android:background="@android:drawable/edit_text"
                             android:prompt="@string/prompt_day"
                             android:spinnerMode="dropdown" />
 
-                        <!-- Spinner cho tháng -->
                         <Spinner
                             android:id="@+id/spinnerMonth"
                             android:layout_width="0dp"
                             android:layout_height="48dp"
-                            android:layout_marginEnd="8dp"
                             android:layout_weight="1"
+                            android:layout_marginEnd="8dp"
                             android:background="@android:drawable/edit_text"
                             android:prompt="@string/prompt_month"
                             android:spinnerMode="dropdown" />
 
-                        <!-- Spinner cho năm -->
                         <Spinner
                             android:id="@+id/spinnerYear"
                             android:layout_width="0dp"
@@ -275,20 +279,20 @@
                             android:prompt="@string/prompt_year"
                             android:spinnerMode="dropdown" />
                     </LinearLayout>
-                    <!-- Nhãn Giới tính -->
+
+                    <!-- Gender -->
                     <TextView
                         android:id="@+id/tvGenderLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:text="Gender"
+                        android:text="@string/gender_label"
                         android:textColor="@color/colorPrimary"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/dobContainer" />
 
-                    <!-- RadioGroup chọn Giới tính -->
                     <RadioGroup
                         android:id="@+id/rgGender"
                         android:layout_width="match_parent"
@@ -304,41 +308,41 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="24dp"
-                            android:text="Male"
+                            android:text="@string/male"
                             android:textColor="@color/colorPrimary" />
 
                         <com.google.android.material.radiobutton.MaterialRadioButton
                             android:id="@+id/rbFemale"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Female"
+                            android:text="@string/female"
                             android:textColor="@color/colorPrimary" />
 
                     </RadioGroup>
 
-
+                    <!-- Sign Up button -->
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnSignup"
                         android:layout_width="match_parent"
                         android:layout_height="56dp"
                         android:layout_marginTop="24dp"
-                        android:text="CREATE ACCOUNT"
+                        android:text="@string/btn_create_account"
                         android:textSize="16sp"
                         app:backgroundTint="@color/green"
                         app:cornerRadius="8dp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/rgGender" />
-
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- Already have an account? -->
             <TextView
                 android:id="@+id/tvHaveAccount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Already have an account?"
+                android:text="@string/btn_signup_have_account"
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toStartOf="@id/btnLogin"
@@ -351,7 +355,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
-                android:text="Login"
+                android:text="@string/btn_login"
                 android:textColor="@color/green"
                 android:textSize="16sp"
                 android:textStyle="bold"

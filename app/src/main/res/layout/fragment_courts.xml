@@ -52,7 +52,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="25dp"
                 android:alpha="0.9"
-                android:text="Date now"
+                android:text="@string/date_now"
                 android:textColor="@android:color/white"
                 android:textSize="14sp" />
 
@@ -61,7 +61,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="25dp"
                 android:layout_marginTop="4dp"
-                android:text="UserName"
+                android:text="@string/username"
                 android:textColor="#F8E16C"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -156,7 +156,7 @@
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
                     android:maxLines="1"
-                    android:hint="@string/search"
+                    android:hint="@string/search_court"
                     android:background="@color/white"
                     android:textSize="16sp" />
 

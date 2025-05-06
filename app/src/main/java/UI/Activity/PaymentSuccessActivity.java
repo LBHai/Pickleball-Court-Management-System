@@ -46,17 +46,17 @@ public class PaymentSuccessActivity extends AppCompatActivity {
         // In log danh sách giá nếu slotPrices không null
         if (slotPrices != null) {
             for (Integer price : slotPrices) {
-                Log.d("QRCodeActivity", "Slot price: " + price);
+                //Log.d("QRCodeActivity", "Slot price: " + price);
             }
         } else {
-            Log.d("QRCodeActivity", "Không có dữ liệu slotPrices được truyền qua Intent");
+            //Log.d("QRCodeActivity", "Không có dữ liệu slotPrices được truyền qua Intent");
         }
 
         // Log giá trị orderId nhận được
         if (orderId != null && !orderId.isEmpty()) {
-            Log.d("Paymentsuscess", "orderId nhan dc: " + orderId);
+            //Log.d("Paymentsuscess", "orderId nhan dc: " + orderId);
         } else {
-            Log.e("Paymentsuscess", "orderId is null or empty!");
+            //Log.e("Paymentsuscess", "orderId is null or empty!");
         }
 
         // Xử lý nút Back: quay về MainActivity
@@ -67,8 +67,8 @@ public class PaymentSuccessActivity extends AppCompatActivity {
         });
 
         // Cập nhật thông tin thông báo cho người dùng
-        tvTitle.setText("Đặt lịch thành công");
-        tvSubTitle.setText("Lịch đặt của bạn đã được gửi tới chủ sân.\nVui lòng kiểm tra trạng thái tại mục \"Tài khoản\" để kiểm soát và xác nhận lịch đặt.");
+        tvTitle.setText(getString(R.string.booking_success_title));
+        tvSubTitle.setText(getString(R.string.booking_success_subtitle));
 
         // Xử lý nút Xem lịch đặt chi tiết
         btnXemLichDatChiTiet.setOnClickListener(new View.OnClickListener() {
@@ -87,8 +87,8 @@ public class PaymentSuccessActivity extends AppCompatActivity {
                 detailIntent.putExtra("customerName", getIntent().getStringExtra("customerName"));  // Truyền tiếp
                 detailIntent.putExtra("phoneNumber", getIntent().getStringExtra("phoneNumber"));    // Truyền tiếp
                 detailIntent.putExtra("note", getIntent().getStringExtra("note"));                  // Truyền tiếp
-                Log.d("Paymentsuscess", "totalTime truyen di: " + totalTime);
-                Log.d("Paymentsuscess", "slotPrices truyen di: " + slotPrices);
+//                Log.d("Paymentsuscess", "totalTime truyen di: " + totalTime);
+//                Log.d("Paymentsuscess", "slotPrices truyen di: " + slotPrices);
                 startActivity(detailIntent);
                 finish();
             }

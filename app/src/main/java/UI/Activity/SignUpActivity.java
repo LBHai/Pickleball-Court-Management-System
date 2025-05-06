@@ -44,7 +44,7 @@ public class SignUpActivity extends AppCompatActivity {
 
     // Regex patterns
     private static final String USERNAME_PATTERN = "^[a-zA-Z0-9]{4,}$";
-    private static final String PASSWORD_PATTERN = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$";
+    private static final String PASSWORD_PATTERN ="^(?=.{6,}$)(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]+$";;
     private static final String NAME_PATTERN = "^[\\p{L} ]{2,}$";
 
     @Override
@@ -124,9 +124,12 @@ public class SignUpActivity extends AppCompatActivity {
 
     private boolean validateUsername() {
         String u = edtUsername.getText().toString().trim();
-        if (u.isEmpty())      { tilUsername.setError("Please enter username"); return false; }
+        if (u.isEmpty()) {
+            tilUsername.setError(getString(R.string.error_enter_username));
+            return false;
+        }
         if (!Pattern.matches(USERNAME_PATTERN, u)) {
-            tilUsername.setError("Username must be at least 4 characters and cannot contain special characters");
+            tilUsername.setError(getString(R.string.error_invalid_username));
             return false;
         }
         tilUsername.setError(null);
@@ -135,9 +138,12 @@ public class SignUpActivity extends AppCompatActivity {
 
     private boolean validatePassword() {
         String p = edtPassword.getText().toString().trim();
-        if (p.isEmpty())      { tilPassword.setError("Please enter password"); return false; }
+        if (p.isEmpty()) {
+            tilPassword.setError(getString(R.string.error_enter_password));
+            return false;
+        }
         if (!Pattern.matches(PASSWORD_PATTERN, p)) {
-            tilPassword.setError("Password must be at least 6 characters, contain at least 1 letter and 1 number");
+            tilPassword.setError(getString(R.string.error_invalid_password));
             return false;
         }
         tilPassword.setError(null);
@@ -146,14 +152,19 @@ public class SignUpActivity extends AppCompatActivity {
 
     private boolean validateFirstName() {
         String n = edtFirstName.getText().toString().trim();
-        if (n.isEmpty()) { tilFirstName.setError("Please enter your first name"); return false; }
+        if (n.isEmpty()) {
+            tilFirstName.setError(getString(R.string.error_enter_first_name));
+            return false;
+        }
         Set<String> badWords = BadWordsLoader.loadEnglishBadWords(this);
         badWords.addAll(BadWordsLoader.loadVietnameseBadWords(this));
         if (badWords.stream().anyMatch(n.toLowerCase()::contains)) {
-            tilFirstName.setError("First name contains sensitive content, please try again!"); return false;
+            tilFirstName.setError(getString(R.string.error_first_name_sensitive_content));
+            return false;
         }
         if (!Pattern.matches(NAME_PATTERN, n)) {
-            tilFirstName.setError("Invalid first name (letters and spaces only, ≥2 characters)"); return false;
+            tilFirstName.setError(getString(R.string.error_invalid_first_name));
+            return false;
         }
         tilFirstName.setError(null);
         return true;
@@ -161,25 +172,32 @@ public class SignUpActivity extends AppCompatActivity {
 
     private boolean validateLastName() {
         String n = edtLastName.getText().toString().trim();
-        if (n.isEmpty()) { tilLastName.setError("Please enter your last name"); return false; }
+        if (n.isEmpty()) {
+            tilLastName.setError(getString(R.string.error_enter_last_name));
+            return false;
+        }
         Set<String> badWords = BadWordsLoader.loadEnglishBadWords(this);
         badWords.addAll(BadWordsLoader.loadVietnameseBadWords(this));
         if (badWords.stream().anyMatch(n.toLowerCase()::contains)) {
-            tilLastName.setError("Last name contains sensitive content, please try again!"); return false;
+            tilLastName.setError(getString(R.string.error_last_name_sensitive_content));
+            return false;
         }
         if (!Pattern.matches(NAME_PATTERN, n)) {
-            tilLastName.setError("Invalid last name (letters and spaces only, ≥2 characters)"); return false;
+            tilLastName.setError(getString(R.string.error_invalid_last_name));
+            return false;
         }
         tilLastName.setError(null);
         return true;
     }
 
-
     private boolean validatePhoneNumber() {
         String pn = edtPhoneNumber.getText().toString().trim();
-        if (pn.isEmpty())     { tilPhoneNumber.setError("Please enter phone number"); return false; }
+        if (pn.isEmpty()) {
+            tilPhoneNumber.setError(getString(R.string.error_enter_phone_number));
+            return false;
+        }
         if (!pn.matches("^(\\+84|0)(3|5|7|8|9)[0-9]{8}$")) {
-            tilPhoneNumber.setError("Invalid phone number");
+            tilPhoneNumber.setError(getString(R.string.error_invalid_phone_number));
             return false;
         }
         tilPhoneNumber.setError(null);
@@ -188,13 +206,16 @@ public class SignUpActivity extends AppCompatActivity {
 
     private boolean validateEmail() {
         String e = edtEmail.getText().toString().trim();
-        if (e.isEmpty())      { tilEmail.setError("Please enter email"); return false; }
+        if (e.isEmpty()) {
+            tilEmail.setError(getString(R.string.error_enter_email));
+            return false;
+        }
         if (!Patterns.EMAIL_ADDRESS.matcher(e).matches()) {
-            tilEmail.setError("Email is not in correct format.");
+            tilEmail.setError(getString(R.string.error_invalid_email_format));
             return false;
         }
         if (!e.endsWith("edu.vn") && !e.endsWith("@gmail.com")) {
-            tilEmail.setError("Please use email @gmail.com or edu.vn");
+            tilEmail.setError(getString(R.string.error_invalid_email_domain));
             return false;
         }
         tilEmail.setError(null);
@@ -214,23 +235,24 @@ public class SignUpActivity extends AppCompatActivity {
             int age = t.get(Calendar.YEAR) - Integer.parseInt(y);
             if (t.get(Calendar.DAY_OF_YEAR) < c.get(Calendar.DAY_OF_YEAR)) age--;
             if (age < 10) {
-                Toast.makeText(this, "You must be 10 years or older", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.error_underage), Toast.LENGTH_SHORT).show();
                 return false;
             }
             return true;
         } catch (Exception ex) {
-            Toast.makeText(this, "Invalid date of birth", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.error_invalid_dob), Toast.LENGTH_SHORT).show();
             return false;
         }
     }
 
     private boolean validateGender() {
         if (rgGender.getCheckedRadioButtonId() == -1) {
-            Toast.makeText(this, "Please select your gender", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.error_select_gender), Toast.LENGTH_SHORT).show();
             return false;
         }
         return true;
     }
+
 
     private void signup() {
         String u = edtUsername.getText().toString().trim();
@@ -308,9 +330,9 @@ public class SignUpActivity extends AppCompatActivity {
 
     private void showEduEmailVerificationDialog() {
         AlertDialog.Builder b = new AlertDialog.Builder(this);
-        b.setTitle("Confirm student email");
-        b.setMessage("Please check your inbox and 'Spam' mail to confirm your account.");
-        b.setPositiveButton("Close", (d, w) -> navigateToLogin());
+        b.setTitle(getString(R.string.dialog_confirm_student_email_title));
+        b.setMessage(getString(R.string.dialog_confirm_student_email_message));
+        b.setPositiveButton(getString(R.string.dialog_confirm_student_email_close_button), (d, w) -> navigateToLogin());
         b.create().show();
     }
 
@@ -326,42 +348,34 @@ public class SignUpActivity extends AppCompatActivity {
                     String errorBodyString = response.errorBody().string();
 
                     // Check for username duplication (based on the error pattern)
-                    if (errorBodyString.contains("Duplicate entry") &&
-                            errorBodyString.contains("username")) {
-                        Toast.makeText(this, "Username already exists. Please choose a different username.",
-                                Toast.LENGTH_LONG).show();
-                        tilUsername.setError("Username already exists");
+                    if (errorBodyString.contains("Duplicate entry") && errorBodyString.contains("username")) {
+                        Toast.makeText(this, getString(R.string.username_exists_error), Toast.LENGTH_LONG).show();
+                        tilUsername.setError(getString(R.string.username_exists_error));
                     }
                     // Check for email duplication
-                    else if (errorBodyString.contains("Duplicate entry") &&
-                                    errorBodyString.contains("email")) {
-                        Toast.makeText(this, "Email address already exists. Please use a different email.",
-                                Toast.LENGTH_LONG).show();
-                        tilEmail.setError("Email already exists");
+                    else if (errorBodyString.contains("Duplicate entry") && errorBodyString.contains("email")) {
+                        Toast.makeText(this, getString(R.string.email_exists_error), Toast.LENGTH_LONG).show();
+                        tilEmail.setError(getString(R.string.email_exists_error));
                     }
                     // Check for phone number duplication
-                    else if (errorBodyString.contains("Duplicate entry") &&
-                                    errorBodyString.contains("phone_number")) {
-                        Toast.makeText(this, "Phone number already exists. Please use a different phone number.",
-                                Toast.LENGTH_LONG).show();
-                        tilPhoneNumber.setError("Phone number already exists");
+                    else if (errorBodyString.contains("Duplicate entry") && errorBodyString.contains("phone_number")) {
+                        Toast.makeText(this, getString(R.string.phone_exists_error), Toast.LENGTH_LONG).show();
+                        tilPhoneNumber.setError(getString(R.string.phone_exists_error));
                     }
                     // Generic duplication error
                     else {
-                        Toast.makeText(this, "Registration failed: A user with some of these details already exists.",
-                                Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, getString(R.string.generic_duplicate_error), Toast.LENGTH_LONG).show();
                     }
                 }
             } catch (Exception e) {
-                Toast.makeText(this, "An error occurred during registration", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.registration_error), Toast.LENGTH_SHORT).show();
                 e.printStackTrace();
             }
         } else if (response.code() == 400) {
-            Toast.makeText(this, "Registration information has existed. Please check the username & email & phone number",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.registration_info_exists_error), Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "Registration failed with error code: " + response.code(),
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, String.format(getString(R.string.registration_failed_error), response.code()), Toast.LENGTH_SHORT).show();
         }
     }
+
 }

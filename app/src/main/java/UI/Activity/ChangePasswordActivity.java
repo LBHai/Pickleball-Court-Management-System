@@ -28,7 +28,7 @@ import retrofit2.Response;
 
 public class ChangePasswordActivity extends AppCompatActivity {
 
-    private static final String PASSWORD_PATTERN = "^(?=.*[A-Za-z])(?=.*\\d).{6,}$";
+    private static final String PASSWORD_PATTERN ="^(?=.{6,}$)(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]+$";;
 
     private EditText etOldPassword, etNewPassword, etConfirmNewPassword;
     private ImageView ivToggleOldPassword, ivToggleNewPassword, ivToggleConfirmNewPassword;

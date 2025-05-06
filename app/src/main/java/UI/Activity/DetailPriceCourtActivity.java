@@ -75,9 +75,9 @@ public class DetailPriceCourtActivity extends AppCompatActivity {
 
     private void fillTimeSlots(TableLayout tableLayout, List<TimeSlot> slots) {
         TableRow headerRow = new TableRow(this);
-        headerRow.addView(createCell("Khung giờ", true, 1.2f));
-        headerRow.addView(createCell("Học sinh", true, 1f));
-        headerRow.addView(createCell("Người lớn", true, 1f));
+        headerRow.addView(createCell(getString(R.string.label_time_slot), true, 1.2f));
+        headerRow.addView(createCell(getString(R.string.label_student), true, 1f));
+        headerRow.addView(createCell(getString(R.string.label_adult), true, 1f));
         tableLayout.addView(headerRow);
 
         if (slots == null || slots.isEmpty()) {

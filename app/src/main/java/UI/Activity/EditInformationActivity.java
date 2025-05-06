@@ -51,7 +51,6 @@ import Data.Network.ApiService;
 import Data.Network.RetrofitClient;
 import Data.Model.MyInfo;
 import Data.Model.MyInfoResponse;
-import Data.Model.Role;
 import Data.Model.UpdateMyInfor;
 import SEP490.G9.R;
 import Data.Session.SessionManager;
@@ -125,14 +124,13 @@ public class EditInformationActivity extends AppCompatActivity {
         loadUserInfo();
         btnSave.setOnClickListener(v -> {
             if (validateInputs()) {
-                saveUserInfo();                   // only save if inputs valid
+                saveUserInfo();
             }
         });
 
         checkAndRequestPermissions();
     }
 
-    /** Set up the date spinners (day, month, year) */
     private void setupSpinners() {
         // Day spinner (1-31)
         List<String> dayList = new ArrayList<>();
@@ -162,7 +160,6 @@ public class EditInformationActivity extends AppCompatActivity {
         spYear.setAdapter(yearAdapter);
     }
 
-    /** Load data from intent and populate UI elements */
     private void loadIntentData() {
         Intent intent = getIntent();
         if (intent != null) {
@@ -211,7 +208,6 @@ public class EditInformationActivity extends AppCompatActivity {
         }
     }
 
-    /** Save user information to the server */
     private void saveUserInfo() {
         String email = etEmail.getText().toString().trim();
         String firstName = etFirstName.getText().toString().trim();
@@ -226,8 +222,6 @@ public class EditInformationActivity extends AppCompatActivity {
         } else if (selectedId == R.id.rbFemale) {
             gender = "FEMALE";
         }
-
-        boolean student = swStudent.isChecked();
 
         // Construct date of birth
         String day = spDay.getSelectedItem().toString();
@@ -248,7 +242,7 @@ public class EditInformationActivity extends AppCompatActivity {
 
         String token = sessionManager.getToken();
         if (token == null || token.isEmpty()) {
-            Toast.makeText(this, "Phiên đăng nhập hết hạn, vui lòng đăng nhập lại!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.session_expired), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -257,25 +251,24 @@ public class EditInformationActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<UpdateMyInfor> call, Response<UpdateMyInfor> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Toast.makeText(EditInformationActivity.this, "Cập nhật thông tin thành công!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EditInformationActivity.this, getString(R.string.update_success), Toast.LENGTH_SHORT).show();
                 } else {
                     try {
-                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "Không có thông tin lỗi";
-                        Toast.makeText(EditInformationActivity.this, "Cập nhật thất bại: " + errorBody, Toast.LENGTH_LONG).show();
+                        String errorBody = response.errorBody() != null ? response.errorBody().string() : getString(R.string.no_error_info);
+                        Toast.makeText(EditInformationActivity.this, getString(R.string.update_failed) + ": " + errorBody, Toast.LENGTH_LONG).show();
                     } catch (IOException e) {
-                        Toast.makeText(EditInformationActivity.this, "Cập nhật thất bại!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(EditInformationActivity.this, getString(R.string.update_failed), Toast.LENGTH_SHORT).show();
                     }
                 }
             }
 
             @Override
             public void onFailure(Call<UpdateMyInfor> call, Throwable t) {
-                Toast.makeText(EditInformationActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditInformationActivity.this, getString(R.string.connection_error) + ": " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    /** Check and request camera permissions */
     private void checkAndRequestPermissions() {
         String[] permissions = { Manifest.permission.CAMERA };
         List<String> listPermissionsNeeded = new ArrayList<>();
@@ -299,7 +292,7 @@ public class EditInformationActivity extends AppCompatActivity {
             for (int i = 0; i < grantResults.length; i++) {
                 if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
                     allPermissionsGranted = false;
-                    Toast.makeText(this, "Bạn cần cấp quyền " + permissions[i] + " để sử dụng tính năng này", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, getString(R.string.permission_required, permissions[i]), Toast.LENGTH_LONG).show();
                     if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[i])) {
                         showPermissionSettingsDialog();
                     }
@@ -311,44 +304,43 @@ public class EditInformationActivity extends AppCompatActivity {
 
     private void showPermissionSettingsDialog() {
         new AlertDialog.Builder(this)
-                .setTitle("Cần cấp quyền")
-                .setMessage("Ứng dụng cần quyền truy cập camera để chụp ảnh. Vui lòng cấp quyền trong cài đặt.")
-                .setPositiveButton("Đi tới cài đặt", (dialog, which) -> {
+                .setTitle(getString(R.string.need_permission_title))
+                .setMessage(getString(R.string.need_permission_message))
+                .setPositiveButton(getString(R.string.go_to_settings), (dialog, which) -> {
                     Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                     intent.setData(Uri.parse("package:" + getPackageName()));
                     startActivity(intent);
                 })
-                .setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss())
+                .setNegativeButton(getString(R.string.cancel), (dialog, which) -> dialog.dismiss())
                 .show();
     }
 
-    /** Show dialog to pick image from gallery or camera */
     private void showImagePickerDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Select photo");
+        builder.setTitle(getString(R.string.select_photo));
 
         PackageManager packageManager = getPackageManager();
         boolean hasCamera = packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
 
         List<String> optionsList = new ArrayList<>();
-        optionsList.add("Select from library");
+        optionsList.add(getString(R.string.select_from_library));
         if (hasCamera) {
-            optionsList.add("Camera");
+            optionsList.add(getString(R.string.camera));
         }
 
         String[] options = optionsList.toArray(new String[0]);
         builder.setItems(options, (dialog, which) -> {
-            if (options[which].equals("Select from library")) {
+            if (options[which].equals(getString(R.string.select_from_library))) {
                 Intent pickIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(pickIntent, REQUEST_IMAGE_PICK);
-            } else if (options[which].equals("Camera")) {
+            } else if (options[which].equals(getString(R.string.camera))) {
                 Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
                     File photoFile = null;
                     try {
                         photoFile = createImageFile();
                     } catch (IOException ex) {
-                        Toast.makeText(this, "Error creating image file", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.error_creating_image_file), Toast.LENGTH_SHORT).show();
                     }
                     if (photoFile != null) {
                         photoUri = FileProvider.getUriForFile(this, "SEP490.G9.fileprovider", photoFile);
@@ -378,7 +370,7 @@ public class EditInformationActivity extends AppCompatActivity {
                     imgAvatar.setImageURI(selectedImageUri);
                     uploadAvatar(selectedImageUri);
                 } else {
-                    Toast.makeText(this, "Cannot get photo from gallery", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.photo_from_gallery_error), Toast.LENGTH_SHORT).show();
                 }
             } else if (requestCode == REQUEST_IMAGE_CAPTURE) {
                 if (photoUri != null) {
@@ -386,24 +378,23 @@ public class EditInformationActivity extends AppCompatActivity {
                     imgAvatar.setImageURI(selectedImageUri);
                     uploadAvatar(selectedImageUri);
                 } else {
-                    Toast.makeText(this, "Cannot get large size images", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.photo_large_size_error), Toast.LENGTH_SHORT).show();
                 }
             }
         }
     }
 
-    /** Upload avatar image to server */
     private void uploadAvatar(Uri imageUri) {
         String mimeType = getContentResolver().getType(imageUri);
         if (mimeType == null || !mimeType.startsWith("image/")) {
-            Toast.makeText(this, "Vui lòng chọn một file ảnh!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.select_image_error), Toast.LENGTH_SHORT).show();
             return;
         }
 
         try {
             InputStream inputStream = getContentResolver().openInputStream(imageUri);
             if (inputStream == null) {
-                Toast.makeText(this, "Không thể đọc ảnh", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.image_read_error), Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -412,7 +403,7 @@ public class EditInformationActivity extends AppCompatActivity {
 
             byte[] imageBytes = compressImage(bitmap);
             if (imageBytes == null) {
-                Toast.makeText(this, "Không thể nén ảnh xuống dưới 250KB. Vui lòng chọn ảnh khác!", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.image_compress_error), Toast.LENGTH_LONG).show();
                 return;
             }
 
@@ -422,7 +413,7 @@ public class EditInformationActivity extends AppCompatActivity {
 
             String token = sessionManager.getToken();
             if (token == null || token.isEmpty()) {
-                Toast.makeText(this, "Token không hợp lệ. Vui lòng đăng nhập lại!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.session_expired), Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -432,24 +423,24 @@ public class EditInformationActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(Call<String> call, Response<String> response) {
                     if (response.isSuccessful() && response.body() != null) {
-                        Toast.makeText(EditInformationActivity.this, response.body(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(EditInformationActivity.this, getString(R.string.update_success), Toast.LENGTH_SHORT).show();
                     } else {
                         try {
-                            String errorBody = response.errorBody() != null ? response.errorBody().string() : "Phản hồi rỗng";
-                            Toast.makeText(EditInformationActivity.this, "Upload thất bại: " + errorBody, Toast.LENGTH_LONG).show();
+                            String errorBody = response.errorBody() != null ? response.errorBody().string() : getString(R.string.no_error_info);
+                            Toast.makeText(EditInformationActivity.this, getString(R.string.update_failed) + ": " + errorBody, Toast.LENGTH_LONG).show();
                         } catch (IOException e) {
-                            Toast.makeText(EditInformationActivity.this, "Upload thất bại!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(EditInformationActivity.this, getString(R.string.update_failed), Toast.LENGTH_SHORT).show();
                         }
                     }
                 }
 
                 @Override
                 public void onFailure(Call<String> call, Throwable t) {
-                    Toast.makeText(EditInformationActivity.this, "No network connection please try again", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EditInformationActivity.this, getString(R.string.connection_error) + ": " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
         } catch (IOException e) {
-            Toast.makeText(this, "No network connection please try again", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.upload_image_error), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -495,8 +486,6 @@ public class EditInformationActivity extends AppCompatActivity {
         return null;
     }
 
-    /** Load user avatar from server */
-    /** Load user info including avatar from server */
     private void loadUserInfo() {
         ApiService apiService = RetrofitClient.getApiService(this);
         String token = sessionManager.getToken();
@@ -533,11 +522,10 @@ public class EditInformationActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<MyInfoResponse> call, Throwable t) {
                 imgAvatar.setImageResource(R.drawable.avatar);
-                Toast.makeText(EditInformationActivity.this, "Unable to load user information", Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditInformationActivity.this, getString(R.string.load_user_info_error), Toast.LENGTH_SHORT).show();
             }
         });
     }
-
 
     private void setupUnicodeValidation(EditText editText) {
         editText.addTextChangedListener(new TextWatcher() {
@@ -552,7 +540,7 @@ public class EditInformationActivity extends AppCompatActivity {
                 String input = s.toString();
                 for (int i = 0; i < input.length(); i++) {
                     if (Character.isISOControl(input.charAt(i))) {
-                        editText.setError("No control characters allowed");
+                        editText.setError(getString(R.string.no_control_characters_allowed));
                         return;
                     }
                 }
@@ -567,22 +555,22 @@ public class EditInformationActivity extends AppCompatActivity {
     }
 
     private void updateStudentSwitch(MyInfo userInfo) {
-        // Kiểm tra xem user có role STUDENT hay không
+        // Kiểm tra vai trò của người dùng
         boolean isStudent = false;
         if (userInfo != null && userInfo.getRoles() != null) {
-            for (Role role : userInfo.getRoles()) {
-                if (role.getName() != null && role.getName().equals("STUDENT")) {
+            for (MyInfo.Role role : userInfo.getRoles()) {
+                if (role.getName() != null && "STUDENT".equalsIgnoreCase(role.getName())) {
                     isStudent = true;
                     break;
                 }
             }
         }
 
-        // Cập nhật trạng thái checked dựa vào dữ liệu từ DB
+        // Cập nhật trạng thái của SwitchMaterial dựa trên vai trò
         swStudent.setChecked(isStudent);
 
-        // Thay vì disabled, sử dụng sự kiện để ngăn thay đổi
-        swStudent.setEnabled(true); // Bật lại để hiển thị màu sắc bình thường
+        // Giữ nguyên logic ngăn người dùng thay đổi trạng thái
+        swStudent.setEnabled(true); // Bật để hiển thị màu sắc bình thường
         swStudent.setClickable(false); // Không cho click để thay đổi
         swStudent.setFocusable(false); // Không cho focus
     }
@@ -605,6 +593,7 @@ public class EditInformationActivity extends AppCompatActivity {
                 break;
         }
     }
+
     private void setupValidationListeners() {
         etFirstName.setOnFocusChangeListener((v, hasFocus) -> { if (!hasFocus) validateFirstName(); });
         etLastName.setOnFocusChangeListener((v, hasFocus) -> { if (!hasFocus) validateLastName(); });
@@ -612,9 +601,8 @@ public class EditInformationActivity extends AppCompatActivity {
         spDay.setOnFocusChangeListener((v, hasFocus) -> { /* spinner focus change not common */ });
     }
 
-    /** Validate all fields before saving */
     private boolean validateInputs() {
-        return  validateFirstName()
+        return validateFirstName()
                 & validateLastName()
                 & validatePhoneNumber()
                 & validateDOB();
@@ -623,23 +611,21 @@ public class EditInformationActivity extends AppCompatActivity {
     private boolean validateFirstName() {
         String n = etFirstName.getText().toString().trim();
         if (n.isEmpty()) {
-            etFirstName.setError("Please enter your first name");
+            etFirstName.setError(getString(R.string.error_first_name_empty));
             return false;
         }
-        // Load cả 2 danh sách bad-words
         Set<String> badWords = new HashSet<>();
         badWords.addAll(BadWordsLoader.loadEnglishBadWords(this));
         badWords.addAll(BadWordsLoader.loadVietnameseBadWords(this));
         String lower = n.toLowerCase();
         for (String bad : badWords) {
             if (lower.contains(bad)) {
-                etFirstName.setError("First name contains sensitive content, please try again!");
+                etFirstName.setError(getString(R.string.error_first_name_sensitive_content));
                 return false;
             }
         }
-        // Kiểm tra ký tự hợp lệ và độ dài (>=2 ký tự, chỉ chữ và dấu cách)
         if (!Pattern.matches(NAME_PATTERN, n)) {
-            etFirstName.setError("Invalid first name (letters and spaces only, ≥2 characters)");
+            etFirstName.setError(getString(R.string.error_first_name_invalid));
             return false;
         }
         etFirstName.setError(null);
@@ -649,38 +635,35 @@ public class EditInformationActivity extends AppCompatActivity {
     private boolean validateLastName() {
         String n = etLastName.getText().toString().trim();
         if (n.isEmpty()) {
-            etLastName.setError("Please enter your last name");
+            etLastName.setError(getString(R.string.error_last_name_empty));
             return false;
         }
-        // Load cả 2 danh sách bad-words
         Set<String> badWords = new HashSet<>();
         badWords.addAll(BadWordsLoader.loadEnglishBadWords(this));
         badWords.addAll(BadWordsLoader.loadVietnameseBadWords(this));
         String lower = n.toLowerCase();
         for (String bad : badWords) {
             if (lower.contains(bad)) {
-                etLastName.setError("Last name contains sensitive content, please try again!");
+                etLastName.setError(getString(R.string.error_last_name_sensitive_content));
                 return false;
             }
         }
-        // Kiểm tra ký tự hợp lệ và độ dài (>=2 ký tự, chỉ chữ và dấu cách)
         if (!Pattern.matches(NAME_PATTERN, n)) {
-            etLastName.setError("Invalid last name (letters and spaces only, ≥2 characters)");
+            etLastName.setError(getString(R.string.error_last_name_invalid));
             return false;
         }
         etLastName.setError(null);
         return true;
     }
 
-
     private boolean validatePhoneNumber() {
         String pn = etPhoneNumber.getText().toString().trim();
         if (pn.isEmpty()) {
-            etPhoneNumber.setError("Please enter phone number");
+            etPhoneNumber.setError(getString(R.string.error_phone_number_empty));
             return false;
         }
         if (!Pattern.matches(PHONE_PATTERN, pn)) {
-            etPhoneNumber.setError("Invalid phone number");
+            etPhoneNumber.setError(getString(R.string.error_phone_number_invalid));
             return false;
         }
         etPhoneNumber.setError(null);
@@ -700,12 +683,12 @@ public class EditInformationActivity extends AppCompatActivity {
             int age = t.get(Calendar.YEAR) - Integer.parseInt(y);
             if (t.get(Calendar.DAY_OF_YEAR) < c.get(Calendar.DAY_OF_YEAR)) age--;
             if (age < 10) {
-                Toast.makeText(this, "You must be 10 years or older", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.error_age_under_10), Toast.LENGTH_SHORT).show();
                 return false;
             }
             return true;
         } catch (Exception ex) {
-            Toast.makeText(this, "Invalid date of birth", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.error_invalid_dob), Toast.LENGTH_SHORT).show();
             return false;
         }
     }

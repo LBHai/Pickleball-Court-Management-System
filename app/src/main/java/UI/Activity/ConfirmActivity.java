@@ -125,7 +125,7 @@ public class ConfirmActivity extends AppCompatActivity {
         orderType = intent.getStringExtra("orderType");
         String tvPhoneFromIntent = intent.getStringExtra("tvPhone");
         if (tvPhoneFromIntent != null) {
-            tvContact.setText("Liên hệ: " + tvPhoneFromIntent);
+            tvContact.setText(getString(R.string.stadium_contact) + tvPhoneFromIntent);
             Log.d("tvContact", tvPhoneFromIntent != null ? tvPhoneFromIntent : "Phone number not provided");
         }
 
@@ -162,13 +162,13 @@ public class ConfirmActivity extends AppCompatActivity {
                 serviceList = gson.fromJson(serviceListJson, new TypeToken<List<Service>>(){}.getType());
             } catch (Exception e) {
                 Log.e("ConfirmActivity", "Lỗi parse serviceListJson: " + e.getMessage());
-                Toast.makeText(this, "Lỗi dữ liệu danh sách dịch vụ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.error_list_service_label), Toast.LENGTH_SHORT).show();
                 finish();
                 return;
             }
         } else {
             Log.e("ConfirmActivity", "serviceListJson is null or empty");
-            Toast.makeText(this, "Không có dữ liệu danh sách dịch vụ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.error_nodata_service_label), Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -180,19 +180,19 @@ public class ConfirmActivity extends AppCompatActivity {
                 Gson gson = new Gson();
                 serviceDetails = gson.fromJson(serviceDetailsJson, new TypeToken<List<ServiceDetail>>(){}.getType());
                 if (serviceDetails == null || serviceDetails.isEmpty()) {
-                    Toast.makeText(this, "Danh sách dịch vụ trống", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.empty_service_label), Toast.LENGTH_SHORT).show();
                     finish();
                     return;
                 }
             } catch (Exception e) {
                 Log.e("ConfirmActivity", "Lỗi parse serviceDetailsJson: " + e.getMessage());
-                Toast.makeText(this, "Lỗi dữ liệu dịch vụ: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.error_data_service_label) + e.getMessage(), Toast.LENGTH_SHORT).show();
                 finish();
                 return;
             }
         } else {
             Log.e("ConfirmActivity", "serviceDetailsJson is null or empty");
-            Toast.makeText(this, "Không có dữ liệu dịch vụ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.no_data_service_label), Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -202,15 +202,15 @@ public class ConfirmActivity extends AppCompatActivity {
         final double paymentAmount = calculatePaymentAmount(serviceDetails);
 
         // Hiển thị thông tin lên giao diện
-        tvStadiumName.setText("Tên sân: " + courtName);
-        tvAddress.setText("Địa chỉ: " + courtAddress);
-        tvDate.setText("Thông tin đơn dịch vụ:");
+        tvStadiumName.setText(getString(R.string.label_stadium_name, courtName));
+        tvAddress.setText(getString(R.string.label_address, courtAddress));
+        tvDate.setText(getString(R.string.infomation_service_label));
 
         layoutConfirmOrders.removeAllViews();
         for (ServiceDetail detail : serviceDetails) {
             TextView tvService = new TextView(this);
             // Tìm Service tương ứng với courtServiceId
-            String serviceName = "Dịch vụ không xác định";
+            String serviceName = getString(R.string.unknown_service_label);
             for (Service service : finalServiceList) {
                 if (service.getId() != null && service.getId().equals(detail.getCourtServiceId())) {
                     serviceName = service.getName();
@@ -225,7 +225,9 @@ public class ConfirmActivity extends AppCompatActivity {
             layoutConfirmOrders.addView(tvService);
         }
 
-        tvTotalPriceLine.setText(Html.fromHtml("Tổng tiền: <b>" + formatMoney((int) paymentAmount) + "</b>"));
+        tvTotalPriceLine.setText(Html.fromHtml(
+                getString(R.string.total_price_html, formatMoney((int) paymentAmount))
+        ));
 
         // Ẩn nút đặt cọc và đặt tên nút thanh toán
         btnDeposit.setVisibility(View.GONE);
@@ -250,11 +252,11 @@ public class ConfirmActivity extends AppCompatActivity {
                 }
                 @Override
                 public void onError(String e) {
-                    Toast.makeText(ConfirmActivity.this, "Lấy thông tin thất bại!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ConfirmActivity.this, getString(R.string.error_get_infor), Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
-            Toast.makeText(this, "Bạn đang đặt dịch vụ với vai trò là Guest!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.order_service_guest), Toast.LENGTH_SHORT).show();
             etName.setText("");
             etPhone.setText("");
             String guestPhone = sessionManager.getGuestPhone();
@@ -270,7 +272,7 @@ public class ConfirmActivity extends AppCompatActivity {
             @Override
             public void onDebouncedClick(View v) {
                 if (isProcessing) {
-                    Toast.makeText(ConfirmActivity.this, "Đang xử lý, vui lòng chờ...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ConfirmActivity.this, getString(R.string.watting), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -339,7 +341,7 @@ public class ConfirmActivity extends AppCompatActivity {
                             finish();
                         } else {
                             Log.e("ConfirmActivity", "Tạo đơn dịch vụ thất bại. Mã trạng thái HTTP: " + response.code());
-                            Toast.makeText(ConfirmActivity.this, "Tạo đơn dịch vụ thất bại!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ConfirmActivity.this, getString(R.string.gen_service_fail), Toast.LENGTH_SHORT).show();
                             isProcessing = false;
                             btnPayment.setEnabled(true);
                         }
@@ -380,7 +382,7 @@ public class ConfirmActivity extends AppCompatActivity {
                 startDate == null || endDate == null ||
                 startTime == null || endTime == null ||
                 (selectedCourtSlots == null || selectedCourtSlots.isEmpty()) && flexibleCourtSlotFixes.isEmpty()) {
-            Toast.makeText(this, "Không có dữ liệu đặt sân!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.no_data_booked), Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -389,7 +391,7 @@ public class ConfirmActivity extends AppCompatActivity {
         int hours = totalMinutes / 60;
         int mins = totalMinutes % 60;
         totalTime = String.format(Locale.getDefault(), "%dh%02d", hours, mins);
-        tvTotalTimeLine.setText("Tổng thời gian chơi: " + totalTime);
+        tvTotalTimeLine.setText(getString(R.string.total_booked) + totalTime);
 
         String formattedStartTime = startTime.contains(":") && startTime.split(":").length == 2 ? startTime + ":00" : startTime;
         String formattedEndTime = endTime.contains(":") && endTime.split(":").length == 2 ? endTime + ":00" : endTime;
@@ -405,27 +407,28 @@ public class ConfirmActivity extends AppCompatActivity {
                     if (paymentValue == 0) {
                         // Hiển thị dialog thông báo lỗi
                         AlertDialog.Builder builder = new AlertDialog.Builder(ConfirmActivity.this);
-                        builder.setTitle("Thông báo");
-                        builder.setMessage("Yêu cầu của quý khách không đúng, vui lòng chọn lại!!!");
-                        builder.setPositiveButton("Chọn lại", new DialogInterface.OnClickListener() {
+                        builder.setTitle(getString(R.string.dialog_title_invalid_request));
+                        builder.setMessage(getString(R.string.dialog_message_invalid_request));
+                        builder.setPositiveButton(getString(R.string.dialog_button_retry), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                // Quay về BookingRegularTableActivity
                                 Intent intent = new Intent(ConfirmActivity.this, BookingRegularTableActivity.class);
                                 startActivity(intent);
                                 finish();
                             }
                         });
+
                         builder.setCancelable(false); // Không cho phép đóng dialog bằng nút back
                         builder.show();
                     } else {
                         totalPriceFixedOrder = response.body().intValue();
                         int numberOfCourts = finalSelectedCourtSlots.size();
                         int finalTotalPrice = totalPriceFixedOrder * numberOfCourts;
-                        tvTotalPriceLine.setText(Html.fromHtml("Tổng tiền: <b>" + formatMoney(finalTotalPrice) + "</b>"));
+                        String totalPriceText = getString(R.string.total_price_html, formatMoney(finalTotalPrice));
+                        tvTotalPriceLine.setText(Html.fromHtml(totalPriceText));
                     }
                 } else {
-                    Toast.makeText(ConfirmActivity.this, "Lỗi khi lấy tổng tiền", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ConfirmActivity.this, getString(R.string.error_get_total), Toast.LENGTH_SHORT).show();
                     tvTotalPriceLine.setText("Tổng tiền: Lỗi");
                 }
             }
@@ -439,13 +442,13 @@ public class ConfirmActivity extends AppCompatActivity {
 
         fetchCourtDetails(courtId);
 
-        tvDate.setText("Ngày " + startDate + " đến ngày " + endDate + "\nThời gian: " + startTime + " - " + endTime + "\nTrong: " + selectedDays);
+        tvDate.setText(getString(R.string.date_range, startDate, endDate, startTime, endTime, selectedDays));
 
         layoutConfirmOrders.removeAllViews();
         if (selectedCourtSlots != null) {
             for (String courtSlot : selectedCourtSlots) {
                 TextView tvCourtSlot = new TextView(this);
-                tvCourtSlot.setText("Sân đang chọn: " + courtSlot);
+                tvCourtSlot.setText(getString(R.string.court_selected)+ courtSlot);
                 tvCourtSlot.setTextColor(getResources().getColor(android.R.color.white));
                 tvCourtSlot.setTextSize(14);
                 layoutConfirmOrders.addView(tvCourtSlot);
@@ -455,7 +458,7 @@ public class ConfirmActivity extends AppCompatActivity {
             String date = entry.getKey();
             String alternativeCourt = entry.getValue();
             TextView tvReplacement = new TextView(this);
-            tvReplacement.setText("Ngày " + date + ": Thay thế bằng " + alternativeCourt);
+            tvReplacement.setText(getString(R.string.replacement_info, date, alternativeCourt));
             tvReplacement.setTextColor(getResources().getColor(android.R.color.white));
             tvReplacement.setTextSize(14);
             layoutConfirmOrders.addView(tvReplacement);
@@ -478,11 +481,11 @@ public class ConfirmActivity extends AppCompatActivity {
                 }
                 @Override
                 public void onError(String e) {
-                    Toast.makeText(ConfirmActivity.this, "Lấy thông tin thất bại!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ConfirmActivity.this, getString(R.string.error_get_infor), Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
-            Toast.makeText(this, "Bạn đang đặt sân với vai trò là Guest!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.order_court_guest), Toast.LENGTH_SHORT).show();
             etName.setText("");
             etPhone.setText("");
             etNote.setText("");
@@ -498,7 +501,7 @@ public class ConfirmActivity extends AppCompatActivity {
                 boolean isNameValid = validateName();
                 boolean isPhoneValid = validatePhoneNumber();
                 boolean isNoteValid = validateNote();
-                if (!isNameValid || !isPhoneValid) {
+                if (!isNameValid || !isPhoneValid || !isNoteValid) {
                     return;
                 }
                 String name = etName.getText().toString().trim();
@@ -514,7 +517,7 @@ public class ConfirmActivity extends AppCompatActivity {
                 boolean isNameValid = validateName();
                 boolean isPhoneValid = validatePhoneNumber();
                 boolean isNoteValid = validateNote();
-                if (!isNameValid || !isPhoneValid) {
+                if (!isNameValid || !isPhoneValid || !isNoteValid) {
                     return;
                 }
                 String name = etName.getText().toString().trim();
@@ -537,7 +540,7 @@ public class ConfirmActivity extends AppCompatActivity {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
             selectedDate = sdf.format(new Date());
         }
-        tvDate.setText("Thông tin chi tiết:");
+        tvDate.setText(getString(R.string.detail_infor));
 
         ApiService apiService = RetrofitClient.getApiService(this);
         String token = sessionManager.getToken();
@@ -557,11 +560,11 @@ public class ConfirmActivity extends AppCompatActivity {
                 }
                 @Override
                 public void onError(String e) {
-                    Toast.makeText(ConfirmActivity.this, "Lấy thông tin thất bại!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ConfirmActivity.this, getString(R.string.error_get_infor), Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
-            Toast.makeText(this, "Bạn đang đặt sân với vai trò là Guest!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.order_court_guest), Toast.LENGTH_SHORT).show();
             etName.setText("");
             etPhone.setText("");
             etNote.setText("");
@@ -573,7 +576,7 @@ public class ConfirmActivity extends AppCompatActivity {
 
         confirmOrders = new Gson().fromJson(confirmOrdersJson, new TypeToken<List<ConfirmOrder>>(){}.getType());
         if (confirmOrders == null || confirmOrders.isEmpty()) {
-            Toast.makeText(this, "Không có dữ liệu đặt sân!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.no_data_booked), Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -592,7 +595,7 @@ public class ConfirmActivity extends AppCompatActivity {
                 boolean isNameValid = validateName();
                 boolean isPhoneValid = validatePhoneNumber();
                 boolean isNoteValid = validateNote();
-                if (!isNameValid || !isPhoneValid) {
+                if (!isNameValid || !isPhoneValid || !isNoteValid) {
                     return;
                 }
                 String name = etName.getText().toString().trim();
@@ -612,7 +615,7 @@ public class ConfirmActivity extends AppCompatActivity {
                 boolean isNameValid = validateName();
                 boolean isPhoneValid = validatePhoneNumber();
                 boolean isNoteValid = validateNote();
-                if (!isNameValid || !isPhoneValid) {
+                if (!isNameValid || !isPhoneValid || !isNoteValid) {
                     return;
                 }
                 String name = etName.getText().toString().trim();
@@ -637,13 +640,13 @@ public class ConfirmActivity extends AppCompatActivity {
                 if (c != null) {
                     courtName = c.getName();
                     courtAddress = c.getAddress();
-                    tvStadiumName.setText("Tên sân: " + courtName);
-                    tvAddress.setText("Địa chỉ: " + courtAddress);
+                    tvStadiumName.setText(getString(R.string.label_stadium_name) + courtName);
+                    tvAddress.setText(getString(R.string.label_address) + courtAddress);
                 }
             }
             @Override
             public void onError(String e) {
-                Toast.makeText(ConfirmActivity.this, "Lỗi khi lấy thông tin sân", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ConfirmActivity.this, getString(R.string.error_fetch_court_infor), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -662,7 +665,7 @@ public class ConfirmActivity extends AppCompatActivity {
             TextView tvDayHeader = new TextView(this);
             tvDayHeader.setTextColor(getResources().getColor(android.R.color.white));
             tvDayHeader.setTextSize(16);
-            tvDayHeader.setText("Ngày: " + e.getKey());
+            tvDayHeader.setText(getString(R.string.data_label) + e.getKey());
             layoutConfirmOrders.addView(tvDayHeader);
             List<ConfirmOrder> list = e.getValue();
             list.sort((o1, o2) -> Integer.compare(toMinutes(o1.getStartTime()), toMinutes(o2.getStartTime())));
@@ -685,8 +688,9 @@ public class ConfirmActivity extends AppCompatActivity {
         int hours = totalMinutes / 60;
         int mins = totalMinutes % 60;
         totalTime = String.format(Locale.getDefault(), "%dh%02d", hours, mins);
-        tvTotalPriceLine.setText(Html.fromHtml("Tổng tiền: <b>" + formatMoney(overallTotalPrice) + "</b>"));
-        tvTotalTimeLine.setText("Tổng thời gian chơi: " + totalTime);
+        tvTotalPriceLine.setText(Html.fromHtml(getString(R.string.total_price_html, formatMoney(overallTotalPrice))));
+        tvTotalTimeLine.setText(getString(R.string.total_play_time, totalTime));
+
     }
     private void createFixedOrder(boolean isDeposit, int totalPriceFixedOrder) {
         String name = etName.getText().toString().trim();
@@ -712,24 +716,24 @@ public class ConfirmActivity extends AppCompatActivity {
         int numberOfCourts = selectedCourtSlots != null ? selectedCourtSlots.size() : 0;
         int finalTotalPrice = totalPriceFixedOrder * numberOfCourts;
 
-        Log.d("CreateFixedOrder", "=== Thông tin đơn cố định ===");
-        Log.d("CreateFixedOrder", "Court ID: " + courtId);
-        Log.d("CreateFixedOrder", "User ID: " + userId);
-        Log.d("CreateFixedOrder", "Customer Name: " + name);
-        Log.d("CreateFixedOrder", "Phone Number: " + phone);
-        Log.d("CreateFixedOrder", "Note: " + note);
-        Log.d("CreateFixedOrder", "Payment Status: Chưa thanh toán");
-        Log.d("CreateFixedOrder", "Order Type: Đơn cố định");
-        Log.d("CreateFixedOrder", "Start Date: " + startDate);
-        Log.d("CreateFixedOrder", "End Date: " + endDate);
-        Log.d("CreateFixedOrder", "Start Time: " + startTime);
-        Log.d("CreateFixedOrder", "End Time: " + endTime);
-        Log.d("CreateFixedOrder", "Selected Days: " + selectedDays);
-        Log.d("CreateFixedOrder", "Selected Court Slots: " + (selectedCourtSlots != null ? selectedCourtSlots.toString() : "[]"));
-        Log.d("CreateFixedOrder", "Flexible Court Slot Fixes: " + flexibleCourtSlotFixes);
-        Log.d("CreateFixedOrder", "Number of Courts: " + numberOfCourts);
-        Log.d("CreateFixedOrder", "Total Price: " + finalTotalPrice);
-        Log.d("CreateFixedOrder", "Is Deposit: " + isDeposit);
+//        Log.d("CreateFixedOrder", "=== Thông tin đơn cố định ===");
+//        Log.d("CreateFixedOrder", "Court ID: " + courtId);
+//        Log.d("CreateFixedOrder", "User ID: " + userId);
+//        Log.d("CreateFixedOrder", "Customer Name: " + name);
+//        Log.d("CreateFixedOrder", "Phone Number: " + phone);
+//        Log.d("CreateFixedOrder", "Note: " + note);
+//        Log.d("CreateFixedOrder", "Payment Status: Chưa thanh toán");
+//        Log.d("CreateFixedOrder", "Order Type: Đơn cố định");
+//        Log.d("CreateFixedOrder", "Start Date: " + startDate);
+//        Log.d("CreateFixedOrder", "End Date: " + endDate);
+//        Log.d("CreateFixedOrder", "Start Time: " + startTime);
+//        Log.d("CreateFixedOrder", "End Time: " + endTime);
+//        Log.d("CreateFixedOrder", "Selected Days: " + selectedDays);
+//        Log.d("CreateFixedOrder", "Selected Court Slots: " + (selectedCourtSlots != null ? selectedCourtSlots.toString() : "[]"));
+//        Log.d("CreateFixedOrder", "Flexible Court Slot Fixes: " + flexibleCourtSlotFixes);
+//        Log.d("CreateFixedOrder", "Number of Courts: " + numberOfCourts);
+//        Log.d("CreateFixedOrder", "Total Price: " + finalTotalPrice);
+//        Log.d("CreateFixedOrder", "Is Deposit: " + isDeposit);
         ApiService api = RetrofitClient.getApiService(this);
         Call<CreateOrderResponse> call = api.createFixedOrder(req);
         call.enqueue(new Callback<CreateOrderResponse>() {
@@ -754,7 +758,7 @@ public class ConfirmActivity extends AppCompatActivity {
                     startActivity(i);
                     finish();
                 } else {
-                    Toast.makeText(ConfirmActivity.this, "Tạo đơn thất bại!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ConfirmActivity.this, getString(R.string.gen_court_fail), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -844,7 +848,7 @@ public class ConfirmActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(Orders order) {
                     if (order == null) {
-                        Toast.makeText(ConfirmActivity.this, "Đơn hàng không tồn tại", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ConfirmActivity.this, getString(R.string.order_not_exist), Toast.LENGTH_SHORT).show();
                         btnPayment.setEnabled(true);
                         btnDeposit.setEnabled(true);
                         return;
@@ -896,16 +900,16 @@ public class ConfirmActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(CreateOrderResponse r) {
                             if (r != null) {
-                                Log.d("ConfirmActivity", "API changeOrder success");
-                                Log.d("ConfirmActivity", "computedPaymentAmount: " + computedPaymentAmount);
-                                Log.d("ConfirmActivity", "qrcode: " + r.getQrcode());
-                                Log.d("ConfirmActivity", "paymentTimeout: " + r.getPaymentTimeout());
+//                                Log.d("ConfirmActivity", "API changeOrder success");
+//                                Log.d("ConfirmActivity", "computedPaymentAmount: " + computedPaymentAmount);
+//                                Log.d("ConfirmActivity", "qrcode: " + r.getQrcode());
+//                                Log.d("ConfirmActivity", "paymentTimeout: " + r.getPaymentTimeout());
 
                                 // **Sửa đổi**: Lấy paymentTimeout mới từ response
                                 String newPaymentTimeout = r.getPaymentTimeout();
                                 if (newPaymentTimeout == null || newPaymentTimeout.isEmpty()) {
                                     Log.e("ConfirmActivity", "paymentTimeout từ changeOrder là null hoặc rỗng");
-                                    Toast.makeText(ConfirmActivity.this, "Lỗi: Timeout không hợp lệ", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(ConfirmActivity.this, getString(R.string.error_timeout_invalid), Toast.LENGTH_SHORT).show();
                                     btnPayment.setEnabled(true);
                                     btnDeposit.setEnabled(true);
                                     return;
@@ -953,7 +957,7 @@ public class ConfirmActivity extends AppCompatActivity {
                                 startActivity(i);
                                 finish();
                             } else {
-                                Toast.makeText(ConfirmActivity.this, "Thay đổi lịch thất bại!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(ConfirmActivity.this, getString(R.string.update_schedule_failed), Toast.LENGTH_SHORT).show();
                                 btnPayment.setEnabled(true);
                                 btnDeposit.setEnabled(true);
                             }
@@ -961,7 +965,7 @@ public class ConfirmActivity extends AppCompatActivity {
 
                         @Override
                         public void onError(String e) {
-                            Toast.makeText(ConfirmActivity.this, "Thay đổi lịch thất bại: " + e, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ConfirmActivity.this, getString(R.string.update_schedule_failed_with_error) + e, Toast.LENGTH_SHORT).show();
                             btnPayment.setEnabled(true);
                             btnDeposit.setEnabled(true);
                         }
@@ -970,7 +974,7 @@ public class ConfirmActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(String e) {
-                    Toast.makeText(ConfirmActivity.this, "Không thể lấy thông tin đơn cũ: " + e, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ConfirmActivity.this, getString(R.string.get_old_order_failed_with_error) + e, Toast.LENGTH_SHORT).show();
                     btnPayment.setEnabled(true);
                     btnDeposit.setEnabled(true);
                 }
@@ -1211,7 +1215,7 @@ public class ConfirmActivity extends AppCompatActivity {
                 }
                 reader.close();
             } catch (Exception e) {
-                Log.e("BadWordsLoader", "Lỗi khi tải danh sách từ tục tĩu tiếng Anh: " + e.getMessage());
+                //Log.e("BadWordsLoader", "Lỗi khi tải danh sách từ tục tĩu tiếng Anh: " + e.getMessage());
             }
             return englishBadWords;
         }
@@ -1234,7 +1238,7 @@ public class ConfirmActivity extends AppCompatActivity {
                 }
                 reader.close();
             } catch (Exception e) {
-                Log.e("BadWordsLoader", "Lỗi khi tải danh sách từ tục tĩu tiếng Việt: " + e.getMessage());
+                //Log.e("BadWordsLoader", "Lỗi khi tải danh sách từ tục tĩu tiếng Việt: " + e.getMessage());
             }
             return vietnameseBadWords;
         }
@@ -1274,20 +1278,20 @@ public class ConfirmActivity extends AppCompatActivity {
 
         // Kiểm tra bad words trước tiên
         if (containsBadWords(name)) {
-            tilName.setError("Name contains sensitive content, please try again!");
+            tilName.setError(getString(R.string.name_contains_bad_words));
             return false;
         }
 
         // Kiểm tra tên trống
         if (name.isEmpty()) {
-            tilName.setError("Please enter your name");
+            tilName.setError(getString(R.string.name_empty));
             return false;
         }
 
         // Kiểm tra ký tự hợp lệ và độ dài
         String namePattern = "^[\\p{L}][\\p{L}\\s]{1,29}$";
         if (!name.matches(namePattern)) {
-            tilName.setError("Invalid name (letters and spaces only, 2-30 characters)");
+            tilName.setError(getString(R.string.name_invalid));
             return false;
         }
 
@@ -1305,7 +1309,7 @@ public class ConfirmActivity extends AppCompatActivity {
 
         // Kiểm tra bad words trước tiên
         if (containsBadWords(note)) {
-            tilNote.setError("Note contains sensitive content, please try again!");
+            tilNote.setError(getString(R.string.note_contains_bad_words));
             return false;
         }
 
@@ -1318,7 +1322,7 @@ public class ConfirmActivity extends AppCompatActivity {
         // Kiểm tra ký tự hợp lệ và độ dài
         String notePattern = "^[a-zA-Z0-9\\s.,!?]{0,100}$";
         if (!note.matches(notePattern)) {
-            tilNote.setError("Invalid note (letters, numbers, spaces, and basic punctuation only, ≤100 characters)");
+            tilNote.setError(getString(R.string.note_invalid));
             return false;
         }
 
@@ -1329,14 +1333,15 @@ public class ConfirmActivity extends AppCompatActivity {
     private boolean validatePhoneNumber() {
         String phone = etPhone.getText().toString().trim();
         if (phone.isEmpty()) {
-            tilPhone.setError("Please enter your phone number");
+            tilPhone.setError(getString(R.string.phone_empty));
             return false;
         }
         if (!phone.matches("^(\\+84|0)(3|5|7|8|9)[0-9]{8}$")) {
-            tilPhone.setError("Invalid phone number");
+            tilPhone.setError(getString(R.string.phone_invalid));
             return false;
         }
         tilPhone.setError(null);
         return true;
     }
+
 }

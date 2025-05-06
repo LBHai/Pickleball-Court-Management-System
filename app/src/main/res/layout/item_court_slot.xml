@@ -11,7 +11,7 @@
         android:id="@+id/tvCourtName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Court Name"
+        android:text="@string/court_name_label"
         android:textSize="18sp"
         android:textStyle="bold" />
 

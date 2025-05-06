@@ -52,7 +52,7 @@ public class TimePickerDialog {
 
     public void show() {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(isStartTime ? "Chọn giờ bắt đầu" : "Chọn giờ kết thúc");
+        builder.setTitle(isStartTime ? context.getString(R.string.select_time_start) : context.getString(R.string.select_time_end));
 
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_time_picker, null);
         builder.setView(dialogView);

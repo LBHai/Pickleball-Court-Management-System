@@ -93,7 +93,7 @@ public class LoginActivity extends AppCompatActivity {
         String username = edtUsername.getText().toString().trim();
         String password = edtPassword.getText().toString().trim();
 
-        Log.d(TAG, "Attempting to login with username: " + username);
+//        Log.d(TAG, "Attempting to login with username: " + username);
         User user = new User(username, password);
         ApiService apiService = RetrofitClient.getApiService(this);
         Call<GetToken> call = apiService.getToken(user);
@@ -104,14 +104,17 @@ public class LoginActivity extends AppCompatActivity {
                 if (data != null && data.getResult() != null && data.getResult().isAuthenticated()) {
                     String token = data.getResult().getToken();
                     if (token != null && !token.isEmpty()) {
-                        Log.d(TAG, "Login successful, token received");
+                        //Log.d(TAG, "Login successful, token received");
                         sessionManager.saveToken(token);
-                        Toast.makeText(LoginActivity.this, data.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this,
+                                data.getMessage() != null ? data.getMessage() : getString(R.string.invalid_token),
+                                Toast.LENGTH_SHORT).show();
                         fetchUserInfo(token);
                     } else {
                         Toast.makeText(LoginActivity.this,
-                                data.getMessage() != null ? data.getMessage() : "Invalid token",
+                                data != null && data.getMessage() != null ? data.getMessage() : getString(R.string.auth_failed),
                                 Toast.LENGTH_SHORT).show();
+
                     }
                 } else {
                     Toast.makeText(LoginActivity.this,
@@ -122,7 +125,7 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onError(String errorMessage) {
-                Log.e(TAG, "Login API error: " + errorMessage);
+//                Log.e(TAG, "Login API error: " + errorMessage);
                 String message = extractMessageFromError(errorMessage);
                 Toast.makeText(LoginActivity.this,
                         message != null ? message : "An error occurred",
@@ -140,7 +143,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (r != null && r.getResult() != null) {
                     userId = r.getResult().getId();
                     sessionManager.saveUserId(userId);
-                    Log.d(TAG, "User info retrieved, userId: " + userId);
+                    //Log.d(TAG, "User info retrieved, userId: " + userId);
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     finish();
                 } else {
@@ -162,11 +165,11 @@ public class LoginActivity extends AppCompatActivity {
     private boolean validateUsername() {
         String u = edtUsername.getText().toString().trim();
         if (u.isEmpty()) {
-            tilUsername.setError("Please enter username");
+            tilUsername.setError(getString(R.string.error_enter_username));
             return false;
         }
         if (!Pattern.matches(USERNAME_PATTERN, u)) {
-            tilUsername.setError("Login name must be at least 4 characters and cannot contain special characters");
+            tilUsername.setError(getString(R.string.error_invalid_username));
             return false;
         }
         tilUsername.setError(null);
@@ -176,16 +179,17 @@ public class LoginActivity extends AppCompatActivity {
     private boolean validatePassword() {
         String p = edtPassword.getText().toString().trim();
         if (p.isEmpty()) {
-            tilPassword.setError("Please enter password");
+            tilPassword.setError(getString(R.string.error_enter_password));
             return false;
         }
         if (!Pattern.matches(PASSWORD_PATTERN, p)) {
-            tilPassword.setError("Password must be at least 6 characters, contain at least 1 letter and 1 number");
+            tilPassword.setError(getString(R.string.error_invalid_password));
             return false;
         }
         tilPassword.setError(null);
         return true;
     }
+
 
     private String extractMessageFromError(String errorMessage) {
         try {
@@ -197,7 +201,7 @@ public class LoginActivity extends AppCompatActivity {
                 return jsonObject.getString("message");
             }
         } catch (Exception e) {
-            Log.e(TAG, "Error parsing error message: " + e.getMessage());
+            //Log.e(TAG, "Error parsing error message: " + e.getMessage());
         }
         return null;
     }

@@ -30,10 +30,8 @@ public class NetworkUtils {
             public void onResponse(Call<T> call, Response<T> response) {
                 try {
                     if (response.isSuccessful() && response.body() != null) {
-                        // Thành công, có body -> trả kết quả
                         callback.onSuccess(response.body());
                     } else {
-                        // Không thành công hoặc body null
                         String errorBody = "";
                         if (response.errorBody() != null) {
                             try {
@@ -46,16 +44,11 @@ public class NetworkUtils {
                         if (!errorBody.isEmpty()) {
                             errorMsg += " - " + errorBody;
                         }
-                        // Hiển thị toast để người dùng biết
-                        Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show();
-                        // Gọi callback onError
                         callback.onError(errorMsg);
                     }
                 } catch (JsonSyntaxException e) {
-                    // Thường gặp khi JSON trả về không hợp lệ -> “End of input...”
                     e.printStackTrace();
                 } catch (Exception e) {
-                    // Bắt các lỗi khác (ví dụ NullPointer)
                     e.printStackTrace();
                 }
             }

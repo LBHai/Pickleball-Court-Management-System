@@ -36,7 +36,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Tên CLB"
+                android:text="@string/club_name"
                 android:textColor="#ebea97"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -45,7 +45,7 @@
                 android:id="@+id/tvStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Hủy do quá giờ thanh toán"
+                android:text="Status"
                 android:textColor="#c3e593"
                 android:textSize="14sp" />
         </LinearLayout>
@@ -62,7 +62,7 @@
                 android:id="@+id/tvDetail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Chi tiết:"
+                android:text="@string/detail"
                 android:textColor="@android:color/white"
                 android:textSize="14sp" />
 
@@ -81,7 +81,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Địa chỉ:"
+            android:text="@string/address"
             android:textColor="@android:color/white"
             android:textSize="14sp" />
     </LinearLayout>

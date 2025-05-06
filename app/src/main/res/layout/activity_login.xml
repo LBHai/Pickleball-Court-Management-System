@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="UI.Activity.LoginActivity">
+
     <androidx.cardview.widget.CardView
         android:id="@+id/homeButtonContainer"
         android:layout_width="48dp"
@@ -21,9 +22,10 @@
             android:layout_height="match_parent"
             android:padding="12dp"
             android:src="@drawable/ic_home"
-            android:contentDescription="Home Button"
+            android:contentDescription="@string/home_button_description"
             android:background="?attr/selectableItemBackgroundBorderless" />
     </androidx.cardview.widget.CardView>
+
     <!-- Full-screen background image -->
     <ImageView
         android:id="@+id/imgBackgroundLogin"
@@ -31,7 +33,7 @@
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
         android:src="@drawable/imagebackground"
-        android:contentDescription="Background"
+        android:contentDescription="@string/background_description"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -64,7 +66,7 @@
             android:padding="20dp"
             android:scaleType="centerCrop"
             android:src="@drawable/imgbg"
-            android:contentDescription="App Logo" />
+            android:contentDescription="@string/app_logo_description" />
     </androidx.cardview.widget.CardView>
 
     <TextView
@@ -72,7 +74,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Welcome"
+        android:text="@string/welcome_text"
         android:textColor="@color/white"
         android:textSize="28sp"
         android:textStyle="bold"
@@ -85,7 +87,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Sport is not giving up"
+        android:text="@string/sport_not_giving_up"
         android:textColor="@color/white"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -115,7 +117,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Username"
+                android:hint="@string/username_hint"
                 app:boxStrokeColor="@color/colorPrimary"
                 app:hintTextColor="@color/colorPrimary"
                 app:startIconDrawable="@drawable/person"
@@ -138,7 +140,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:hint="Password"
+                android:hint="@string/password_hint"
                 app:boxStrokeColor="@color/colorPrimary"
                 app:endIconMode="password_toggle"
                 app:hintTextColor="@color/colorPrimary"
@@ -162,7 +164,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Forgot Password?"
+                android:text="@string/forgot_password_1"
                 android:textColor="@color/green"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -173,7 +175,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="24dp"
-                android:text="LOGIN"
+                android:text="@string/login_button_text_upcase"
                 android:textSize="16sp"
                 app:cornerRadius="8dp"
                 app:backgroundTint="@color/green"
@@ -189,7 +191,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Don't have an account?"
+        android:text="@string/no_account_text"
         android:textColor="@color/white"
         android:textSize="16sp"
         app:layout_constraintEnd_toStartOf="@id/btnSignup"
@@ -202,7 +204,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
-        android:text="Sign Up"
+        android:text="@string/signup_button_text"
         android:textColor="@color/yellow"
         android:textSize="16sp"
         android:textStyle="bold"

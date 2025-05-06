@@ -13,6 +13,7 @@ import Data.Network.ApiService;
 import Data.Network.RetrofitClient;
 import Data.Model.NotificationRequest;
 import Data.Session.SessionManager;
+import SEP490.G9.R;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -87,24 +88,35 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
-                    CHANNEL_NAME,
+                    getString(R.string.channel_name),
                     NotificationManager.IMPORTANCE_DEFAULT
             );
-            channel.setDescription("Kênh thông báo của ứng dụng");
+            channel.setDescription(getString(R.string.channel_description));
             channel.enableLights(true);
             channel.setLightColor(Color.GREEN);
             if (manager != null) {
                 manager.createNotificationChannel(channel);
             }
         }
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
-                .setContentTitle(title != null ? title : "Thông báo mới")
-                .setContentText(body != null ? body : "Bạn có thông báo mới")
+                .setContentTitle(
+                        title != null
+                                ? title
+                                : getString(R.string.default_notification_title)
+                )
+                .setContentText(
+                        body != null
+                                ? body
+                                : getString(R.string.default_notification_body)
+                )
                 .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
         if (manager != null) {
             manager.notify((int) System.currentTimeMillis(), builder.build());
         }
     }
+
 }

@@ -22,7 +22,7 @@
                 android:id="@+id/tvHourLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Giờ"
+                android:text="@string/hour"
                 android:textSize="16sp"
                 android:textColor="#1976D2"
                 android:textStyle="bold" />
@@ -55,7 +55,7 @@
                 android:id="@+id/tvMinuteLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Phút"
+                android:text="@string/minute"
                 android:textSize="16sp"
                 android:textColor="#1976D2"
                 android:textStyle="bold" />
@@ -82,7 +82,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Hủy"
+            android:text="@string/cancel"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:textColor="#757575"
             app:strokeColor="#757575"
@@ -97,7 +97,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Xác nhận"
+            android:text="@string/btn_confirm"
             android:backgroundTint="#2196F3"
             android:textColor="#FFFFFF"
             app:cornerRadius="8dp" />

@@ -19,29 +19,30 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- Tên câu lạc bộ -->
+    <!-- Tên CLB -->
     <TextView
         android:id="@+id/tvClubName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/club_name_placeholder"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:layout_marginTop="16dp"
         android:textColor="@android:color/black"
         app:layout_constraintTop_toBottomOf="@id/imgClubCover"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:text="Câu Lạc Bộ Cầu Lông - Pickleball" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- Địa chỉ -->
     <TextView
         android:id="@+id/tvAddress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
         android:layout_marginTop="8dp"
+        android:text="@string/address_placeholder"
+        android:textSize="16sp"
         android:textColor="#666666"
         app:layout_constraintTop_toBottomOf="@id/tvClubName"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:text="Địa chỉ" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- TabLayout -->
     <com.google.android.material.tabs.TabLayout

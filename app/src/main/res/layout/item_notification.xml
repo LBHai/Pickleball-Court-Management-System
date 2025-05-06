@@ -23,7 +23,8 @@
             android:textColor="#FFFF00"
             android:textSize="14sp"
             android:textStyle="bold"
-            android:text="Tiêu đề thông báo" />
+            android:text="@string/notification_title"
+            />
 
         <TextView
             android:id="@+id/tvDescription"
@@ -32,7 +33,7 @@
             android:layout_marginTop="2dp"
             android:textColor="@android:color/white"
             android:textSize="13sp"
-            android:text="Nội dung mô tả" />
+            android:text="@string/notification_description" />
     </LinearLayout>
 
     <!-- Thời gian ở góc dưới bên phải -->
@@ -45,5 +46,5 @@
         android:layout_marginTop="4dp"
         android:textColor="#A9A9A9"
         android:textSize="12sp"
-        android:text="Thời gian" />
+        android:text="@string/time_1" />
 </RelativeLayout>

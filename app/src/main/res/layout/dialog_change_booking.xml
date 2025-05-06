@@ -9,7 +9,7 @@
         android:id="@+id/tvWarning"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Khi bạn thay đổi lịch, nếu bạn không hoàn tất thanh toán với lịch bạn đổi thì bạn sẽ mất hết lịch bạn đã hoàn tất thanh toán trước đó."
+        android:text="@string/warning_change_booking"
         android:textColor="#FF0000"
         android:textSize="16sp" />
 
@@ -17,7 +17,7 @@
         android:id="@+id/cbAccept"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Tôi chấp nhận" />
+        android:text="@string/accept_terms" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -29,12 +29,12 @@
             android:id="@+id/btnNo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Không" />
+            android:text="@string/yes" />
 
         <Button
             android:id="@+id/btnYes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Có" />
+            android:text="@string/no" />
     </LinearLayout>
 </LinearLayout>

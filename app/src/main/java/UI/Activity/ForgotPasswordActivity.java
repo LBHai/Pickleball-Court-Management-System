@@ -55,7 +55,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
         // 1. Kiểm tra độ dài chung
         if (key.length() <= 2) {
-            tilRecoveryKey.setError("Please enter at least 3 characters");
+            tilRecoveryKey.setError(getString(R.string.error_username_format));
             return;
         }
 
@@ -73,7 +73,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         } else {
             // Username
             if (!key.matches(USERNAME_PATTERN)) {
-                tilRecoveryKey.setError("Username must be at least 4 characters and not contain special characters");
+                tilRecoveryKey.setError(getString(R.string.error_username_format));
                 return;
             }
             tilRecoveryKey.setError(null);
@@ -83,7 +83,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
     private boolean validateEmailInput(String email) {
         if (!email.endsWith("@gmail.com") && !email.endsWith("edu.vn")) {
-            tilRecoveryKey.setError("Email must have the extension @gmail.com or edu.vn");
+            tilRecoveryKey.setError(getString(R.string.error_email_extension));
             return false;
         }
         tilRecoveryKey.setError(null);
@@ -92,7 +92,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
     private boolean validatePhoneInput(String pn) {
         if (!pn.matches(PHONE_PATTERN)) {
-            tilRecoveryKey.setError("Phone number is not in correct format");
+            tilRecoveryKey.setError(getString(R.string.error_phone_format));
             return false;
         }
         tilRecoveryKey.setError(null);
@@ -118,7 +118,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 showLoading(false);
-                showErrorDialog("Connection Error", "Vui lòng kiểm tra kết nối Internet");
+                showErrorDialog(getString(R.string.connection_error), getString(R.string.connection_error));
             }
         });
     }
@@ -130,20 +130,20 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                     .fromJson(errJson, ForgetPasswordResponse.class);
 
             if (err.getCode() == 1005) {
-                showErrorDialog("User Not Found", err.getMessage());
+                showErrorDialog(getString(R.string.user_not_found), err.getMessage());
             } else {
-                showErrorDialog("Error", err.getMessage());
+                showErrorDialog(getString(R.string.general_error), err.getMessage());
             }
         } catch (Exception e) {
-            showErrorDialog("Error", "Không thể đọc phản hồi từ server");
+            showErrorDialog(getString(R.string.general_error), getString(R.string.server_response_error));
         }
     }
 
     private void showSuccessDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Password Reset Sent");
-        builder.setMessage("Your new password has been sent to your email address. Please check your inbox.");
-        builder.setPositiveButton("GO TO LOGIN", (dialog, which) -> {
+        builder.setTitle(getString(R.string.reset_password_success_title));
+        builder.setMessage(getString(R.string.reset_password_success_message));
+        builder.setPositiveButton(getString(R.string.go_to_login), (dialog, which) -> {
             startActivity(new Intent(ForgotPasswordActivity.this, LoginActivity.class));
             finish();
         });
@@ -155,17 +155,18 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title);
         builder.setMessage(message);
-        builder.setPositiveButton("OK", null);
+        builder.setPositiveButton(getString(R.string.ok), null);
         builder.show();
     }
 
     private void showLoading(boolean isLoading) {
         if (isLoading) {
             btnResetPassword.setEnabled(false);
-            btnResetPassword.setText("SENDING...");
+            btnResetPassword.setText(getString(R.string.sending));
         } else {
             btnResetPassword.setEnabled(true);
-            btnResetPassword.setText("RESET PASSWORD");
+            btnResetPassword.setText(getString(R.string.reset_password_button));
         }
     }
+
 }

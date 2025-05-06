@@ -64,7 +64,14 @@ public class CourtsAdapter extends RecyclerView.Adapter<CourtViewHolder> {
         holder.getTvAddress().setText("Địa chỉ: " + court.getAddress());
         holder.getTvOpenTime().setText(court.getOpenTime());
         holder.getTvPhone().setText(court.getPhone());
-
+        holder.getTvPhone().setOnClickListener(v -> {
+            String phone = court.getPhone() != null ? court.getPhone() : "";
+            if (!phone.isEmpty()) {
+                Intent intent = new Intent(Intent.ACTION_DIAL);
+                intent.setData(Uri.parse("tel:" + phone));
+                context.startActivity(intent);
+            }
+        });
         String logoUrl = court.getLogoUrl();
         if (logoUrl != null && !logoUrl.isEmpty()) {
             Glide.with(context)

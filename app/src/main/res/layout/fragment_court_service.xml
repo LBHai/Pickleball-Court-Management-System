@@ -36,7 +36,7 @@
                 android:layout_weight="1"
                 android:layout_marginLeft="10dp"
                 android:background="@android:color/transparent"
-                android:hint="Tìm kiếm"
+                android:hint="@string/search_court"
                 android:textColorHint="#ADADAD"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"

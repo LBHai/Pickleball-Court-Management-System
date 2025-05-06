@@ -123,7 +123,7 @@ public class ServiceActivity extends Fragment {
                     }
                 } else {
                     showEmptyView(true);
-                    Toast.makeText(getContext(), "Không thể tải dữ liệu dịch vụ", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), getString(R.string.error_loading_service), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -131,7 +131,7 @@ public class ServiceActivity extends Fragment {
             public void onFailure(Call<List<Service>> call, Throwable t) {
                 showLoading(false);
                 showEmptyView(true);
-                Toast.makeText(getContext(), "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), getString(R.string.connection_error, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -165,7 +165,7 @@ public class ServiceActivity extends Fragment {
         }
 
         if (orderedServiceDetails.isEmpty()) {
-            Toast.makeText(getContext(), "Vui lòng chọn ít nhất một dịch vụ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), getString(R.string.select_service), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -194,13 +194,13 @@ public class ServiceActivity extends Fragment {
                     intent.putExtra("serviceListJson", serviceListJson);
                     startActivity(intent);
                 } else {
-                    Toast.makeText(getContext(), "Không thể lấy thông tin sân", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), getString(R.string.error_getting_field_info), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Courts> call, Throwable t) {
-                Toast.makeText(getContext(), "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), getString(R.string.network_error, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });
     }

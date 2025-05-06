@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F9F9F9"
@@ -12,24 +13,25 @@
         android:padding="16dp">
 
         <!-- Tiêu đề trang -->
+
+        <!-- Panel chọn ngày trong tuần -->
         <TextView
             android:id="@+id/tvPageTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Đặt lịch cố định"
-            android:textSize="24sp"
-            android:textColor="#1565C0"
             android:fontFamily="sans-serif-medium"
             android:gravity="center"
-            android:layout_marginBottom="16dp"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:text="@string/fixed_schedule"
+            android:textColor="#1565C0"
+            android:textSize="24sp"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_editor_absoluteX="16dp" />
 
-        <!-- Panel chọn ngày trong tuần -->
         <TextView
             android:id="@+id/tvSelectDays"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Chọn ngày trong tuần"
+            android:text="@string/select_days_of_week"
             android:textSize="18sp"
             android:textColor="#212121"
             android:fontFamily="sans-serif-medium"
@@ -63,7 +65,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Thứ 2"
+                        android:text="@string/monday"
                         android:buttonTint="#4CAF50"
                         android:textColor="#424242" />
 
@@ -72,7 +74,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Thứ 3"
+                        android:text="@string/tuesday"
                         android:buttonTint="#4CAF50"
                         android:textColor="#424242" />
 
@@ -81,7 +83,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Thứ 4"
+                        android:text="@string/wednesday"
                         android:buttonTint="#4CAF50"
                         android:textColor="#424242" />
                 </LinearLayout>
@@ -97,7 +99,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Thứ 5"
+                        android:text="@string/thursday"
                         android:buttonTint="#4CAF50"
                         android:textColor="#424242" />
 
@@ -106,7 +108,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Thứ 6"
+                        android:text="@string/friday"
                         android:buttonTint="#4CAF50"
                         android:textColor="#424242" />
 
@@ -115,7 +117,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Thứ 7"
+                        android:text="@string/saturday"
                         android:buttonTint="#4CAF50"
                         android:textColor="#424242" />
                 </LinearLayout>
@@ -131,7 +133,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="3"
-                        android:text="Chủ Nhật"
+                        android:text="@string/sunday"
                         android:buttonTint="#4CAF50"
                         android:textColor="#424242" />
                 </LinearLayout>
@@ -143,7 +145,7 @@
             android:id="@+id/tvTimeRange"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Khoảng thời gian đặt lịch"
+            android:text="@string/time_range_label"
             android:textSize="18sp"
             android:textColor="#212121"
             android:fontFamily="sans-serif-medium"
@@ -178,7 +180,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Ngày bắt đầu"
+                        android:text="@string/start_date_label"
                         app:cornerRadius="8dp"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:textColor="#1976D2"
@@ -196,7 +198,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Ngày kết thúc"
+                        android:text="@string/end_date_label"
                         app:cornerRadius="8dp"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:textColor="#1976D2"
@@ -218,7 +220,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Giờ bắt đầu"
+                        android:text="@string/start_time_label"
                         app:cornerRadius="8dp"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:textColor="#1976D2"
@@ -236,7 +238,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Giờ kết thúc"
+                        android:text="@string/end_time_label"
                         app:cornerRadius="8dp"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:textColor="#1976D2"

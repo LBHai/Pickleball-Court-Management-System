@@ -87,6 +87,8 @@ public class AccountFragment extends Fragment {
     private List<Orders> bookedOrders;
     private List<Orders> serviceOrders;
     private static final int REFRESH_INTERVAL = 2000;
+    private String avatarUrl;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -152,6 +154,8 @@ public class AccountFragment extends Fragment {
         tvServiceInfo.setOnClickListener(v -> showMemberInfoTab());
 
         orderAdapter.setOnItemClickListener(order -> {
+            boolean studentStatus = sessionManager.getStudentStatus();
+
             Intent intent = new Intent(getActivity(), DetailBookingActivity.class);
             intent.putExtra("orderId", order.getId());
             intent.putExtra("totalTime", order.getTotalTime());
@@ -162,6 +166,8 @@ public class AccountFragment extends Fragment {
             intent.putExtra("customerName", order.getCustomerName());
             intent.putExtra("phoneNumber", order.getPhoneNumber());
             intent.putExtra("note", order.getNote());
+            intent.putExtra("isStudent", studentStatus);
+            intent.putExtra("avatarUrl", avatarUrl);
             String serviceDetailsJson = OrderServiceHolder.getInstance().getServiceDetailsJson(order.getId());
             String serviceListJson = OrderServiceHolder.getInstance().getServiceListJson(order.getId());
             if (serviceDetailsJson != null) {
@@ -387,7 +393,7 @@ public class AccountFragment extends Fragment {
                         MyInfoResponse myInfoResponse = response.body();
                         if (myInfoResponse.getResult() != null) {
                             MyInfo info = myInfoResponse.getResult();
-
+                            //Log.d("AccountFragment", "Dữ liệu MyInfo đầy đủ: " + new Gson().toJson(info));
                             id = info.getId();
                             username = info.getUsername();
                             firstName = info.getFirstName();
@@ -397,20 +403,17 @@ public class AccountFragment extends Fragment {
                             gender = info.getGender();
                             dob = info.getDob();
                             student = info.isStudent();
-
+                            avatarUrl = info.getAvatarUrl();
+                            sessionManager.saveStudentStatus(student);
+                            sessionManager.saveAvatarUrl(avatarUrl);
+                            //Log.d("AccountFragment", "Giá trị student từ API: " + student);
                             tvUserName.setText(firstName + " " + lastName);
                             tvPhoneNumber.setText(info.getPhoneNumber());
-
-                            String avatarUrl = info.getAvatarUrl();
-
-                            Log.d("AccountFragment", "Avatar URL: " + avatarUrl);
-
                             if (requireContext() == null) {
-                                Log.e("AccountFragment", "Context is null, cannot load avatar");
                                 ivAvatar.setImageResource(R.drawable.avatar);
                                 return;
                             }
-
+                            
                             if (avatarUrl != null && !avatarUrl.isEmpty()) {
                                 Log.d("AccountFragment", "Loading avatar from URL: " + avatarUrl);
                                 Glide.with(requireContext())

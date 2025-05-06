@@ -2,6 +2,8 @@ package Data.Session;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.util.ArrayList;
@@ -14,9 +16,11 @@ public class SessionManager {
     private static final String KEY_TOKEN = "token";
     private static final String KEY_USER_ID = "userId";
     private static final String KEY_PHONE_NUMBER = "phoneNumber";
-    private static final String KEY_GUEST_PHONE = "guestPhone"; // Đổi từ KEY_GUEST_PHONES thành KEY_GUEST_PHONE
+    private static final String KEY_GUEST_PHONE = "guestPhone";
     private static final String KEY_HAS_SHOWN_GUEST_DIALOG = "hasShownGuestDialog";
     private static final String KEY_FAVORITE_COURTS = "favoriteCourts";
+    private static final String KEY_STUDENT_STATUS = "isStudent";
+    private static final String KEY_AVATAR_URL = "avatarUrl";
 
     private final SharedPreferences pref;
     private final SharedPreferences.Editor editor;
@@ -27,7 +31,6 @@ public class SessionManager {
         this.editor = pref.edit();
     }
 
-    //region Authentication
     public void saveToken(String token) {
         editor.putString(KEY_TOKEN, token).apply();
     }
@@ -59,18 +62,35 @@ public class SessionManager {
     public void clearSession() {
         editor.remove(KEY_TOKEN)
                 .remove(KEY_USER_ID)
-                .apply(); // Giữ lại phoneNumber cho guest
+                .remove(KEY_STUDENT_STATUS)
+                .remove(KEY_AVATAR_URL)
+                .apply();
     }
-    //endregion
 
-    //region Favorites
-    // [Các phương thức về favorites - giữ nguyên]
-    //endregion
+    public void saveStudentStatus(boolean isStudent) {
+        editor.putBoolean(KEY_STUDENT_STATUS, isStudent).apply();
+        Log.d("SessionManager", "Lưu isStudent: " + isStudent);
+    }
 
-    //region Guest
-    // Thay đổi: Lưu chỉ một số điện thoại guest thay vì danh sách
+    public boolean getStudentStatus() {
+        boolean isStudent = pref.getBoolean(KEY_STUDENT_STATUS, false);
+        Log.d("SessionManager", "Lấy isStudent: " + isStudent);
+        return isStudent;
+    }
+
+    /** Avatar URL storage **/
+    public void saveAvatarUrl(String url) {
+        editor.putString(KEY_AVATAR_URL, url).apply();
+        Log.d("SessionManager", "Lưu avatarUrl: " + url);
+    }
+
+    public String getAvatarUrl() {
+        String url = pref.getString(KEY_AVATAR_URL, null);
+        Log.d("SessionManager", "Lấy avatarUrl: " + url);
+        return url;
+    }
+
     public void setGuestPhone(String phone) {
-        // Không lưu nếu số này đã là số của người dùng đăng ký
         if (isUserPhone(phone)) {
             return;
         }
@@ -84,25 +104,21 @@ public class SessionManager {
     public void clearGuestPhone() {
         editor.remove(KEY_GUEST_PHONE).apply();
     }
-    //endregion
 
-
-    // Kiểm tra xem số điện thoại có thuộc về người dùng đã đăng ký không
     public boolean isUserPhone(String phone) {
         String userPhone = getPhoneNumber();
         return userPhone != null && userPhone.equals(phone);
     }
 
-    // Dọn dẹp số điện thoại của người dùng khỏi guest
     public void cleanupUserPhoneFromGuestList() {
         String userPhone = getPhoneNumber();
         String guestPhone = getGuestPhone();
-
         if (userPhone != null && !userPhone.isEmpty() &&
                 guestPhone != null && guestPhone.equals(userPhone)) {
             clearGuestPhone();
         }
     }
+
     public void setHasShownGuestDialog(boolean hasShown) {
         editor.putBoolean(KEY_HAS_SHOWN_GUEST_DIALOG, hasShown).apply();
     }
@@ -110,7 +126,7 @@ public class SessionManager {
     public boolean hasShownGuestDialog() {
         return pref.getBoolean(KEY_HAS_SHOWN_GUEST_DIALOG, false);
     }
-    //region Favorites
+
     public void saveFavoriteCourts(List<String> courtIds) {
         editor.putStringSet(KEY_FAVORITE_COURTS, new HashSet<>(courtIds)).apply();
     }

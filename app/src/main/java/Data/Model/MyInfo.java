@@ -15,9 +15,29 @@ public class MyInfo {
     private String gender;
     private boolean student;
     private String avatar;
+    private List<String> courtNames;
+    private boolean active;
 
+    public static class Role {
+        private String name;
+        private String description;
 
-    // Getters và setters
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+    }
 
     public MyInfo() {
     }
@@ -34,7 +54,7 @@ public class MyInfo {
         this.userRank = userRank;
         this.gender = gender;
         this.student = student;
-        this.avatar = avatar;
+        this.avatar = avatarUrl;
     }
 
     public String getId() {
@@ -118,7 +138,14 @@ public class MyInfo {
     }
 
     public boolean isStudent() {
-        return student;
+        if (roles != null) {
+            for (Role role : roles) {
+                if ("STUDENT".equalsIgnoreCase(role.getName())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public void setStudent(boolean student) {
@@ -131,5 +158,21 @@ public class MyInfo {
 
     public void setAvatarUrl(String avatarUrl) {
         this.avatar = avatarUrl;
+    }
+
+    public List<String> getCourtNames() {
+        return courtNames;
+    }
+
+    public void setCourtNames(List<String> courtNames) {
+        this.courtNames = courtNames;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

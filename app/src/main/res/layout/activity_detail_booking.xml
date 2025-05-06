@@ -144,6 +144,7 @@
                                 android:src="@drawable/pickleball" />
 
                             <TextView
+                                android:id="@+id/subject"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Đối tượng: Pickleball"
@@ -326,17 +327,18 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
                     android:text="Thay đổi lịch đặt"
                     android:textAllCaps="false"
                     android:backgroundTint="#e3b02c" />
+
                 <Button
                     android:id="@+id/btnPayRemaining"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/btnChangeBooking"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginTop="16dp"
-                    android:text="Thanh toán"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:text="Thanh toán nốt"
                     android:textColor="#FFFFFF"
                     android:backgroundTint="#FF5722"
                     android:visibility="gone" />

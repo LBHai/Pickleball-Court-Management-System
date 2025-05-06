@@ -10,6 +10,7 @@
     <string name="already_have_account">Đã có tài khoản?</string>
     <string name="signup">Đăng ký</string>
     <string name="create_account">Create Account</string>
+    <string name="birthday">Ngày sinh</string>
 
 
 
@@ -33,9 +34,9 @@
     <string name="menu_deleteaccount">Xóa tài khoản</string>
 
     <string-array name="gender_array">
-        <item>Select gender</item>
-        <item>MALE</item>
-        <item>FEMALE</item>
+        <item>Chọn giới tính</item>
+        <item>Nam</item>
+        <item>Nữ</item>
     </string-array>
 
     <string name="avatar">Ảnh đại diện</string>
@@ -100,8 +101,535 @@
     <string name="scanQR">Quét mã QR</string>
     <string name="topay">Để thanh toán ngay 😍</string>
     <string name="timepay">Thời gian thanh toán còn lại 🕛</string>
+    <string name="channel_name">Thông báo chung</string>
+    <string name="channel_description">Kênh thông báo của ứng dụng</string>
+    <string name="default_notification_title">Thông báo mới</string>
+    <string name="default_notification_body">Bạn có thông báo mới</string>
+    <!-- Date/Time Pickers -->
+    <string name="start_date_label">Ngày bắt đầu: </string>
+    <string name="end_date_label">Ngày kết thúc: </string>
+    <string name="start_time_label">Giờ bắt đầu: </string>
+    <string name="end_time_label">Giờ kết thúc: </string>
+
+    <!-- Validation Errors -->
+    <string name="error_finish_before_start_date">Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu!</string>
+    <string name="error_invalid_date_format">Lỗi định dạng ngày</string>
+    <string name="error_finish_before_start_time">Giờ kết thúc phải lớn hơn giờ bắt đầu!</string>
+    <string name="error_invalid_time_format">Lỗi định dạng thời gian</string>
+
+    <!-- No Availability -->
+    <string name="toast_no_available_slots">Không có lịch trống trong thời gian này, vui lòng chọn lại!</string>
+    <string name="toast_network_error">Lỗi mạng: </string>
+
+    <!-- Available Courts Header -->
+    <string name="header_available_courts">Sân có sẵn (Có thể chọn nhiều):</string>
+
+    <!-- Book Buttons -->
+    <string name="btn_book_fixed">Đặt lịch cố định</string>
+    <string name="btn_book_optimized">Đặt lịch tối ưu</string>
+
+    <!-- Selection Prompts -->
+    <string name="prompt_select_at_least_one">Vui lòng chọn ít nhất một sân</string>
+    <string name="prompt_select_at_least_one_or_replacement">Vui lòng chọn ít nhất một sân hoặc sân thay thế</string>
+
+    <!-- No Courts Found -->
+    <string name="toast_no_courts_available">Không có sân nào khả dụng</string>
+
+    <!-- Conflicting Courts -->
+    <string name="label_conflicting_courts">Sân đã được đặt</string>
+
+    <!-- Replacement Prompt -->
+    <string name="dialog_title_choose_replacement">Chọn sân thay thế cho </string>
+    <string name="checkbox_none">Chưa chọn</string>
+    <string name="btn_confirm">Xác nhận</string>
+    <string name="btn_cancel">Hủy</string>
+
+    <!-- 5/5/2025 -->
+    <string name="court_booked_label">Sân đã được đặt: </string>
+    <string name="_day_label">- Ngày: </string>
+    <string name="replace_label"> | Thay thế: </string>
+    <string name="_day_label2"> - Ngày </string>
+
+    <string name="fixed_schedule">Đặt lịch cố định</string>
+    <!-- Panel chọn ngày trong tuần -->
+    <string name="select_days_of_week">Chọn ngày trong tuần</string>
+
+    <!-- Thứ trong tuần -->
+    <string name="monday">Thứ 2</string>
+    <string name="tuesday">Thứ 3</string>
+    <string name="wednesday">Thứ 4</string>
+    <string name="thursday">Thứ 5</string>
+    <string name="friday">Thứ 6</string>
+    <string name="saturday">Thứ 7</string>
+    <string name="sunday">Chủ Nhật</string>
+
+    <!-- Panel thời gian đặt lịch -->
+    <string name="time_range_label">Khoảng thời gian đặt lịch</string>
+    <string name="data_label">Ngày: </string>
+    <string name="no_slot_data_label">Không có dữ liệu slot</string>
+    <string name="select_time_start">Chọn giờ bắt đầu</string>
+    <string name="select_time_end">Chọn giờ kết thúc</string>
+    <string name="hour">Giờ</string>
+    <string name="minute">Phút</string>
+    <string name="all">Tất cả</string>
+    <string name="court">Sân</string>
+    <string name="no_data_label">Không có dữ liệu</string>
+    <string name="court_label">, Tên sân: </string>
+    <string name="timeslot_label">, Khoảng thời gian: </string>
+    <string name="price_label">, Giá: </string>
+    <string name="select_timeslot">Vui lòng chọn ít nhất một khung giờ!</string>
+    <!-- 6/5/2025 -->
+    <string name="contact_label">Liên hệ: </string>
+    <string name="error_list_service_label">Lỗi dữ liệu danh sách dịch vụ</string>
+    <string name="error_nodata_service_label">Không có dữ liệu danh sách dịch vụ</string>
+    <string name="empty_service_label">Danh sách dịch vụ trống</string>
+    <string name="error_data_service_label">Lỗi dữ liệu dịch vụ: </string>
+    <string name="no_data_service_label">Không có dữ liệu dịch vụ</string>
+    <string name="court_name_label">Tên sân: </string>
+    <string name="address_label">Địa chỉ: </string>
+    <string name="infomation_service_label">Thông tin đơn dịch vụ:</string>
+    <string name="unknown_service_label">Dịch vụ không xác định</string>
+    <string name="btn_payment">THANH TOÁN</string>
+    <string name="order_service_guest">Bạn đang đặt dịch vụ với vai trò là Guest!</string>
+    <string name="watting">Đang xử lý, vui lòng chờ...</string>
+    <string name="gen_service_fail">Tạo đơn dịch vụ thất bại!</string>
+    <string name="no_data_booked">Không có dữ liệu đặt sân!</string>
+    <string name="total_booked">Tổng thời gian chơi: </string>
+    <string name="noti">Thông báo</string>
+    <string name="request_invalid">Yêu cầu của quý khách không đúng, vui lòng chọn lại!!!</string>
+    <string name="error_get_total">Lỗi khi lấy tổng tiền</string>
+    <string name="re_select">Chọn lại</string>
+    <string name="total_price_2"><![CDATA[Tổng tiền: <b>%1$s</b>]]></string>
+    <string name="error_total">Tổng tiền: Lỗi</string>
+    <string name="date_range">Ngày %1$s đến ngày %2$s&#10;Thời gian: %3$s - %4$s&#10;Trong: %5$s</string>
+    <string name="court_selected">Sân đang chọn: </string>
+    <string name="replacement_info">
+        Ngày %1$s: Thay thế bằng %2$s
+    </string>
+    <string name="error_get_infor">Lấy thông tin thất bại!</string>
+    <string name="order_court_guest">Bạn đang đặt sân với vai trò là Guest!</string>
+    <string name="detail_infor">Thông tin chi tiết:</string>
+    <string name="error_fetch_court_infor">Lỗi khi lấy thông tin sân</string>
+    <string name="not_payment">Chưa thanh toán</string>
+    <string name="gen_court_fail">Tạo đơn thất bại!</string>
+    <!-- Thông báo đơn hàng -->
+    <string name="order_not_exist">Đơn hàng không tồn tại</string>
+
+    <!-- Trạng thái thanh toán -->
+    <string name="status_unpaid">Chưa thanh toán</string>
+    <string name="status_paid">Đã thanh toán</string>
+    <string name="status_not_deposited">Chưa đặt cọc</string>
+    <string name="status_deposited">Đã đặt cọc</string>
+    <string name="error_timeout_invalid">Lỗi: Timeout không hợp lệ</string>
+    <string name="update_schedule_failed">Thay đổi lịch thất bại!</string>
+    <string name="update_schedule_failed_with_error">Thay đổi lịch thất bại: </string>
+
+    <!-- Lỗi lấy đơn cũ -->
+    <string name="get_old_order_failed_with_error">Không thể lấy thông tin đơn cũ: </string>
+    <!-- Validate Name -->
+    <string name="error_name_sensitive">Name chứa nội dung không phù hợp, vui lòng thử lại!</string>
+    <string name="error_name_empty">Vui lòng nhập tên của bạn</string>
+    <string name="error_name_invalid">Tên không hợp lệ (chỉ chữ và khoảng trắng, 2-30 ký tự)</string>
+
+    <!-- Order type -->
+    <string name="order_type_service">Đơn dịch vụ</string>
+
+    <!-- Validate Note -->
+    <string name="error_note_sensitive">Note chứa nội dung không phù hợp, vui lòng thử lại!</string>
+    <string name="error_note_invalid">Note không hợp lệ (chỉ chữ, số, khoảng trắng và dấu .,!?; tối đa 100 ký tự)</string>
+
+    <!-- Validate Phone -->
+    <string name="error_phone_empty">Vui lòng nhập số điện thoại</string>
+    <string name="error_phone_invalid">Số điện thoại không hợp lệ</string>
+    <!-- Error & Status messages -->
+    <string name="error_loading_data">Đang tải dữ liệu, vui lòng thử lại sau</string>
+    <string name="cancel_warning_title">Cảnh báo</string>
+    <string name="cancel_warning_message">Khi bạn hủy đặt lịch, đồng nghĩa với việc bạn sẽ mất tiền cọc sân. Bạn có chắc chắn muốn tiếp tục?</string>
+    <string name="yes">Có</string>
+    <string name="no">Không</string>
+
+
+    <!-- Tổng thời gian -->
+    <string name="total_time">Tổng thời gian: </string>
+
+    <!-- Chưa có dữ liệu -->
+    <string name="not_available">N/A</string>
+
+    <!-- Tổng tiền -->
+    <string name="total_price">Tổng tiền: </string>
+    <!-- Thông tin khách hàng -->
+    <string name="label_customer">Khách hàng: </string>
+    <string name="label_phone">SDT: </string>
+    <string name="label_note">Khách hàng ghi chú: </string>
+    <string name="no_note">Không có</string>
+    <!-- Transaction & Payment Display -->
+    <string name="status_refund">Hoàn tiền</string>
+    <string name="label_amount_paid">Số tiền đã trả: </string>
+    <string name="label_amount_refunded">Số tiền đã hoàn trả: </string>
+    <string name="amount_zero">0đ</string>
+
+    <string name="label_payment_status">Trạng thái thanh toán: </string>
+    <string name="label_stadium_name">Tên sân:  </string>
+    <string name="label_address">Địa chỉ: </string>
+    <string name="error_order_fetch_failed">Không thể tải dữ liệu đơn hàng</string>
+    <!-- Định nghĩa các chuỗi dùng trong updatePaymentButton -->
+    <string name="order_status_success">Đặt lịch thành công</string>
+    <string name="payment_status_deposited">Đã đặt cọc</string>
+
+    <!-- Định nghĩa các chuỗi dùng trong displayServiceDetails -->
+    <string name="service_unknown">Dịch vụ không xác định</string>
+    <string name="no_service_info">Không có thông tin dịch vụ</string>
+    <string name="status_change_failed">Đổi lịch thất bại</string>
+    <string name="status_canceled">Hủy đặt lịch</string>
+    <string name="status_canceled_timeout">Hủy đặt lịch do quá giờ thanh toán</string>
+
+
+    <!-- Nút và nhãn hành động -->
+    <string name="btn_cancel_service">Hủy đặt dịch vụ</string>
+    <string name="btn_pay">Thanh toán</string>
+    <string name="btn_change_booking">Thay đổi lịch đặt</string>
+    <string name="error_must_accept_terms">Bạn phải chấp nhận điều khoản để tiếp tục</string>
+    <string name="toast_service_cancelled">Đã hủy đặt dịch vụ</string>
+    <string name="log_cancel_error">Lỗi khi hủy đặt dịch vụ: </string>
+    <string name="toast_cancel_error">Lỗi khi hủy đặt dịch vụ</string>
+    <string name="toast_qr_creation_failed">Không thể tạo QR code</string>
+    <string name="toast_error_prefix">Lỗi: </string>
+    <string name="toast_order_load_failed">Không thể tải dữ liệu đơn hàng</string>
+    <string name="toast_order_load_error">Lỗi khi lấy dữ liệu đơn hàng</string>
+    <string name="dialog_title_confirm">Xác nhận</string>
+    <string name="dialog_message_cancel">Bạn có chắc chắn là muốn hủy đơn không?</string>
+    <string name="btn_yes">Có</string>
+    <string name="btn_no">Không</string>
+    <string name="label_time_slot">Khung giờ</string>
+    <string name="label_student">Học sinh</string>
+    <string name="label_adult">Người lớn</string>
+    <string name="session_expired">Phiên đăng nhập hết hạn, vui lòng đăng nhập lại!</string>
+    <string name="update_success">Cập nhật thông tin thành công!</string>
+    <string name="update_failed">Cập nhật thất bại!</string>
+    <string name="no_error_info">Không có thông tin lỗi</string>
+    <string name="connection_error">Lỗi kết nối</string>
+    <string name="upload_image_error">Không thể tải hình ảnh lên, vui lòng thử lại!!</string>
+    <string name="load_user_info_error">Không thể tải thông tin người dùng</string>
+    <string name="no_control_characters_allowed">Không cho phép ký tự điều khiển</string>
+    <string name="error_first_name_empty">Vui lòng nhập tên của bạn</string>
+    <string name="error_first_name_sensitive_content">Tên có chứa nội dung nhạy cảm, vui lòng thử lại!</string>
+    <string name="error_first_name_invalid">Tên không hợp lệ (chỉ có chữ cái và khoảng trắng, ≥2 ký tự)</string>
+
+    <string name="error_last_name_empty">Vui lòng nhập họ của bạn</string>
+    <string name="error_last_name_sensitive_content">Họ có chứa nội dung nhạy cảm, vui lòng thử lại!</string>
+    <string name="error_last_name_invalid">Họ không hợp lệ (chỉ có chữ cái và khoảng trắng, ≥2 ký tự)</string>
+
+    <string name="error_phone_number_empty">Vui lòng nhập số điện thoại</string>
+    <string name="error_phone_number_invalid">Số điện thoại không hợp lệ</string>
+
+    <string name="error_age_under_10">Bạn phải từ 10 tuổi trở lên cũ hơn</string>
+    <string name="error_invalid_dob">Ngày sinh không hợp lệ</string>
+    <string name="select_image_error">Vui lòng chọn một file ảnh!</string>
+    <string name="image_read_error">Không thể đọc ảnh</string>
+    <string name="image_compress_error">Không thể nén ảnh xuống dưới 250KB. Vui lòng chọn ảnh khác!</string>
+
+    <string name="photo_from_gallery_error">Không thể lấy ảnh từ thư viện</string>
+    <string name="photo_large_size_error">Không thể lấy ảnh kích thước lớn</string>
+    <string name="permission_required">Bạn cần cấp quyền  để sử dụng tính năng này</string>
+    <string name="need_permission_title">Cần cấp quyền</string>
+    <string name="need_permission_message">Ứng dụng cần quyền truy cập camera để chụp ảnh. Vui lòng cấp quyền trong cài đặt.</string>
+    <string name="go_to_settings">Đi tới cài đặt</string>
+    <string name="cancel">Hủy</string>
+    <string name="select_photo">Chọn ảnh</string>
+    <string name="select_from_library">Chọn từ thư viện</string>
+    <string name="camera">Camera</string>
+    <string name="error_creating_image_file">Lỗi khi tạo file ảnh</string>
+    <string name="cannot_get_photo">Không thể lấy ảnh từ thư viện</string>
+    <string name="cannot_get_large_image">Không thể lấy ảnh kích thước lớn</string>
+    <string name="error_email_extension">Email phải có đuôi @gmail.com hoặc edu.vn</string>
+        <string name="error_phone_format">Số điện thoại không đúng định dạng</string>
+        <string name="error_username_format">Tên người dùng phải ít nhất 4 ký tự và không chứa ký tự đặc biệt</string>
+        <string name="user_not_found">Người dùng không tìm thấy</string>
+        <string name="general_error">Lỗi</string>
+        <string name="server_response_error">Không thể đọc phản hồi từ server</string>
+        <string name="reset_password_success_title">Đặt lại mật khẩu đã được gửi</string>
+        <string name="reset_password_success_message">Mật khẩu mới của bạn đã được gửi đến địa chỉ email của bạn. Vui lòng kiểm tra hộp thư đến của bạn.</string>
+        <string name="go_to_login">Đi đến đăng nhập</string>
+        <string name="ok">OK</string>
+        <string name="sending">ĐANG GỬI...</string>
+        <string name="reset_password_button">ĐẶT LẠI MẬT KHẨU</string>
+    <string name="error_no_image_url">Không có URL hình ảnh</string>
+    <string name="login_success">Đăng nhập thành công</string>
+    <string name="invalid_token">Mã token không hợp lệ</string>
+    <string name="auth_failed">Xác thực thất bại</string>
+    <string name="error_occurred">Đã xảy ra lỗi</string>
+    <string name="error_enter_username">Vui lòng nhập tên người dùng</string>
+    <string name="error_invalid_username">Tên đăng nhập phải có ít nhất 4 ký tự và không được chứa các ký tự đặc biệt</string>
+
+    <string name="error_enter_password">Vui lòng nhập mật khẩu</string>
+    <string name="error_invalid_password">Mật khẩu phải có ít nhất 6 ký tự, chứa ít nhất 1 chữ cái và 1 số</string>
+    <!-- Permission messages -->
+    <string name="all_permissions_granted">Tất cả quyền đã được cấp</string>
+    <string name="permissions_denied_title">Quyền bị từ chối</string>
+    <string name="permissions_denied_message_suffix">Một số tính năng có thể không hoạt động đúng.</string>
+    <string name="button_agree">Đồng ý</string>
+    <string name="denied_camera">Camera</string>
+    <string name="denied_read_storage">Đọc bộ nhớ</string>
+    <string name="denied_write_storage">Ghi bộ nhớ</string>
+    <string name="denied_fine_location">Vị trí chính xác</string>
+    <string name="denied_coarse_location">Vị trí gần đúng</string>
+    <string name="no_user_info">Không có thông tin người dùng</string>
+    <string name="cannot_get_notifications">Không thể lấy danh sách thông báo</string>
+    <string name="deleted_and_marked_read">Đã xóa và đánh dấu đã đọc</string>
+    <string name="delete_success">Xóa thành công</string>
+    <string name="deleted_all_notifications">Đã xóa tất cả thông báo</string>
+    <string name="cannot_mark_as_read">Không thể đánh dấu đã đọc</string>
+    <string name="booking_success_title">Đặt lịch thành công</string>
+    <string name="booking_success_subtitle">Lịch đặt của bạn đã được gửi tới chủ sân.\nVui lòng kiểm tra trạng thái tại mục "Tài khoản" để kiểm soát và xác nhận lịch đặt.</string>
+    <string name="no_user_for_qr_data">Không có người dùng để lấy dữ liệu QR Code</string>
+    <string name="deposit_message">Vui lòng chuyển ₫ để hoàn tất việc gửi tiền!</string>
+    <string name="payment_message">Vui lòng chuyển ₫ để hoàn tất thanh toán!</string>
+    <string name="error_loading_service">Không thể tải dữ liệu dịch vụ</string>
+    <string name="select_service">Vui lòng chọn ít nhất một dịch vụ</string>
+    <string name="network_error">Lỗi mạng: </string>
+    <string name="error_getting_field_info">Không thể lấy thông tin sân</string>
+
+
+    <string name="error_enter_first_name">Vui lòng nhập tên của bạn</string>
+    <string name="error_invalid_first_name">Tên không hợp lệ (chỉ có chữ cái và khoảng trắng, ≥2 ký tự)</string>
+
+    <string name="error_enter_last_name">Vui lòng nhập họ của bạn</string>
+    <string name="error_invalid_last_name">Họ không hợp lệ (chỉ gồm chữ cái và khoảng trắng, ≥2 ký tự)</string>
+
+    <string name="error_enter_phone_number">Vui lòng nhập số điện thoại</string>
+    <string name="error_invalid_phone_number">Số điện thoại không hợp lệ</string>
+
+    <string name="error_enter_email">Vui lòng nhập email</string>
+    <string name="error_invalid_email_format">Email không đúng định dạng.</string>
+    <string name="error_invalid_email_domain">Vui lòng sử dụng email @gmail.com hoặc edu.vn</string>
+
+    <string name="error_underage">Bạn phải từ 10 tuổi trở lên</string>
+
+    <string name="error_select_gender">Vui lòng chọn giới tính của bạn</string>
+    <string name="dialog_confirm_student_email_title">Xác nhận email của sinh viên</string>
+    <string name="dialog_confirm_student_email_message">Vui lòng kiểm tra hộp thư đến và thư "Spam" để xác nhận tài khoản của bạn</string>
+    <string name="dialog_confirm_student_email_close_button">Đóng</string>
+
+    <string name="username_exists_error">Tên người dùng đã tồn tại. Vui lòng chọn tên người dùng khác.</string>
+    <string name="email_exists_error">Địa chỉ email đã tồn tại. Vui lòng sử dụng một email khác.</string>
+    <string name="phone_exists_error">Số điện thoại đã tồn tại. Vui lòng sử dụng một số điện thoại khác.</string>
+    <string name="generic_duplicate_error">Đăng ký không thành công: Người dùng có một số thông tin chi tiết này đã tồn tại.</string>
+    <string name="registration_error">Đã xảy ra lỗi trong quá trình đăng ký</string>
+    <string name="registration_info_exists_error">Thông tin đăng ký đã tồn tại. Vui lòng kiểm tra tên người dùng, email và số điện thoại</string>
+    <string name="registration_failed_error">Đăng ký không thành công với mã lỗi: %1$d</string>
+    <string name="select_date_range_title">Chọn phạm vi ngày</string>
+    <string name="no_orders_in_selected_range">Không có đơn đặt nào trong khoảng thời gian đã chọn</string>
+    <string-array name="order_statuses">
+        <item>Đang xử lý</item>
+        <item>Đã hoàn thành</item>
+        <item>Hủy đặt lịch</item>
+        <item>Đặt lịch thành công</item>
+        <item>Thay đổi lịch đặt thành công</item>
+        <item>Hủy đặt lịch do quá giờ thanh toán</item>
+        <item>Đặt dịch vụ tại sân</item>
+    </string-array>
+    <string name="select_status_title">Chọn trạng thái</string>
+    <string name="cancel_button">Hủy</string>
+
+        <string name="no_phone_number_for_booking">Chưa có số điện thoại được sử dụng để đặt lịch.</string>
+
+        <!-- Thông báo lỗi khi không có dữ liệu đơn hàng -->
+        <string name="no_order_data">Không có dữ liệu đơn hàng</string>
+    <string name="guest_dialog_message">Tạo tài khoản để dễ dàng quản lý và lưu trữ lịch đặt của bạn.</string>
+
+    <!-- Các nút trong dialog -->
+    <string name="login_button_text">Đăng nhập</string>
+    <string name="signup_button_text">Đăng ký</string>
+    <string name="ok_button_text">OK</string>
+    <string name="unable_to_load_profile_picture">Không thể tải ảnh đại diện. Vui lòng thử upload lại trong phần chỉnh sửa thông tin!</string>
+
+    <!-- Thông báo dữ liệu trả về không hợp lệ -->
+    <string name="invalid_response_data">Dữ liệu trả về không hợp lệ</string>
+
+    <!-- Thông báo lấy thông tin thất bại -->
+    <string name="failed_to_get_info">Lấy thông tin thất bại, vui lòng đăng nhập lại!</string>
+    <string name="token_not_found">Token không tồn tại, vui lòng đăng nhập lại!</string>
+    <string name="filtered_by_status">Đã lọc theo trạng thái: </string>
+    <string name="no_orders_to_display_message">Không có đơn nào để hiển thị</string>
+    <string name="filter_newest_message">Đã lọc: Mới nhất</string>
+    <string name="change_password_title">Thay đổi mật khẩu</string>
+
+    <string name="header_title">Đặt lịch trực quan</string>
+    <string name="stadium_name">Tên sân: </string>
+    <string name="stadium_address"> Địa chỉ: </string>
+    <string name="stadium_contact"> Liên hệ: </string>
+    <string name="order_details_title">Thông tin chi tiết:</string>
+
+    <string name="full_name_hint">Họ và tên của bạn</string>
+    <string name="phone_number_hint">Số điện thoại của bạn</string>
+    <string name="note_for_owner_hint">Ghi chú cho chủ sân</string>
+    <string name="club_name_placeholder">Tên câu lạc bộ</string>
+    <string name="address_placeholder">Địa chỉ câu lạc bộ</string>
+    <string name="title_booking_detail">Chi tiết đặt lịch</string>
+    <string name="tab_booking_info">Thông tin Đặt lịch</string>
+    <string name="back_button_description">Quay lại</string>
+
+    <!-- Thông tin khách hàng -->
+    <string name="customer_label">Khách Hàng: </string>
+    <string name="sport_label">Đối tượng: </string>
+    <string name="phone_label">Số điện thoại: </string>
+
+    <!-- Card Booking -->
+    <string name="booking_info_title">Thông tin Đặt lịch</string>
+    <string name="stadium_name_label">Tên sân: </string>
+    <string name="total_time_label">Tổng thời gian: </string>
+    <string name="total_price_label">Tổng tiền: </string>
+    <string name="payment_status_paid">Trạng thái thanh toán: Đã thanh toán</string>
+    <string name="amount_paid_label">Số tiền đã trả: </string>
+    <string name="refund_amount_label">Số tiền đã hoàn lại: </string>
+
+    <!-- Ghi chú -->
+    <string name="note_label">Khách hàng ghi chú: </string>
+
+    <!-- Buttons -->
+    <string name="cancel_booking">Hủy đặt lịch</string>
+    <string name="change_booking">Thay đổi lịch đặt</string>
+    <string name="pay_remaining">Thanh toán</string>
+    <string name="student">Học sinh</string>
+    <string name="adult">Người lớn</string>
+    <string name="loading_error_message">Đang tải dữ liệu, vui lòng thử lại sau</string>
+    <string name="no_information">Không có thông tin</string>
+    <string name="customer_name_label">Khách hàng: </string>
+    <string name="phone_number_label">SDT: </string>
+    <string name="customer_note_label">Khách hàng ghi chú: </string>
+    <string name="error_loading_booking_data">Không thể tải dữ liệu đơn hàng</string>
+    <string name="amount_refunded">Số tiền đã hoàn trả: </string>
+    <string name="amount_paid">Số tiền đã trả: </string>
+    <string name="payment_status">Trạng thái thanh toán: </string>
+    <string name="amount_paid_default">Số tiền đã trả: 0đ</string>
+    <string name="error_loading_order">Lỗi khi lấy dữ liệu đơn hàng</string>
+    <string name="dialog_confirm_title">Xác nhận</string>
+    <string name="dialog_confirm_cancel_message">Bạn có chắc chắn là muốn hủy đơn không?</string>
+    <string name="no_slots_selected">Không có slot nào được chọn</string>
+    <string name="name_contains_bad_words">Tên chứa nội dung nhạy cảm, vui lòng thử lại!</string>
+    <string name="name_empty">Vui lòng nhập tên của bạn</string>
+    <string name="name_invalid">Tên không hợp lệ (chỉ chữ cái và khoảng trắng, 2-30 ký tự)</string>
+
+    <string name="note_contains_bad_words">Ghi chú chứa nội dung nhạy cảm, vui lòng thử lại!</string>
+    <string name="note_invalid">Ghi chú không hợp lệ (chỉ chữ cái, số, khoảng trắng và dấu câu cơ bản, ≤100 ký tự)</string>
+
+    <string name="phone_empty">Vui lòng nhập số điện thoại của bạn</string>
+    <string name="phone_invalid">Số điện thoại không hợp lệ</string>
+
+    <string name="total_price_html">Tổng tiền: &lt;b&gt;&lt;/b&gt;</string>
+    <string name="total_play_time">Tổng thời gian chơi: </string>
+    <string name="dialog_title_invalid_request">Thông báo</string>
+    <string name="dialog_message_invalid_request">Yêu cầu của quý khách không đúng, vui lòng chọn lại!!!</string>
+    <string name="dialog_button_retry">Chọn lại</string>
+
+    <string name="back">Quay lại</string>
+    <string name="view_court_and_price">Xem sân và bảng giá</string>
+    <string name="court_price_list">Bảng giá sân</string>
+    <string name="pickleball">Pickleball</string>
+    <string name="weekdays">T2 - T6</string>
+    <string name="weekends">T7 - CN</string>
+    <string name="edit_profile_title">Chỉnh sửa hồ sơ</string>
+
+
+    <string name="back_button">Quay lại</string>
+    <string name="edit_avatar">Chỉnh sửa ảnh đại diện</string>
+
+    <string name="forgot_password">Quên mật khẩu</string>
+    <string name="reset_password_title">Đặt lại mật khẩu của bạn</string>
+    <string name="reset_instructions">Nhập tên người dùng, số điện thoại hoặc địa chỉ email của bạn để đặt lại mật khẩu.</string>
+    <string name="username_email_phone">Tên người dùng / Email / Điện thoại</string>
+    <string name="remember_password">Bạn còn nhớ mật khẩu của mình không?</string>
+    <string name="login">Đăng nhập</string>
+
+    <!-- Mô tả nội dung -->
+    <string name="background_image">Nền</string>
+
+    <string name="welcome_text">Chào mừng</string>
+    <string name="sport_not_giving_up">Thể thao không bỏ cuộc</string>
+    <string name="username_hint">Tên người dùng</string>
+    <string name="password_hint">Mật khẩu</string>
+    <string name="forgot_password_1">Quên mật khẩu?</string>
+    <string name="login_button_text_upcase">ĐĂNG NHẬP</string>
+    <string name="no_account_text">Bạn chưa có tài khoản?</string>
+    <string name="home_button_description">Nút trang chủ</string>
+    <string name="background_description">Nền</string>
+    <string name="app_logo_description">Logo ứng dụng</string>
+
+    <string name="join_us_today">Tham gia cùng chúng tôi ngay hôm nay</string>
+
+
+    <!-- Gợi ý nhập -->
+    <string name="hint_username">Tên người dùng</string>
+    <string name="hint_password">Mật khẩu</string>
+    <string name="hint_first_name">Tên</string>
+    <string name="hint_last_name">Họ</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_phone_number">Số điện thoại</string>
 
 
 
+    <!-- Giới tính -->
+    <string name="gender_label">Giới tính</string>
+    <string name="male">Nam</string>
+    <string name="female">Nữ</string>
 
+    <!-- Nút -->
+    <string name="btn_create_account">TẠO TÀI KHOẢN</string>
+    <string name="btn_signup_have_account">Bạn đã có tài khoản?</string>
+    <string name="btn_login">Đăng nhập</string>
+
+    <!-- Mô tả nội dung -->
+    <string name="background_cd">Bối cảnh</string>
+    <string name="service_title">Dịch vụ sân</string>
+    <string name="service_subtitle">Đặt đồ uống và thức ăn</string>
+
+    <!-- Search bar -->
+    <string name="search_hint">Tìm kiếm dịch vụ</string>
+    <string name="cd_search_icon">Search Icon</string>
+    <string name="cd_clear_search">Clear Search</string>
+
+    <!-- Tabs -->
+    <string name="tab_all">Tất cả</string>
+    <string name="tab_drinks">Đồ uống</string>
+    <string name="tab_foods">Đồ ăn</string>
+    <string name="tab_others">Khác</string>
+
+    <!-- Empty state -->
+    <string name="empty_services">Không có dịch vụ nào</string>
+
+    <!-- Bottom sheet -->
+    <string name="items_count">Mục</string>
+    <string name="total_price_format">Giá</string> <!-- ví dụ "0đ" -->
+    <string name="order_services">Đặt dịch vụ</string>
+
+    <!-- FAB -->
+    <string name="cd_scroll_to_top">Trượt lên đầu</string>
+
+    <string name="warning_change_booking">
+        Khi bạn thay đổi lịch, nếu bạn không hoàn tất thanh toán với lịch bạn đổi thì bạn sẽ mất hết lịch bạn đã hoàn tất thanh toán trước đó.
+    </string>
+    <string name="accept_terms">Tôi chấp nhận</string>
+    <string name="permission_title">Cấp quyền</string>
+    <string name="permission_description">Mô tả về quyền</string>
+    <string name="grant_permission">Cấp quyền</string>
+    <string name="skip">Bỏ qua</string>
+
+    <string name="booked_schedule">Lịch đã đặt</string>
+    <string name="booked_service">Dịch vụ đã đặt</string>
+    <string name="search_court">Tìm kiếm sân</string>
+    <string name="date_now">Ngày hôm nay</string>
+    <string name="service_price_title">Bảng giá dịch vụ</string>
+    <string name="category_header">DANH MỤC</string>
+    <string name="price_per_unit">Giá/Đơn vị</string>
+    <string name="price_note">* Giá có thể thay đổi tùy thời điểm</string>
+    <string name="stadium_map">Sơ đồ sân</string>
+    <string name="image">Hình ảnh</string>
+    <string name="court_1">Sân: </string>
+    <string name="time_1">Thời gian: </string>
+    <string name="price_1">Giá: </string>
+    <string name="btn_service">DỊCH VỤ</string>
+    <string name="notification_title">Tiêu đề thông báo</string>
+    <string name="notification_description">Nội dung mô tả</string>
+    <string name="detail">Chi tiết: </string>
+    <string name="left">Còn: </string>
 </resources>

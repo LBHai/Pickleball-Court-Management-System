@@ -31,8 +31,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
                     android:layout_marginTop="28dp"
-                    android:text="Dịch vụ sân"
-                    android:textColor="@android:color/white"
+                    android:text="@string/service_title"                    android:textColor="@android:color/white"
                     android:textSize="26sp"
                     android:textStyle="bold"
                     app:layout_constraintStart_toStartOf="parent"
@@ -44,8 +43,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
                     android:layout_marginTop="4dp"
-                    android:text="Đặt đồ uống và thức ăn"
-                    android:textColor="#E0FFFFFF"
+                    android:text="@string/service_subtitle"                    android:textColor="#E0FFFFFF"
                     android:textSize="16sp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tvTitle" />
@@ -75,8 +73,7 @@
                             android:layout_height="24dp"
                             android:layout_marginEnd="12dp"
                             android:contentDescription="Search Icon"
-                            android:src="@drawable/search"
-                            app:tint="#ADADAD" />
+                            android:src="@drawable/search"/>
 
                         <EditText
                             android:id="@+id/etSearch"
@@ -84,8 +81,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:background="@null"
-                            android:hint="Tìm kiếm dịch vụ"
-                            android:imeOptions="actionSearch"
+                            android:hint="@string/search_hint"                            android:imeOptions="actionSearch"
                             android:inputType="text"
                             android:textColor="#333333"
                             android:textColorHint="#ADADAD"
@@ -102,43 +98,6 @@
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <com.google.android.material.tabs.TabLayout
-                    android:id="@+id/tabLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="20dp"
-                    android:background="@android:color/transparent"
-                    app:tabBackground="@drawable/tab_background_selector"
-                    app:tabIndicatorHeight="0dp"
-                    app:tabMode="scrollable"
-                    app:tabSelectedTextColor="@color/green"
-                    app:tabTextColor="#FFFFFF"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/cardSearch">
-
-                    <com.google.android.material.tabs.TabItem
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tất cả" />
-
-                    <com.google.android.material.tabs.TabItem
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Đồ uống" />
-
-                    <com.google.android.material.tabs.TabItem
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Đồ ăn" />
-
-                    <com.google.android.material.tabs.TabItem
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Khác" />
-                </com.google.android.material.tabs.TabLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
@@ -176,8 +135,7 @@
                 android:drawableTop="@drawable/empty_box"
                 android:drawablePadding="16dp"
                 android:gravity="center"
-                android:text="Không có dịch vụ nào"
-                android:textColor="#757575"
+                android:text="@string/empty_services"                android:textColor="#757575"
                 android:textSize="16sp"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -242,15 +200,14 @@
                         android:id="@+id/tvItemCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0 mục"
-                        android:textColor="#757575"
+                        android:text="@string/items_count"                        android:textColor="#757575"
                         android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/tvTotalPrice"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0đ"
+                        android:text="@string/total_price_format"
                         android:textColor="#333333"
                         android:textSize="18sp"
                         android:textStyle="bold" />
@@ -263,8 +220,7 @@
                     android:backgroundTint="@color/green"
                     android:paddingHorizontal="24dp"
                     android:paddingVertical="12dp"
-                    android:text="Đặt dịch vụ"
-                    android:textAllCaps="false"
+                    android:text="@string/order_services"                    android:textAllCaps="false"
                     android:textColor="@android:color/white"
                     android:textSize="16sp"
                     app:cornerRadius="24dp" />

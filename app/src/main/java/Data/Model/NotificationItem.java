@@ -17,20 +17,19 @@ public class NotificationItem {
 
     @SerializedName("createAt")
     private String createAt;
-
-//    @SerializedName("notificationData")
-//    private NotificationData notificationData;
+    @SerializedName("notificationData")
+    private NotificationData notificationData;
 
     public NotificationItem() {
     }
 
-    public NotificationItem(String id, String title, String description, String status, String createAt) {
+    public NotificationItem(String id, String title, String description, String status, String createAt, NotificationData notificationData) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.status = status;
         this.createAt = createAt;
-
+        this.notificationData = notificationData;
     }
 
     public String getId() {
@@ -73,6 +72,11 @@ public class NotificationItem {
         this.createAt = createAt;
     }
 
+    public NotificationData getNotificationData() {
+        return notificationData;
+    }
 
-
+    public void setNotificationData(NotificationData notificationData) {
+        this.notificationData = notificationData;
+    }
 }

@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -17,23 +18,30 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import android.content.SharedPreferences;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.TreeSet;
 
 import Data.Model.CreateOrderResponse;
 import Data.Model.OrderDetail;
 import Data.Model.Orders;
+import Data.Model.QRPaymentRemaining;
 import Data.Model.Service;
 import Data.Model.ServiceDetail;
 import Data.Model.Transaction;
@@ -66,14 +74,25 @@ public class DetailBookingActivity extends AppCompatActivity {
     private Runnable checkOrderStatusRunnable;
     private SessionManager sessionManager;
     private Button btnPayRemaining;
+    private boolean isFirstClick = true;
+    private String currentQRCode; // Lưu QR code hiện tại
+    private String currentPaymentTimeout; // Lưu paymentTimeout hiện tại
+    private static final String PREF_NAME = "QRCodePrefs";
+    private static final String KEY_QR_CODE = "currentQRCode";
+    private static final String KEY_TIMEOUT = "currentPaymentTimeout";
+    private SharedPreferences sharedPreferences;
+    private static final String KEY_INITIAL_PAYMENT_DONE = "initialPaymentDone"; // Theo dõi trạng thái thanh toán lần đầu
+    private ImageView imgAvatar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_booking);
+        sharedPreferences = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
 
         // Khởi tạo UI
         btnBack = findViewById(R.id.btnBack);
         tvTitleMain = findViewById(R.id.tvTitleMain);
+        imgAvatar = findViewById(R.id.imgAvatar);
         tvTabBookingInfo = findViewById(R.id.tvTabBookingInfo);
         layoutBookingInfo = findViewById(R.id.layoutBookingInfo);
         layoutServiceDetail = findViewById(R.id.layoutServiceDetail);
@@ -93,6 +112,14 @@ public class DetailBookingActivity extends AppCompatActivity {
         btnPayRemaining = findViewById(R.id.btnPayRemaining);
         sessionManager = new SessionManager(this);
 
+        String savedQRCode = sharedPreferences.getString(KEY_QR_CODE, null);
+        String savedTimeout = sharedPreferences.getString(KEY_TIMEOUT, null);
+
+        if (savedQRCode != null && savedTimeout != null) {
+            Log.d("DetailBookingActivity", "Restored from SharedPreferences - QRCode: " + savedQRCode + ", Timeout: " + savedTimeout);
+        } else {
+            Log.d("DetailBookingActivity", "No saved QR code or timeout found in SharedPreferences");
+        }
         btnCancelBooking.setOnClickListener(v -> {
             if (paymentStatus == null) {
                 Toast.makeText(this, "Đang tải dữ liệu, vui lòng thử lại sau", Toast.LENGTH_SHORT).show();
@@ -131,7 +158,23 @@ public class DetailBookingActivity extends AppCompatActivity {
             finish();
             return;
         }
-
+        String avatarUrl = getIntent().getStringExtra("avatarUrl");
+        if (avatarUrl != null && !avatarUrl.isEmpty()) {
+            Glide.with(this)
+                    .load(avatarUrl)
+                    .into(imgAvatar);
+        } else {
+            imgAvatar.setImageResource(R.drawable.avatar);
+        }
+        boolean isStudent = getIntent().getBooleanExtra("isStudent", false);
+        //Log.d("DetailBookingActivity", "Giá trị isStudent nhận được: " + isStudent);
+        // Hiển thị subject
+        TextView tvSubject = findViewById(R.id.subject);
+        if (isStudent) {
+            tvSubject.setText("Subject: " + getString(R.string.student));
+        } else {
+            tvSubject.setText("Subject: " + getString(R.string.adult));
+        }
         // Gọi hàm để lấy thông tin người dùng từ API
         fetchUserInfo();
 
@@ -173,7 +216,13 @@ public class DetailBookingActivity extends AppCompatActivity {
         String displayNote = (note == null || note.trim().isEmpty()) ? "Không có" : note;
         tvNote.setText("Khách hàng ghi chú: " + displayNote);
     }
-
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("currentQRCode", currentQRCode);
+        outState.putString("currentPaymentTimeout", currentPaymentTimeout);
+        Log.d("DetailBookingActivity", "Saving state - QRCode: " + currentQRCode + ", Timeout: " + currentPaymentTimeout);
+    }
     private void fetchOrderDetails(String orderId) {
         Call<Orders> call = RetrofitClient.getApiService(this).getOrderById(orderId);
         NetworkUtils.callApi(call, this, new NetworkUtils.ApiCallback<Orders>() {
@@ -281,9 +330,12 @@ public class DetailBookingActivity extends AppCompatActivity {
         });
     }
     private void updatePaymentButton() {
-        if ("Đặt lịch thành công".equals(orderStatus) && "Đã đặt cọc".equals(paymentStatus)) {
+        if ("Đặt lịch thành công".equals(orderStatus) && "Đã đặt cọc".equals(paymentStatus) ||"Đặt lịch thành công".equals(orderStatus) && "Thanh toán sau đặt cọc thất bại".equals(paymentStatus) ||"Đặt lịch thành công".equals(orderStatus) && "Chờ thanh toán sau đặt cọc".equals(paymentStatus)) {
             btnPayRemaining.setVisibility(View.VISIBLE);
-            btnPayRemaining.setOnClickListener(v -> createQRForRemainingPayment(orderId));
+            btnPayRemaining.setOnClickListener(v -> {
+                Log.d("DetailBookingActivity", "btnPayRemaining clicked");
+                createQRForRemainingPayment(orderId);
+            });            Log.d("DetailBookingActivity", "orderStatus: " + orderStatus + ", paymentStatus: " + paymentStatus);
         } else {
             btnPayRemaining.setVisibility(View.GONE);
         }
@@ -621,27 +673,148 @@ public class DetailBookingActivity extends AppCompatActivity {
         });
     }
     private void createQRForRemainingPayment(String orderId) {
-        Call<CreateOrderResponse> call = RetrofitClient.getApiService(this).createPaymentForRemaining(orderId);
-        NetworkUtils.callApi(call, this, new NetworkUtils.ApiCallback<CreateOrderResponse>() {
+        Log.d("DetailBookingActivity", "Starting createQRForRemainingPayment with orderId: " + orderId);
+        String savedQRCode = sharedPreferences.getString(KEY_QR_CODE, null);
+        String savedTimeout = sharedPreferences.getString(KEY_TIMEOUT, null);
+        boolean initialPaymentDone = sharedPreferences.getBoolean(KEY_INITIAL_PAYMENT_DONE, false);
+
+        Call<Orders> orderCall = RetrofitClient.getApiService(this).getOrderById(orderId);
+        orderCall.enqueue(new Callback<Orders>() {
             @Override
-            public void onSuccess(CreateOrderResponse response) {
-                if (response != null && response.getQrcode() != null) {
-                    Intent intent = new Intent(DetailBookingActivity.this, QRCodeActivity.class);
-                    intent.putExtra("qrCodeData", response.getQrcode());
-                    intent.putExtra("orderId", orderId);
-                    intent.putExtra("isRemainingPayment", true); // Flag để phân biệt thanh toán còn lại
-                    startActivity(intent);
-                } else {
-                    Toast.makeText(DetailBookingActivity.this, "Không thể tạo QR code", Toast.LENGTH_SHORT).show();
+            public void onResponse(Call<Orders> call, Response<Orders> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Orders order = response.body();
+                    int totalAmount = order.getTotalAmount();
+
+                    Call<List<Transaction>> transactionCall = RetrofitClient.getApiService(DetailBookingActivity.this).getTransactionHistory(orderId);
+                    transactionCall.enqueue(new Callback<List<Transaction>>() {
+                        @Override
+                        public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                List<Transaction> transactions = response.body();
+                                int depositAmount = 0;
+                                for (Transaction t : transactions) {
+                                    if ("Đã đặt cọc".equals(t.getPaymentStatus())) {
+                                        depositAmount = (int) t.getAmount();
+                                        break;
+                                    }
+                                }
+
+                                if (savedQRCode != null && savedTimeout != null && initialPaymentDone) {
+                                    try {
+                                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSS", Locale.getDefault());
+                                        sdf.setTimeZone(TimeZone.getTimeZone("GMT+7"));
+                                        Date timeoutDate = sdf.parse(savedTimeout);
+                                        long timeoutTimeMillis = timeoutDate.getTime();
+                                        long currentTimeMillis = System.currentTimeMillis();
+
+                                        if (currentTimeMillis < timeoutTimeMillis) {
+                                            Log.d("DetailBookingActivity", "Using existing QR code: " + savedQRCode);
+                                            Intent intent = new Intent(DetailBookingActivity.this, QRCodeActivity.class);
+                                            intent.putExtra("qrCodeData", savedQRCode);
+                                            intent.putExtra("paymentTimeout", savedTimeout);
+                                            intent.putExtra("orderId", orderId);
+                                            intent.putExtra("isRemainingPayment", true);
+                                            intent.putExtra("totalTime", totalTime);
+                                            intent.putExtra("totalPrice", totalAmount);
+                                            intent.putExtra("depositAmount", depositAmount);
+                                            intent.putExtra("courtId", courtId);
+                                            intent.putIntegerArrayListExtra("slotPrices", slotPrices);
+                                            intent.putExtra("customerName", customerName);
+                                            intent.putExtra("phoneNumber", phoneNumber);
+                                            intent.putExtra("note", note);
+                                            startActivity(intent);
+                                            return;
+                                        }
+                                    } catch (Exception e) {
+                                        Log.e("DetailBookingActivity", "Lỗi parse paymentTimeout: " + e.getMessage());
+                                    }
+                                }
+
+                                generateNewQRCode(orderId, totalAmount, depositAmount);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<List<Transaction>> call, Throwable t) {
+                            Log.e("DetailBookingActivity", "Failed to fetch transactions: " + t.getMessage());
+                            Toast.makeText(DetailBookingActivity.this, "Lỗi khi lấy lịch sử giao dịch", Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 }
             }
 
             @Override
-            public void onError(String errorMessage) {
-                Toast.makeText(DetailBookingActivity.this, "Lỗi: " + errorMessage, Toast.LENGTH_SHORT).show();
+            public void onFailure(Call<Orders> call, Throwable t) {
+                Log.e("DetailBookingActivity", "Failed to fetch order: " + t.getMessage());
+                Toast.makeText(DetailBookingActivity.this, "Lỗi khi lấy thông tin đơn hàng", Toast.LENGTH_SHORT).show();
             }
         });
     }
+    private void generateNewQRCode(String orderId, int totalAmount, int depositAmount) {
+        Call<String> paymentCall = RetrofitClient.getApiService(this).createPaymentForRemaining(orderId);
+        paymentCall.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                if (response.isSuccessful()) {
+                    Call<Orders> orderCall = RetrofitClient.getApiService(DetailBookingActivity.this).getOrderById(orderId);
+                    orderCall.enqueue(new Callback<Orders>() {
+                        @Override
+                        public void onResponse(Call<Orders> call, Response<Orders> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                Orders order = response.body();
+                                String newQRCode = order.getQrcode();
+                                String newPaymentTimeout = order.getPaymentTimeout();
+
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putString(KEY_QR_CODE, newQRCode);
+                                editor.putString(KEY_TIMEOUT, newPaymentTimeout);
+                                editor.putBoolean(KEY_INITIAL_PAYMENT_DONE, true);
+                                editor.apply();
+
+                                Log.d("DetailBookingActivity", "New QR code generated: " + newQRCode);
+                                Log.d("DetailBookingActivity", "New paymentTimeout: " + newPaymentTimeout);
+
+                                Intent intent = new Intent(DetailBookingActivity.this, QRCodeActivity.class);
+                                intent.putExtra("qrCodeData", newQRCode);
+                                intent.putExtra("paymentTimeout", newPaymentTimeout);
+                                intent.putExtra("orderId", orderId);
+                                intent.putExtra("isRemainingPayment", true);
+                                intent.putExtra("totalTime", totalTime);
+                                intent.putExtra("totalPrice", totalAmount);
+                                intent.putExtra("depositAmount", depositAmount);
+                                intent.putExtra("courtId", courtId);
+                                intent.putIntegerArrayListExtra("slotPrices", slotPrices);
+                                intent.putExtra("customerName", customerName);
+                                intent.putExtra("phoneNumber", phoneNumber);
+                                intent.putExtra("note", note);
+                                startActivity(intent);
+                            } else {
+                                Log.e("DetailBookingActivity", "getOrderById failed. Code: " + response.code());
+                                Toast.makeText(DetailBookingActivity.this, "Lỗi server: " + response.code(), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Orders> call, Throwable t) {
+                            Log.e("DetailBookingActivity", "getOrderById failed: " + t.getMessage());
+                            Toast.makeText(DetailBookingActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    Log.e("DetailBookingActivity", "createPaymentForRemaining failed. Code: " + response.code());
+                    Toast.makeText(DetailBookingActivity.this, "Lỗi server: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                Log.e("DetailBookingActivity", "createPaymentForRemaining failed: " + t.getMessage());
+                Toast.makeText(DetailBookingActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     private void checkAndHideButtons(Orders order) {
         if (order == null) {
             btnCancelBooking.setVisibility(View.GONE);
@@ -787,5 +960,9 @@ public class DetailBookingActivity extends AppCompatActivity {
         if (handler != null) {
             handler.removeCallbacks(checkOrderStatusRunnable);
         }
+        // Xóa dữ liệu SharedPreferences khi thoát ứng dụng
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();
+        editor.apply();
     }
 }

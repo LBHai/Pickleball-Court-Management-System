@@ -27,14 +27,14 @@
                 android:layout_height="32dp"
                 android:background="@android:color/transparent"
                 android:src="@drawable/backicon"
-                android:contentDescription="Quay lại"
+                android:contentDescription="@string/back"
                 tools:ignore="TouchTargetSizeCheck"/>
 
             <TextView
                 android:id="@+id/tvHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Xem sân và bảng giá"
+                android:text="@string/view_court_and_price"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold"
                 android:textSize="22sp"
@@ -46,24 +46,22 @@
             android:id="@+id/tvCourtPriceTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bảng giá sân"
+            android:text="@string/court_price_list"
             android:textColor="#FFFFFF"
             android:textSize="18sp"
             android:layout_marginTop="8dp" />
 
-        <!-- Tên bộ môn (nếu muốn) -->
         <TextView
             android:id="@+id/tvPickleballLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Pickleball"
+            android:text="@string/pickleball"
             android:textColor="#FFFFFF"
             android:textStyle="bold"
             android:textSize="18sp"
             android:gravity="center"
             android:layout_marginTop="4dp" />
 
-        <!-- TableLayout "bao" 2 dòng: T2 - T6 và T7 - CN -->
         <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -72,9 +70,7 @@
             android:background="#FFFFFF"
             android:padding="1dp">
 
-            <!-- Dòng 1: Label "T2 - T6" (cột 1) và bảng con (cột 2) -->
             <TableRow>
-
                 <TextView
                     android:id="@+id/tvLabelWeekday"
                     android:layout_width="0dp"
@@ -84,26 +80,23 @@
                     android:gravity="center"
                     android:minHeight="80dp"
                     android:padding="8dp"
-                    android:text="T2 - T6"
+                    android:text="@string/weekdays"
                     android:textColor="#000000" />
 
                 <TableLayout
                     android:id="@+id/tableWeekday"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="3">
-                </TableLayout>
+                    android:layout_weight="3" />
             </TableRow>
 
-            <!-- Dòng 2: Label "T7 - CN" (cột 1) và bảng con (cột 2) -->
             <TableRow>
-
                 <TextView
                     android:id="@+id/tvLabelWeekend"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:text="T7 - CN"
+                    android:text="@string/weekends"
                     android:textColor="#000000"
                     android:gravity="center"
                     android:background="@drawable/cell_border"
@@ -114,8 +107,7 @@
                     android:id="@+id/tableWeekend"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="3">
-                </TableLayout>
+                    android:layout_weight="3" />
             </TableRow>
 
         </TableLayout>

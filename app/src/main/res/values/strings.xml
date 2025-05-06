@@ -54,8 +54,8 @@
     <!-- Mảng gender -->
     <string-array name="gender_array">
         <item>Select gender</item>
-        <item>MALE</item>
-        <item>FEMALE</item>
+        <item>Male</item>
+        <item>Female</item>
     </string-array>
 
     <string name="avatar">Ảnh đại diện</string>
@@ -129,6 +129,550 @@
     <string name="topay">To pay now 😍</string>
     <string name="timepay">Remaining payment time 🕛</string>
     <string name="methodbook">Select booking type</string>
+    <string name="channel_name">General Notifications</string>
+    <string name="channel_description">Notification channel for the app</string>
+    <string name="default_notification_title">New Notification</string>
+    <string name="default_notification_body">You have a new notification</string>
+    <!-- Date/Time Pickers -->
+    <string name="start_date_label">Start Date: </string>
+    <string name="end_date_label">End Date: </string>
+    <string name="start_time_label">Start Time: </string>
+    <string name="end_time_label">End Time: </string>
 
+    <!-- Validation Errors -->
+    <string name="error_finish_before_start_date">End date must be greater than or equal to start date!</string>
+    <string name="error_invalid_date_format">Invalid date format</string>
+    <string name="error_finish_before_start_time">End time must be after start time!</string>
+    <string name="error_invalid_time_format">Invalid time format</string>
+
+    <!-- No Availability -->
+    <string name="toast_no_available_slots">No available slots in this period, please choose again!</string>
+    <string name="toast_network_error">Network error: </string>
+
+    <!-- Available Courts Header -->
+    <string name="header_available_courts">Available courts (multiple selection allowed):</string>
+
+    <!-- Book Buttons -->
+    <string name="btn_book_fixed">Book Regular</string>
+    <string name="btn_book_optimized">Book Optimized</string>
+
+    <!-- Selection Prompts -->
+    <string name="prompt_select_at_least_one">Please select at least one court</string>
+    <string name="prompt_select_at_least_one_or_replacement">Please select at least one court or a replacement</string>
+
+    <!-- No Courts Found -->
+    <string name="toast_no_courts_available">No courts available</string>
+
+    <!-- Conflicting Courts -->
+    <string name="label_conflicting_courts">Courts already booked:</string>
+
+    <!-- Replacement Prompt -->
+    <string name="dialog_title_choose_replacement">Choose replacement court for </string>
+    <string name="checkbox_none">None selected</string>
+    <string name="btn_confirm">Confirm</string>
+    <string name="btn_cancel">Cancel</string>
+
+    <!-- 5/5/2025 -->
+    <string name="court_booked_label">The field has been booked: </string>
+    <string name="_day_label">- Day: </string>
+    <string name="replace_label"> | Replace: </string>
+    <string name="_day_label2"> - Day </string>
+    <!-- Tiêu đề trang -->
+    <string name="fixed_schedule">Book Fixed Schedule</string>
+
+    <!-- Panel chọn ngày trong tuần -->
+    <string name="select_days_of_week">Select Days of the Week</string>
+
+    <!-- Thứ trong tuần -->
+    <string name="monday">Monday</string>
+    <string name="tuesday">Tuesday</string>
+    <string name="wednesday">Wednesday</string>
+    <string name="thursday">Thursday</string>
+    <string name="friday">Friday</string>
+    <string name="saturday">Saturday</string>
+    <string name="sunday">Sunday</string>
+
+    <!-- Panel thời gian đặt lịch -->
+    <string name="time_range_label">Schedule Time Range</string>
+    <string name="data_label"> Date: </string>
+    <string name="no_slot_data_label">No slot data</string>
+    <string name="select_time_start">Select start time</string>
+    <string name="select_time_end">Select end time</string>
+    <string name="hour">Hour</string>
+    <string name="minute">Minute</string>
+    <string name="all">All</string>
+    <string name="court"> Court </string>
+    <string name="no_data_label">No data</string>
+    <string name="court_label">, Court name: </string>
+    <string name="timeslot_label">, Time slot: </string>
+    <string name="price_label">, Price: </string>
+    <string name="select_timeslot">Please select at least one timeslot!</string>
+
+    <!-- 6/5/2025 -->
+    <string name="contact_label">Contact: </string>
+
+    <string name="error_list_service_label">Service list data error</string>
+    <string name="error_nodata_service_label">No service list data available</string>
+    <string name="empty_service_label">Empty service list</string>
+    <string name="error_data_service_label">Service data error: </string>
+    <string name="no_data_service_label">No service data available</string>
+    <string name="court_name_label">Court name: </string>
+    <string name="address_label">Address: </string>
+    <string name="infomation_service_label">Service order information:</string>
+    <string name="unknown_service_label">Unknown Service</string>
+    <string name="btn_payment">PAYMENT</string>
+    <string name="order_service_guest">You are booking service as a Guest!</string>
+    <string name="watting">Processing, please wait...</string>
+    <string name="gen_service_fail">Service order creation failed!</string>
+    <string name="no_data_booked">No booking data!</string>
+    <string name="total_booked">Total playing time: </string>
+    <string name="noti">Notification</string>
+    <string name="request_invalid">Your request is incorrect, please select again!!!</string>
+    <string name="error_get_total">Error getting total amount</string>
+    <string name="re_select">Select again</string>
+    <string name="total_price_2"><![CDATA[Total price: <b>%1$s</b>]]></string>
+    <string name="error_total">Total: Error</string>
+    <string name="date_range">
+        From %1$s to %2$s\n
+        Time: %3$s - %4$s\n
+        Duration: %5$s
+    </string>
+    <string name="court_selected">Selected field: </string>
+    <string name="replacement_info">
+        On %1$s: Replace with %2$s
+    </string>
+    <string name="error_get_infor">Fetch information failed!</string>
+    <string name="order_court_guest">You are booking court as a Guest!</string>
+    <string name="detail_infor">Detail information:</string>
+    <string name="error_fetch_court_infor">Error while fetching court</string>
+    <string name="not_payment">Not paid</string>
+    <string name="gen_court_fail">Order creation failed</string>
+    <!-- Order notifications -->
+    <string name="order_not_exist">Order does not exist</string>
+
+    <!-- Payment statuses -->
+    <string name="status_unpaid">Unpaid</string>
+    <string name="status_paid">Paid</string>
+    <string name="status_not_deposited">Not deposited</string>
+    <string name="status_deposited">Deposited</string>
+    <string name="error_timeout_invalid">Error: Invalid timeout</string>
+    <!-- Update schedule errors -->
+    <string name="update_schedule_failed">Failed to update schedule!</string>
+    <string name="update_schedule_failed_with_error">Failed to update schedule: </string>
+
+    <!-- Get old order error -->
+    <string name="get_old_order_failed_with_error">Failed to get old order info: </string>
+    <!-- Validate Name -->
+    <string name="error_name_sensitive">Name contains sensitive content, please try again!</string>
+    <string name="error_name_empty">Please enter your name</string>
+    <string name="error_name_invalid">Invalid name (letters and spaces only, 2-30 characters)</string>
+
+    <!-- Order type -->
+    <string name="order_type_service">Service Order</string>
+
+    <!-- Validate Note -->
+    <string name="error_note_sensitive">Note contains sensitive content, please try again!</string>
+    <string name="error_note_invalid">Invalid note (letters, numbers, spaces, and basic punctuation only, ≤100 characters)</string>
+
+    <!-- Validate Phone -->
+    <string name="error_phone_empty">Please enter your phone number</string>
+    <string name="error_phone_invalid">Invalid phone number</string>
+    <!-- Error & Status messages -->
+    <string name="error_loading_data">Loading data, please try again later</string>
+    <string name="cancel_warning_title">Warning</string>
+    <string name="cancel_warning_message">If you cancel the booking, you will forfeit the court deposit. Are you sure you want to continue?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
+    <!-- Total time -->
+    <string name="total_time">Total time: </string>
+
+    <!-- Not available -->
+    <string name="not_available">N/A</string>
+
+    <!-- Total price -->
+    <string name="total_price">Total price: </string>
+    <!-- Customer info -->
+    <string name="label_customer">Customer: </string>
+    <string name="label_phone">Phone: </string>
+    <string name="label_note">Customer note: </string>
+    <string name="no_note">None</string>
+    <!-- Transaction & Payment Display -->
+    <string name="status_refund">Refunded</string>
+    <string name="label_amount_paid">Amount paid: </string>
+    <string name="label_amount_refunded">Amount refunded: </string>
+    <string name="amount_zero">0đ</string>
+
+    <string name="label_payment_status">Payment status: </string>
+    <string name="label_stadium_name">Stadium name: </string>
+    <string name="label_address">Address: </string>
+    <string name="error_order_fetch_failed">Unable to load order data</string>
+    <!-- Defines strings used in updatePaymentButton -->
+    <string name="order_status_success">Order successful</string>
+    <string name="payment_status_deposited">Deposit placed</string>
+
+    <!-- Defines strings used in displayServiceDetails -->
+    <string name="service_unknown">Service unknown</string>
+    <string name="no_service_info">No service information</string>
+    <string name="status_change_failed">Change booking failed</string>
+    <string name="status_canceled">Booking canceled</string>
+    <string name="status_canceled_timeout">Booking canceled due to payment timeout</string>
+
+    <!-- Buttons and labels -->
+    <string name="btn_cancel_service">Cancel service</string>
+    <string name="btn_pay">Pay</string>
+    <string name="btn_change_booking">Modify booking</string>
+    <string name="dialog_title_confirm">Confirm</string>
+    <string name="error_must_accept_terms">You must accept the terms to continue</string>
+    <string name="toast_service_cancelled">Service booking canceled</string>
+    <string name="log_cancel_error">Error canceling service booking: </string>
+    <string name="toast_cancel_error">Error canceling service booking</string>
+    <string name="toast_qr_creation_failed">Failed to generate QR code</string>
+    <string name="toast_error_prefix">Error: </string>
+    <string name="toast_order_load_failed">Failed to load order data</string>
+    <string name="toast_order_load_error">Error fetching order data</string>
+    <string name="dialog_message_cancel">Are you sure you want to cancel the order?</string>
+    <string name="btn_yes">Yes</string>
+    <string name="btn_no">No</string>
+    <string name="label_time_slot">Time slot</string>
+    <string name="label_student">Student</string>
+    <string name="label_adult">Adult</string>
+    <string name="session_expired">Session expired, please login again!</string>
+    <string name="update_success">Update information successful!</string>
+    <string name="update_failed">Update failed!</string>
+    <string name="no_error_info">No error information</string>
+    <string name="connection_error">Connection error</string>
+    <string name="upload_image_error">Unable to upload image, please try again!!</string>
+    <string name="load_user_info_error">Unable to load user information</string>
+    <string name="no_control_characters_allowed">No control characters allowed</string>
+    <string name="error_first_name_empty">Please enter your first name</string>
+    <string name="error_first_name_sensitive_content">First name contains sensitive content, please try again!</string>
+    <string name="error_first_name_invalid">Invalid first name (letters and spaces only, ≥2 characters)</string>
+
+    <string name="error_last_name_empty">Please enter your last name</string>
+    <string name="error_last_name_sensitive_content">Last name contains sensitive content, please try again!</string>
+    <string name="error_last_name_invalid">Invalid last name (letters and spaces only, ≥2 characters)</string>
+
+    <string name="error_phone_number_empty">Please enter phone number</string>
+    <string name="error_phone_number_invalid">Invalid phone number</string>
+
+    <string name="error_age_under_10">You must be 10 years or older</string>
+    <string name="error_invalid_dob">Invalid date of birth</string>
+
+    <string name="select_image_error">Please select an image file!</string>
+    <string name="image_read_error">Unable to read image</string>
+    <string name="image_compress_error">Unable to compress image to less than 250KB. Please select another image!</string>
+
+    <string name="photo_from_gallery_error">Could not get photo from gallery</string>
+    <string name="photo_large_size_error">Could not get large size photo</string>
+    <string name="permission_required">You need to grant  permission to use this feature</string>
+    <string name="need_permission_title">Permission required</string>
+    <string name="need_permission_message">The app needs permission to access the camera to take photos. Please grant permission in settings.</string>
+    <string name="go_to_settings">Go to settings</string>
+    <string name="cancel">Cancel</string>
+    <string name="select_photo">Select photo</string>
+    <string name="select_from_library">Select from library</string>
+    <string name="camera">Camera</string>
+    <string name="error_creating_image_file">Error creating image file</string>
+    <string name="cannot_get_photo">Cannot get photo from library</string>
+    <string name="cannot_get_large_image">Cannot get large image</string>
+    <string name="error_email_extension">Email must end with @gmail.com or edu.vn</string>
+    <string name="error_phone_format">Phone number is not in the correct format</string>
+    <string name="error_username_format">Username must be at least 4 characters and not contain special characters</string>
+    <string name="user_not_found">User not found</string>
+    <string name="general_error">Error</string>
+    <string name="server_response_error">Could not read response from server</string>
+    <string name="reset_password_success_title">Password reset sent</string>
+    <string name="reset_password_success_message">Your new password has been sent to your email address. Please check your inbox.</string>
+    <string name="go_to_login">Go to login</string>
+    <string name="ok">OK</string>
+    <string name="sending">SENDING...</string>
+    <string name="reset_password_button">RESET PASSWORD</string>
+    <string name="error_no_image_url">No image URL</string>
+    <string name="login_success">Login successful</string>
+    <string name="invalid_token">Invalid token</string>
+    <string name="auth_failed">Authentication failed</string>
+    <string name="error_occurred">An error occurred</string>
+    <string name="error_enter_username">Please enter username</string>
+    <string name="error_invalid_username">Login name must be at least 4 characters and cannot contain special characters</string>
+
+    <string name="error_enter_password">Please enter password</string>
+    <string name="error_invalid_password">Password must be at least 6 characters, contain at least 1 letter and 1 number</string>
+    <!-- Permission messages -->
+    <string name="all_permissions_granted">All permissions granted</string>
+    <string name="permissions_denied_title">Permissions denied</string>
+    <string name="permissions_denied_message_suffix">Some features may not work properly.</string>
+    <string name="button_agree">Agree</string>
+    <string name="denied_camera">Camera</string>
+    <string name="denied_read_storage">Read storage</string>
+    <string name="denied_write_storage">Write storage</string>
+    <string name="denied_fine_location">Precise location</string>
+    <string name="denied_coarse_location">Approximate location</string>
+    <string name="no_user_info">No user info</string>
+    <string name="cannot_get_notifications">Cannot get list of notifications</string>
+    <string name="deleted_and_marked_read">Deleted and marked read</string>
+    <string name="delete_success">Delete successful</string>
+    <string name="deleted_all_notifications">All notifications deleted</string>
+    <string name="cannot_mark_as_read">Cannot mark as read</string>
+    <string name="booking_success_title">Booking successful</string>
+    <string name="booking_success_subtitle">Your booking has been sent to the venue.\nPlease check the status in "Account" to monitor and confirm your booking.</string>
+    <string name="no_user_for_qr_data">No user to fetch QR Code data</string>
+    <string name="deposit_message">Please transfer ₫ to complete the deposit!</string>
+    <string name="payment_message">Please transfer ₫ complete the payment!</string>
+    <string name="error_loading_service">Failed to load service data</string>
+    <string name="select_service">Please select at least one service</string>
+    <string name="network_error">Network error: </string>
+    <string name="error_getting_field_info">Failed to get field information</string>
+
+    <string name="error_enter_first_name">Please enter your first name</string>
+    <string name="error_invalid_first_name">Invalid first name (letters and spaces only, ≥2 characters)</string>
+
+    <string name="error_enter_last_name">Please enter your last name</string>
+    <string name="error_invalid_last_name">Invalid last name (letters and spaces only, ≥2 characters)</string>
+
+    <string name="error_enter_phone_number">Please enter phone number</string>
+    <string name="error_invalid_phone_number">Invalid phone number</string>
+
+    <string name="error_enter_email">Please enter email</string>
+    <string name="error_invalid_email_format">Email is not in correct format.</string>
+    <string name="error_invalid_email_domain">Please use email @gmail.com or edu.vn</string>
+
+    <string name="error_underage">You must be 10 years or older</string>
+
+    <string name="error_select_gender">Please select your gender</string>
+    <string name="dialog_confirm_student_email_title">Confirm student email</string>
+    <string name="dialog_confirm_student_email_message">Please check your inbox and "Spam" mail to confirm your account.</string>
+    <string name="dialog_confirm_student_email_close_button">Close</string>
+
+    <string name="username_exists_error">Username already exists. Please choose a different username.</string>
+    <string name="email_exists_error">Email address already exists. Please use a different email.</string>
+    <string name="phone_exists_error">Phone number already exists. Please use a different phone number.</string>
+    <string name="generic_duplicate_error">Registration failed: A user with some of these details already exists.</string>
+    <string name="registration_error">An error occurred during registration</string>
+    <string name="registration_info_exists_error">Registration information has existed. Please check the username, email, and phone number</string>
+    <string name="registration_failed_error">Registration failed with error code: %1$d</string>
+    <string name="select_date_range_title">Select Date Range</string>
+    <string name="no_orders_in_selected_range">There are no orders in the selected time range</string>
+    <string-array name="order_statuses">
+        <item>Processing</item>
+        <item>Completed</item>
+        <item>Cancel booking</item>
+        <item>Booking successful</item>
+        <item>Change booking successful</item>
+        <item>Cancel booking due to payment deadline</item>
+        <item>Booking on-site</item>
+    </string-array>
+    <string name="select_status_title">Select status</string>
+
+    <string name="cancel_button">Cancel</string>
+    <string name="no_phone_number_for_booking">There is no phone number used for booking.</string>
+
+    <!-- Error message when no order data is available -->
+    <string name="no_order_data">No order data</string>
+    <string name="guest_dialog_message">Create an account to easily manage and save your bookings.</string>
+
+    <!-- Buttons in the dialog -->
+    <string name="login_button_text">Log in</string>
+    <string name="signup_button_text">Sign up</string>
+    <string name="ok_button_text">OK</string>
+    <string name="unable_to_load_profile_picture">Unable to load profile picture. Please try uploading again in the edit information section!</string>
+
+    <!-- Invalid response data message -->
+    <string name="invalid_response_data">Invalid response data</string>
+
+    <!-- Failed to get info message -->
+    <string name="failed_to_get_info">Failed to get info, please log in again!</string>
+    <string name="token_not_found">Token does not exist, please log in again!</string>
+    <string name="filtered_by_status">Filtered by status: </string>
+    <string name="no_orders_to_display_message">No orders to display</string>
+    <string name="filter_newest_message">Filtered: Latest</string>
+    <string name="change_password_title">Change password</string>
+
+
+    <string name="header_title">Intuitive Booking</string>
+    <string name="stadium_name">Stadium Name: </string>
+    <string name="stadium_address">Address: </string>
+    <string name="stadium_contact">Contact: </string>
+    <string name="order_details_title">Details:</string>
+
+    <string name="full_name_hint">Your Full Name</string>
+    <string name="phone_number_hint">Your Phone Number</string>
+    <string name="note_for_owner_hint">Note for Owner</string>
+    <string name="club_name_placeholder">Club name</string>
+    <string name="address_placeholder">Club address</string>
+
+
+    <string name="title_booking_detail">Booking Details</string>
+    <string name="tab_booking_info">Booking Information</string>
+    <string name="back_button_description">Back</string>
+
+    <!-- Customer Information -->
+    <string name="customer_label">Customer: </string>
+    <string name="sport_label">Subject: </string>
+    <string name="phone_label">Phone Number: </string>
+
+    <!-- Card Booking -->
+    <string name="booking_info_title">Booking Information</string>
+    <string name="stadium_name_label">Stadium Name: </string>
+    <string name="total_time_label">Total Time: </string>
+    <string name="total_price_label">Total Price: </string>
+    <string name="payment_status_paid">Payment Status: Paid</string>
+    <string name="amount_paid_label">Amount Paid: </string>
+    <string name="refund_amount_label">Amount Refunded: </string>
+
+    <!-- Notes -->
+    <string name="note_label">Customer Notes: </string>
+
+    <!-- Buttons -->
+    <string name="cancel_booking">Cancel Booking</string>
+    <string name="change_booking">Change Booking</string>
+    <string name="pay_remaining">Payment</string>
+    <string name="student">Student</string>
+    <string name="adult">Adult</string>
+    <string name="loading_error_message">Loading data, please try again later</string>
+    <string name="no_information">No information</string>
+    <string name="customer_name_label">Customer: </string>
+    <string name="phone_number_label">Phone: </string>
+    <string name="customer_note_label">Customer note: </string>
+    <string name="error_loading_booking_data">Unable to load order data</string>
+    <string name="amount_refunded">Amount refunded: </string>
+    <string name="amount_paid">Amount paid: </string>
+    <string name="payment_status">Payment status: </string>
+    <string name="amount_paid_default">Amount paid: 0đ</string>
+    <string name="error_loading_order">Error while retrieving order data</string>
+    <string name="dialog_confirm_title">Confirm</string>
+    <string name="dialog_confirm_cancel_message">Are you sure you want to cancel?</string>
+    <string name="no_slots_selected">No slots selected</string>
+    <string name="name_contains_bad_words">Name contains sensitive content, please try again!</string>
+    <string name="name_empty">Please enter your name</string>
+    <string name="name_invalid">Invalid name (letters and spaces only, 2-30 characters)</string>
+
+    <string name="note_contains_bad_words">Note contains sensitive content, please try again!</string>
+    <string name="note_invalid">Invalid note (letters, numbers, spaces, and basic punctuation only, ≤100 characters)</string>
+
+    <string name="phone_empty">Please enter your phone number</string>
+    <string name="phone_invalid">Invalid phone number</string>
+    <string name="total_price_html">Total price: &lt;b&gt;&lt;/b&gt;</string>
+    <string name="total_play_time">Total play time: </string>
+
+    <string name="dialog_title_invalid_request">Notification</string>
+    <string name="dialog_message_invalid_request">Your request is incorrect, please select again!!!</string>
+    <string name="dialog_button_retry">Select again</string>
+
+    <string name="back">Back</string>
+    <string name="view_court_and_price">View court and price list</string>
+    <string name="court_price_list">Court price list</string>
+    <string name="pickleball">Pickleball</string>
+    <string name="weekdays">Monday - Friday</string>
+    <string name="weekends">Saturday - Sun</string>
+
+
+    <string name="edit_profile_title">Edit Profile</string>
+
+    <!-- Content descriptions -->
+    <string name="back_button">Back</string>
+    <string name="edit_avatar">Edit avatar</string>
+
+    <string name="forgot_password">Forgot Password</string>
+    <string name="reset_password_title">Reset Your Password</string>
+    <string name="reset_instructions">Enter your username, phone number, or email address to reset your password.</string>
+    <string name="username_email_phone">Username / Email / Phone</string>
+    <string name="remember_password">Remember your password?</string>
+    <string name="login">Login</string>
+
+    <!-- Content Descriptions -->
+    <string name="background_image">Background</string>
+
+    <string name="welcome_text">Welcome</string>
+    <string name="sport_not_giving_up">Sport is not giving up</string>
+    <string name="username_hint">Username</string>
+    <string name="password_hint">Password</string>
+    <string name="login_button_text_upcase">LOGIN</string>
+    <string name="forgot_password_1">Forget password?</string>
+    <string name="no_account_text">Dont have an account?</string>
+    <string name="home_button_description">Home Button</string>
+    <string name="background_description">Background</string>
+    <string name="app_logo_description">App Logo</string>
+
+    <string name="join_us_today">Join Us Today</string>
+
+    <!-- Form title -->
+
+    <!-- Input hints -->
+    <string name="hint_username">Username</string>
+    <string name="hint_password">Password</string>
+    <string name="hint_first_name">First Name</string>
+    <string name="hint_last_name">Last Name</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_phone_number">Phone Number</string>
+
+
+
+    <!-- Gender -->
+    <string name="gender_label">Gender</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+
+    <!-- Buttons -->
+    <string name="btn_create_account">CREATE ACCOUNT</string>
+    <string name="btn_signup_have_account">Already have an account?</string>
+    <string name="btn_login">Login</string>
+
+    <!-- Content descriptions -->
+    <string name="background_cd">Background</string>
+
+    <string name="service_title">Court Services</string>
+    <string name="service_subtitle">Order Services</string>
+
+    <!-- Search bar -->
+    <string name="search_hint">Search Services</string>
+    <string name="cd_search_icon">Search Icon</string>
+    <string name="cd_clear_search">Clear Search</string>
+
+    <!-- Tabs -->
+    <string name="tab_all">All</string>
+    <string name="tab_drinks">Drinks</string>
+    <string name="tab_foods">Food</string>
+    <string name="tab_others">Others</string>
+
+    <!-- Empty state -->
+    <string name="empty_services">No services</string>
+
+    <!-- Bottom sheet -->
+    <string name="items_count">Items</string>
+    <string name="total_price_format">Price</string> <!-- example "0đ" -->
+    <string name="order_services">Order services</string>
+
+    <!-- FAB -->
+    <string name="cd_scroll_to_top">Scroll to top</string>
+
+    <string name="warning_change_booking">
+When you change your booking, if you do not complete payment for the booking you change, you will lose all bookings you have previously completed payment for.
+    </string>
+    <string name="accept_terms">I accept</string>
+
+    <string name="permission_title">Grant Permission</string>
+    <string name="permission_description">Description of Permission</string>
+    <string name="grant_permission">Grant Permission</string>
+    <string name="skip">Skip</string>
+
+    <string name="booked_schedule">Booked Schedule</string>
+    <string name="booked_service">Booked Service</string>
+    <string name="search_court">Search Courts</string>
+    <string name="date_now">Date now</string>
+    <string name="service_price_title">Service price list</string>
+    <string name="category_header">CATEGORY</string>
+    <string name="price_per_unit">Price/Unit</string>
+    <string name="price_note">* Prices may change depending on the time</string>
+    <string name="stadium_map">Stadium map</string>
+    <string name="image">Image</string>
+    <string name="court_1">Court: </string>
+    <string name="time_1">Time: </string>
+    <string name="price_1">Price: </string>
+    <string name="btn_service">SERVICE</string>
+    <string name="notification_title">Notification title</string>
+    <string name="notification_description">Description content</string>
+    <string name="detail">Detail: </string>
+    <string name="left">Left: </string>
 
 </resources>

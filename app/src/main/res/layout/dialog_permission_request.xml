@@ -9,7 +9,7 @@
         android:id="@+id/tvPermissionTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Cấp quyền"
+        android:text="@string/permission_title"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent" />
@@ -19,8 +19,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Mô tả về quyền"
-        app:layout_constraintTop_toBottomOf="@+id/tvPermissionTitle" />
+        android:text="@string/permission_description"
+        app:layout_constraintTop_toBottomOf="@id/tvPermissionTitle" />
 
     <Button
         android:id="@+id/btnGrantPermission"
@@ -28,21 +28,21 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
-        android:text="Cấp quyền"
-        app:layout_constraintEnd_toStartOf="@+id/btnSkip"
+        android:text="@string/grant_permission"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvPermissionDescription" />
+        app:layout_constraintEnd_toStartOf="@id/btnSkip"
+        app:layout_constraintTop_toBottomOf="@id/tvPermissionDescription" />
 
     <Button
         android:id="@+id/btnSkip"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
-        android:text="Bỏ qua"
+        android:layout_marginStart="8dp"
+        android:text="@string/skip"
         android:backgroundTint="#888888"
+        app:layout_constraintStart_toEndOf="@id/btnGrantPermission"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnGrantPermission"
-        app:layout_constraintTop_toBottomOf="@+id/tvPermissionDescription" />
+        app:layout_constraintTop_toBottomOf="@id/tvPermissionDescription" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

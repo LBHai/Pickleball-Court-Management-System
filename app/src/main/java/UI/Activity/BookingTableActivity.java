@@ -96,7 +96,7 @@ public class BookingTableActivity extends AppCompatActivity {
 
         Calendar c = Calendar.getInstance();
         selectedDate = sdf.format(c.getTime());
-        btnSelectDate.setText("Date: " + selectedDate);
+        btnSelectDate.setText(getString(R.string.data_label) + selectedDate);
 
         selectedOrdersByDate.put(selectedDate, new HashMap<>());
 
@@ -181,7 +181,7 @@ public class BookingTableActivity extends AppCompatActivity {
                         selectedOrdersByDate.put(newSelectedDate, new HashMap<>());
                     }
                     selectedDate = newSelectedDate;
-                    btnSelectDate.setText("Date: " + selectedDate);
+                    btnSelectDate.setText(getString(R.string.data_label) + selectedDate);
                     fetchBookingSlots(courtId, selectedDate);
                 },
                 year, month, day
@@ -205,7 +205,7 @@ public class BookingTableActivity extends AppCompatActivity {
                             buildTableForDate(dateBooking);
                             updateSelectedBookings();
                         } else {
-                            Toast.makeText(BookingTableActivity.this, "Không có dữ liệu slot", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(BookingTableActivity.this, getString(R.string.no_slot_data_label), Toast.LENGTH_SHORT).show();
                         }
                     }
 
@@ -221,7 +221,7 @@ public class BookingTableActivity extends AppCompatActivity {
         HashMap<String, Boolean> startTimesMap = new HashMap<>();
         for (CourtSlot court : courtList) {
             for (BookingSlot slot : court.getBookingSlots()) {
-                Log.d("BookingTableActivity", "Slot: start=" + slot.getStartTime() + ", end=" + slot.getEndTime());
+                //Log.d("BookingTableActivity", "Slot: start=" + slot.getStartTime() + ", end=" + slot.getEndTime());
                 allTimesMap.put(slot.getStartTime(), true);
                 allTimesMap.put(slot.getEndTime(), true);
                 startTimesMap.put(slot.getStartTime(), true);
@@ -232,8 +232,8 @@ public class BookingTableActivity extends AppCompatActivity {
         allTimesCurrentDay.sort((t1, t2) -> Integer.compare(toMinutes(t1), toMinutes(t2)));
         startTimesCurrentDay.sort((t1, t2) -> Integer.compare(toMinutes(t1), toMinutes(t2)));
 
-        Log.d("BookingTableActivity", "All Times for " + selectedDate + ": " + allTimesCurrentDay);
-        Log.d("BookingTableActivity", "Start Times for " + selectedDate + ": " + startTimesCurrentDay);
+        //Log.d("BookingTableActivity", "All Times for " + selectedDate + ": " + allTimesCurrentDay);
+        //Log.d("BookingTableActivity", "Start Times for " + selectedDate + ": " + startTimesCurrentDay);
     }
 
     private int toMinutes(String hhmmss) {
@@ -245,7 +245,7 @@ public class BookingTableActivity extends AppCompatActivity {
 
     private void setupCourtSpinner(List<CourtSlot> courtList) {
         List<String> spinnerItems = new ArrayList<>();
-        spinnerItems.add("Tất cả");
+        spinnerItems.add(getString(R.string.all));
         for (CourtSlot c : courtList) {
             spinnerItems.add(c.getCourtSlotName());
         }
@@ -258,13 +258,13 @@ public class BookingTableActivity extends AppCompatActivity {
 
         List<CourtSlot> courtSlots = courtsByDate.get(date);
         if (courtSlots == null) {
-            Log.e("BookingTableActivity", "No court slots for date: " + date);
+            //Log.e("BookingTableActivity", "No court slots for date: " + date);
             return;
         }
 
         // Tạo hàng tiêu đề với tất cả thời gian (bao gồm endTime)
         TableRow headerRow = new TableRow(this);
-        headerRow.addView(createCell("Court", true, true));
+        headerRow.addView(createCell(getString(R.string.court), true, true));
         for (String time : allTimesCurrentDay) {
             String displayTime = time.substring(0, 5);
             headerRow.addView(createCell(displayTime, true, false));
@@ -281,9 +281,9 @@ public class BookingTableActivity extends AppCompatActivity {
 
         if (courtSlots.isEmpty() || startTimesCurrentDay.isEmpty()) {
             TextView tvEmpty = new TextView(this);
-            tvEmpty.setText("Không có dữ liệu");
+            tvEmpty.setText(getString(R.string.no_data_label));
             tableLayout.addView(tvEmpty);
-            Log.w("BookingTableActivity", "No court slots or start times available");
+            //Log.w("BookingTableActivity", "No court slots or start times available");
             return;
         }
 
@@ -401,18 +401,18 @@ public class BookingTableActivity extends AppCompatActivity {
             // Kiểm tra số ô trong hàng
             int expectedCellsPerRow = allTimesCurrentDay.size() - 1; // Trừ endTime cuối
             if (cellsInRow != expectedCellsPerRow) {
-                Log.w("BookingTableActivity", "Row for court " + court.getCourtSlotName() + " has " + cellsInRow +
-                        " cells, expected " + expectedCellsPerRow);
+                //Log.w("BookingTableActivity", "Row for court " + court.getCourtSlotName() + " has " + cellsInRow +
+                        //" cells, expected " + expectedCellsPerRow);
             }
         }
 
         // Kiểm tra tổng số ô
         int expectedTotalCells = displayedCourts * (allTimesCurrentDay.size() - 1);
         if (totalCellsDisplayed != expectedTotalCells) {
-            Log.w("BookingTableActivity", "Total cells displayed: " + totalCellsDisplayed +
-                    ", expected: " + expectedTotalCells);
+            //Log.w("BookingTableActivity", "Total cells displayed: " + totalCellsDisplayed +
+                   // ", expected: " + expectedTotalCells);
         } else {
-            Log.d("BookingTableActivity", "Total cells displayed matches expected: " + totalCellsDisplayed);
+            //Log.d("BookingTableActivity", "Total cells displayed matches expected: " + totalCellsDisplayed);
         }
     }
 
@@ -494,11 +494,11 @@ public class BookingTableActivity extends AppCompatActivity {
                 NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
                 // Định dạng giá mà không cần ép kiểu int, đảm bảo giá trị chính xác
                 String formattedPrice = formatter.format(order.getDailyPrice());
-                String info = "Date: " + order.getDayBooking()
-                        + ", Court: " + order.getCourtSlotName()
-                        + ", Time slot: " + order.getStartTime().substring(0, 5)
+                String info = getString(R.string.data_label) + order.getDayBooking()
+                        +getString(R.string.court_label)+ order.getCourtSlotName()
+                        + getString(R.string.timeslot_label)+ order.getStartTime().substring(0, 5)
                         + " - " + order.getEndTime().substring(0, 5)
-                        + ", Price: " + formattedPrice;
+                        + getString(R.string.price_label) + formattedPrice;
                 selectedBookingsList.add(info);
             }
         }
@@ -517,7 +517,7 @@ public class BookingTableActivity extends AppCompatActivity {
             }
         }
         if (confirmOrders.isEmpty()) {
-            Toast.makeText(this, "Please select at least one timeslot!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.select_timeslot), Toast.LENGTH_SHORT).show();
             return;
         }
         Gson gson = new Gson();
